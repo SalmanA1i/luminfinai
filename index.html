@@ -331,10 +331,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
     <h1 class="hero-title">Your personal<br><em>finance advisor,</em><br>powered by AI</h1>
     <p class="hero-sub">LuminFin combines Bloomberg's market intelligence with conversational AI to give you personalized investment advice — tailored to your age, risk appetite, and financial knowledge.</p>
     <div class="hero-actions">
-      <button class="btn-hero btn-hero-gold" onclick="startApp()">Start for $5 / month</button>
+      <button class="btn-hero btn-hero-gold" onclick="startApp()">Get Started — Free</button>
       <button class="btn-hero btn-hero-outline" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">See how it works</button>
     </div>
-    <div class="hero-note">Secured by Gumroad · Cancel anytime · No hidden fees</div>
+    <div class="hero-note">Free to use · No credit card required</div>
   </div>
  
   <!-- TICKER -->
@@ -350,7 +350,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
     <div class="steps-grid">
       <div class="step-card"><div class="step-accent"></div><div class="step-num">01 · PROFILE</div><h3>Tell us about yourself</h3><p>Your age, occupation, and financial background shape every recommendation you receive.</p></div>
       <div class="step-card"><div class="step-accent"></div><div class="step-num">02 · RISK</div><h3>Set your risk tolerance</h3><p>From capital preservation to aggressive speculation — use our slider to define your comfort level.</p></div>
-      <div class="step-card"><div class="step-accent"></div><div class="step-num">03 · SUBSCRIBE</div><h3>Unlock for $5/month</h3><p>One simple plan. Full access to unlimited AI consultations, live market data, and real-time news.</p></div>
+      <div class="step-card"><div class="step-accent"></div><div class="step-num">03 · SUBSCRIBE</div><h3>Completely Free</h3><p>One simple plan. Full access to unlimited AI consultations, live market data, and real-time news.</p></div>
       <div class="step-card"><div class="step-accent"></div><div class="step-num">04 · ADVISE</div><h3>Get tailored advice</h3><p>Ask anything — from PSX picks to global ETFs. Every answer is calibrated to your exact profile.</p></div>
     </div>
   </section>
@@ -528,7 +528,7 @@ function nx(){
   if(S.step===0){const n=document.getElementById('fn')?.value.trim(),a=document.getElementById('fa')?.value.trim();if(!n||!a||isNaN(a)||a<13)return;S.profile.name=n;S.profile.age=a;}
   else if(S.step===1){const o=document.getElementById('fo')?.value.trim();if(!o)return;S.profile.occupation=o;}
   else if(S.step===2){S.profile.risk=parseInt(document.getElementById('fr')?.value||50);}
-  else if(S.step===3){if(!S.profile.knowledge)return;S.screen='subscribe';render();return;}
+  else if(S.step===3){if(!S.profile.knowledge)return;S.screen='chat';render();return;}
   S.step++;render();
 }
 function selK(id){S.profile.knowledge=id;document.querySelectorAll('.kopt').forEach(el=>el.classList.toggle('sel',el.getAttribute('onclick').includes(`'${id}'`)));const b=document.getElementById('kbtn');if(b)b.disabled=false;}
@@ -602,3 +602,5 @@ async function send(){
 </script>
 </body>
 </html>
+ 
+
