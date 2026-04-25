@@ -14,7 +14,7 @@
 /* ── RESET ── */
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-
+ 
 /* ── TOKENS ── */
 :root{
   --bg:#0d0f14;--bg2:#13161d;--bg3:#1a1e28;--bg4:#20253a;
@@ -24,20 +24,20 @@ html{scroll-behavior:smooth}
   --danger:#e05252;--success:#4caf82;
   --radius:12px;--radius-lg:18px;
 }
-
+ 
 /* ── BASE ── */
 body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden}
 a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}
 button{cursor:pointer;font-family:'DM Sans',sans-serif}
-
+ 
 /* ── LAYOUT SHELLS ── */
 #landing{display:block}
 #app-shell{display:none;max-width:480px;margin:0 auto;min-height:100vh;position:relative}
-
+ 
 /* ══════════════════════════════
    LANDING PAGE
 ══════════════════════════════ */
-
+ 
 /* NAV */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
@@ -55,7 +55,7 @@ nav.scrolled{background:rgba(13,15,20,0.95);border-color:var(--border);backdrop-
 .nav-cta{background:var(--gold);color:#0d0f14;border:none;border-radius:8px;padding:9px 20px;font-size:14px;font-weight:500;transition:opacity .2s}
 .nav-cta:hover{opacity:.85}
 .nav-mobile-cta{display:none}
-
+ 
 /* HERO */
 .hero{
   min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -87,7 +87,7 @@ nav.scrolled{background:rgba(13,15,20,0.95);border-color:var(--border);backdrop-
 .btn-hero-outline{background:transparent;color:var(--text);border:0.5px solid var(--border2)}
 .btn-hero-outline:hover{border-color:var(--gold);color:var(--gold)}
 .hero-note{margin-top:18px;font-size:12px;color:var(--muted)}
-
+ 
 /* TICKER */
 .ticker-wrap{border-top:0.5px solid var(--border);border-bottom:0.5px solid var(--border);overflow:hidden;padding:12px 0;background:var(--bg2)}
 .ticker-inner{display:flex;gap:40px;animation:ticker 30s linear infinite;width:max-content}
@@ -96,13 +96,13 @@ nav.scrolled{background:rgba(13,15,20,0.95);border-color:var(--border);backdrop-
 .tick-name{color:var(--muted)}.tick-val{color:var(--text)}.tick-chg{font-size:11px}
 .tick-up{color:var(--success)}.tick-dn{color:var(--danger)}
 @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-
+ 
 /* SECTION */
 section{padding:90px 40px;max-width:1100px;margin:0 auto}
 .section-label{font-size:11px;font-family:'DM Mono',monospace;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px}
 .section-title{font-family:'DM Serif Display',serif;font-size:clamp(32px,4vw,46px);line-height:1.2;margin-bottom:16px}
 .section-sub{font-size:16px;color:var(--text2);line-height:1.7;max-width:560px}
-
+ 
 /* HOW IT WORKS */
 .steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-top:50px}
 .step-card{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:24px;position:relative;overflow:hidden;transition:border-color .2s}
@@ -111,7 +111,7 @@ section{padding:90px 40px;max-width:1100px;margin:0 auto}
 .step-card h3{font-size:16px;font-weight:500;margin-bottom:8px}
 .step-card p{font-size:13px;color:var(--text2);line-height:1.6}
 .step-accent{position:absolute;top:-20px;right:-20px;width:70px;height:70px;border-radius:50%;background:var(--gold-dim)}
-
+ 
 /* FEATURES */
 .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:50px}
 .feat-card{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:26px;transition:border-color .2s}
@@ -120,7 +120,7 @@ section{padding:90px 40px;max-width:1100px;margin:0 auto}
 .feat-icon svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .feat-card h3{font-size:15px;font-weight:500;margin-bottom:8px}
 .feat-card p{font-size:13px;color:var(--text2);line-height:1.6}
-
+ 
 /* CHAT DEMO */
 .demo-section{padding:90px 40px;background:var(--bg2);border-top:0.5px solid var(--border);border-bottom:0.5px solid var(--border)}
 .demo-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
@@ -135,7 +135,7 @@ section{padding:90px 40px;max-width:1100px;margin:0 auto}
 .dmsg.user{background:var(--gold);color:#0d0f14;align-self:flex-end;border-bottom-right-radius:3px}
 .dmsg strong{color:var(--gold);font-weight:500}
 .dmsg.ai strong{color:var(--gold2)}
-
+ 
 /* PRICING */
 .pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:50px;max-width:680px}
 .pricing-card{background:var(--bg3);border:1px solid var(--gold);border-radius:var(--radius-lg);padding:28px;position:relative;overflow:hidden}
@@ -151,7 +151,7 @@ section{padding:90px 40px;max-width:1100px;margin:0 auto}
 .paddle-badge{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:var(--muted);margin-top:12px}
 .paddle-ico{width:16px;height:16px;background:var(--gold);border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .paddle-ico svg{width:9px;height:9px;fill:#0d0f14}
-
+ 
 /* FOOTER */
 footer{border-top:0.5px solid var(--border);padding:40px;max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
 .footer-logo{font-family:'DM Serif Display',serif;font-size:18px;color:var(--gold)}
@@ -160,7 +160,7 @@ footer{border-top:0.5px solid var(--border);padding:40px;max-width:1100px;margin
 .footer-links a{font-size:13px;color:var(--muted);transition:color .2s}
 .footer-links a:hover{color:var(--text);text-decoration:none}
 .footer-copy{font-size:12px;color:var(--muted)}
-
+ 
 /* ══════════════════════════════
    APP SHELL
 ══════════════════════════════ */
@@ -171,7 +171,7 @@ footer{border-top:0.5px solid var(--border);padding:40px;max-width:1100px;margin
 .hbadge{font-size:10px;font-family:'DM Mono',monospace;color:var(--gold);border:0.5px solid var(--gold);padding:3px 8px;border-radius:20px;letter-spacing:.5px}
 .gear-btn{width:30px;height:30px;border-radius:50%;background:var(--bg3);border:0.5px solid var(--border);cursor:pointer;display:none;align-items:center;justify-content:center}
 .gear-btn svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-
+ 
 /* ONBOARDING */
 .page{flex:1;display:flex;flex-direction:column;padding:28px 24px;gap:22px}
 .progress-row{display:flex;gap:6px}
@@ -198,7 +198,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .btn-g{background:var(--gold);color:#0d0f14}.btn-g:hover{opacity:.9}
 .btn-o{background:transparent;color:var(--muted);border:0.5px solid var(--border)}.btn-o:hover{color:var(--text);border-color:var(--text)}
 .btn-d{background:transparent;color:var(--danger);border:0.5px solid var(--danger)}.btn-d:hover{background:rgba(224,82,82,0.08)}
-
+ 
 /* SUBSCRIBE */
 .plan-card{background:var(--bg3);border:1px solid var(--gold);border-radius:16px;padding:24px;position:relative}
 .plan-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold));border-radius:2px 2px 0 0}
@@ -212,7 +212,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .secure{display:flex;align-items:center;gap:6px;justify-content:center;font-size:11px;color:var(--muted);margin-top:10px}
 .p-ico{width:14px;height:14px;background:var(--gold);border-radius:3px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
 .p-ico svg{width:8px;height:8px;fill:#0d0f14}
-
+ 
 /* PADDLE OVERLAY */
 .overlay-wrap{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
 .paddle-modal{background:#fff;border-radius:16px;width:100%;max-width:420px;overflow:hidden;color:#1a1a1a;font-family:'DM Sans',sans-serif}
@@ -238,7 +238,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .paddle-powered{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:4px;font-size:10px;color:#bbb}
 .paddle-powered-box{width:12px;height:12px;background:#c9a84c;border-radius:2px;display:flex;align-items:center;justify-content:center}
 .paddle-powered-box svg{width:7px;height:7px;fill:#0d0f14}
-
+ 
 /* CHAT */
 .chat-wrap{flex:1;display:flex;flex-direction:column;height:calc(100vh - 57px)}
 .chat-profile{padding:12px 24px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:10px}
@@ -271,7 +271,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .wcard{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px}
 .wcard-title{font-family:'DM Serif Display',serif;font-size:16px;color:var(--gold);margin-bottom:6px}
 .wcard p{font-size:13px;color:var(--muted);line-height:1.6}
-
+ 
 /* ACCOUNT SHEET */
 .sheet-wrap{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:150;display:flex;align-items:flex-end;justify-content:center}
 .sheet{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:28px 24px 36px;border-top:0.5px solid var(--border)}
@@ -282,12 +282,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .active-pill{background:rgba(76,175,130,0.12);color:var(--success);border:0.5px solid var(--success);font-size:11px;font-family:'DM Mono',monospace;padding:4px 10px;border-radius:20px}
 .divider{height:0.5px;background:var(--border);margin:16px 0}
 .cancel-note{font-size:12px;color:var(--muted);text-align:center;line-height:1.6;margin-top:10px}
-
+ 
 /* SUCCESS / CANCELLED */
 .success-page{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;gap:20px}
 .sicon{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 .sicon svg{width:32px;height:32px;fill:none;stroke-linecap:round;stroke-linejoin:round}
-
+ 
 /* RESPONSIVE */
 @media(max-width:768px){
   nav{padding:16px 20px}
@@ -306,12 +306,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 </style>
 </head>
 <body>
-
+ 
 <!-- ═══════════════════════════════════════
      LANDING PAGE
 ═══════════════════════════════════════ -->
 <div id="landing">
-
+ 
   <!-- NAV -->
   <nav id="nav">
     <div class="nav-logo">Lumin<span>Fin</span></div>
@@ -323,7 +323,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
     </div>
     <button class="nav-mobile-cta" onclick="startApp()">Get Started</button>
   </nav>
-
+ 
   <!-- HERO -->
   <div class="hero">
     <div class="hero-grid"></div>
@@ -334,14 +334,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
       <button class="btn-hero btn-hero-gold" onclick="startApp()">Start for $5 / month</button>
       <button class="btn-hero btn-hero-outline" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">See how it works</button>
     </div>
-    <div class="hero-note">Secured by Paddle · Cancel anytime · No hidden fees</div>
+    <div class="hero-note">Secured by Lemon Squeezy · Cancel anytime · No hidden fees</div>
   </div>
-
+ 
   <!-- TICKER -->
   <div class="ticker-wrap">
     <div class="ticker-inner" id="ticker"></div>
   </div>
-
+ 
   <!-- HOW IT WORKS -->
   <section id="how">
     <div class="section-label">How it works</div>
@@ -354,7 +354,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
       <div class="step-card"><div class="step-accent"></div><div class="step-num">04 · ADVISE</div><h3>Get tailored advice</h3><p>Ask anything — from PSX picks to global ETFs. Every answer is calibrated to your exact profile.</p></div>
     </div>
   </section>
-
+ 
   <!-- FEATURES -->
   <section id="features" style="background:var(--bg2);max-width:100%;padding:90px 0">
     <div style="max-width:1100px;margin:0 auto;padding:0 40px">
@@ -395,7 +395,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
       </div>
     </div>
   </section>
-
+ 
   <!-- DEMO -->
   <div class="demo-section">
     <div class="demo-inner">
@@ -419,7 +419,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
       </div>
     </div>
   </div>
-
+ 
   <!-- PRICING -->
   <section id="pricing">
     <div class="section-label">Pricing</div>
@@ -440,12 +440,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
         <button class="btn btn-g" onclick="startApp()">Get Started →</button>
         <div class="paddle-badge" style="margin-top:12px;">
           <div class="paddle-ico"><svg viewBox="0 0 10 12"><path d="M2 0h4a4 4 0 0 1 0 8H2V0z"/><rect x="2" y="9" width="2" height="3"/></svg></div>
-          Payments secured by Paddle
+          Payments secured by Lemon Squeezy
         </div>
       </div>
     </div>
   </section>
-
+ 
   <!-- FOOTER -->
   <div style="border-top:0.5px solid var(--border)">
     <footer>
@@ -460,9 +460,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
       <div class="footer-copy">© 2025 LuminFin. All rights reserved.</div>
     </footer>
   </div>
-
+ 
 </div><!-- /landing -->
-
+ 
 <!-- ═══════════════════════════════════════
      APP SHELL
 ═══════════════════════════════════════ -->
@@ -479,7 +479,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <div id="main"></div>
   <div id="modals"></div>
 </div>
-
+ 
 <script>
 /* ── STATE ── */
 const S={screen:'onboard',step:0,profile:{name:'',age:'',occupation:'',risk:50,knowledge:''},messages:[],loading:false,subscribed:false,subDate:null,nextBilling:null,cancelled:false};
@@ -489,22 +489,22 @@ const RL=v=>v<20?'Capital preservation':v<40?'Conservative growth':v<60?'Balance
 const ini=n=>n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()||'U';
 const fmtD=d=>d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
 const fmtM=t=>t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/^[•\-] /gm,'&bull; ').replace(/\n/g,'<br>');
-
+ 
 /* ── NAV SCROLL ── */
 window.addEventListener('scroll',()=>{document.getElementById('nav')?.classList.toggle('scrolled',window.scrollY>20)});
-
+ 
 /* ── TICKER ── */
 const ticks=[{n:'AAPL',v:'189.42',c:'+1.2%',up:true},{n:'MSFT',v:'415.30',c:'+0.8%',up:true},{n:'GOOGL',v:'178.54',c:'-0.3%',up:false},{n:'META',v:'527.80',c:'+2.1%',up:true},{n:'BTC',v:'67,420',c:'+3.4%',up:true},{n:'GOLD',v:'2,341',c:'+0.6%',up:true},{n:'PSX',v:'79,230',c:'+0.9%',up:true},{n:'SYS',v:'412.50',c:'+1.5%',up:true},{n:'PKR/USD',v:'278.40',c:'-0.1%',up:false},{n:'SPX',v:'5,248',c:'+0.4%',up:true},{n:'NVDA',v:'875.40',c:'+4.2%',up:true},{n:'TRG',v:'97.30',c:'+2.0%',up:true}];
 function buildTicker(){const el=document.getElementById('ticker');if(!el)return;const html=t=>`<div class="tick"><span class="tick-name">${t.n}</span><span class="tick-val">${t.v}</span><span class="tick-chg ${t.up?'tick-up':'tick-dn'}">${t.c}</span></div>`;el.innerHTML=[...ticks,...ticks].map(html).join('');}
 buildTicker();
-
+ 
 /* ── LANDING ↔ APP ── */
 function startApp(){document.getElementById('landing').style.display='none';document.getElementById('app-shell').style.display='block';window.scrollTo(0,0);render();}
 function backToLanding(){document.getElementById('landing').style.display='block';document.getElementById('app-shell').style.display='none';window.scrollTo(0,0);}
-
+ 
 /* ── BADGE ── */
 function setBadge(txt,color){const b=document.getElementById('hbadge');b.textContent=txt;b.style.color=color||'var(--gold)';b.style.borderColor=color||'var(--gold)';}
-
+ 
 /* ── RENDER ── */
 function render(){
   const main=document.getElementById('main'),gear=document.getElementById('gear');
@@ -514,13 +514,13 @@ function render(){
   else if(S.screen==='chat'){setBadge('LIVE','var(--success)');gear.style.display='flex';main.innerHTML=renderChat();attachChat();scrollBot();}
   else if(S.screen==='cancelled'){setBadge('CANCELLED','var(--danger)');gear.style.display='none';main.innerHTML=renderCancelled();}
 }
-
+ 
 /* ── ONBOARDING ── */
 function renderOnboard(){
   const dots=[0,1,2,3].map(i=>`<div class="pdot ${i<=S.step?'on':''}"></div>`).join('');
   return`<div class="page"><div class="progress-row">${dots}</div>${[s0,s1,s2,s3][S.step]()}</div>`;
 }
-function s0(){return`<div><div class="step-title">Welcome to<br>LuminFin</div><div class="step-sub">Your AI-powered personal finance advisor. Let's set up your profile.</div></div><div><div class="flabel">Full name</div><input class="finput" id="fn" type="text" placeholder="e.g. Salman Ali" value="${S.profile.name}"/></div><div><div class="flabel">Age</div><input class="finput" id="fa" type="number" placeholder="e.g. 25" min="13" max="100" value="${S.profile.age}"/></div><button class="btn btn-g" onclick="nx()">Continue →</button>`}
+function s0(){return`<div><div class="step-title">Welcome to<br>LuminFin</div><div class="step-sub">Your AI-powered personal finance advisor. Let's set up your profile.</div></div><div><div class="flabel">Full name</div><input class="finput" id="fn" type="text" placeholder="e.g. John Smith" value="${S.profile.name}"/></div><div><div class="flabel">Age</div><input class="finput" id="fa" type="number" placeholder="e.g. 25" min="13" max="100" value="${S.profile.age}"/></div><button class="btn btn-g" onclick="nx()">Continue →</button>`}
 function s1(){return`<div><div class="step-title">What do you do for a living?</div><div class="step-sub">Helps us understand your income and financial goals.</div></div><div><div class="flabel">Occupation</div><input class="finput" id="fo" type="text" placeholder="e.g. Software Engineer, Student…" value="${S.profile.occupation}"/></div><button class="btn btn-g" onclick="nx()">Continue →</button>`}
 function s2(){return`<div><div class="step-title">How much risk are you willing to take?</div><div class="step-sub">0 = no risk at all &nbsp;·&nbsp; 100 = maximum speculation.</div></div><div><div class="risk-val" id="rv">${S.profile.risk}</div><input type="range" id="fr" min="0" max="100" step="1" value="${S.profile.risk}" style="--pct:${S.profile.risk}%"/><div class="slider-labels"><span>Safe</span><span>Balanced</span><span>Aggressive</span></div><div class="risk-lbl" id="rl">${RL(S.profile.risk)}</div></div><button class="btn btn-g" onclick="nx()">Continue →</button>`}
 function s3(){return`<div><div class="step-title">How well do you know finance?</div><div class="step-sub">We'll match advice complexity to your expertise.</div></div><div class="kopts">${KO.map(k=>`<div class="kopt ${S.profile.knowledge===k.id?'sel':''}" onclick="selK('${k.id}')"><div class="kdot"></div><div><div class="kt">${k.title}</div><div class="kd">${k.desc}</div></div></div>`).join('')}</div><button class="btn btn-g" id="kbtn" onclick="nx()" ${!S.profile.knowledge?'disabled':''}>Continue →</button>`}
@@ -533,16 +533,16 @@ function nx(){
 }
 function selK(id){S.profile.knowledge=id;document.querySelectorAll('.kopt').forEach(el=>el.classList.toggle('sel',el.getAttribute('onclick').includes(`'${id}'`)));const b=document.getElementById('kbtn');if(b)b.disabled=false;}
 function attachSlider(){const r=document.getElementById('fr');if(r)r.addEventListener('input',function(){const v=parseInt(this.value);S.profile.risk=v;this.style.setProperty('--pct',v+'%');const d=document.getElementById('rv'),l=document.getElementById('rl');if(d)d.textContent=v;if(l)l.textContent=RL(v);});}
-
+ 
 /* ── SUBSCRIBE ── */
 function renderSubscribe(){
   const fs=['Unlimited AI finance consultations','Live market data & news integration','Personalized portfolio advice','PSX + global market coverage','Cancel anytime — no questions asked'];
-  return`<div class="page"><div><div class="step-title">Unlock LuminFin Pro</div><div class="step-sub">One plan. Full access to your AI finance advisor.</div></div><div class="plan-card"><div class="plan-badge">LUMINFIN PRO</div><div class="plan-price"><sup>$</sup>5<sub> / month</sub></div><div class="plan-feats">${fs.map(f=>`<div class="plan-feat"><div class="feat-check"><svg viewBox="0 0 10 10"><polyline points="2,5 4,8 8,2"/></svg></div>${f}</div>`).join('')}</div></div><div><button class="btn btn-g" onclick="openPaddle()">Subscribe with Paddle →</button><div class="secure" style="margin-top:10px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Secured by</span><span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;"><span class="p-ico"><svg viewBox="0 0 10 12"><path d="M2 0h4a4 4 0 0 1 0 8H2V0z"/><rect x="2" y="9" width="2" height="3"/></svg></span>Paddle</span>· Cancel anytime</div></div></div>`;
+  return`<div class="page"><div><div class="step-title">Unlock LuminFin Pro</div><div class="step-sub">One plan. Full access to your AI finance advisor.</div></div><div class="plan-card"><div class="plan-badge">LUMINFIN PRO</div><div class="plan-price"><sup>$</sup>5<sub> / month</sub></div><div class="plan-feats">${fs.map(f=>`<div class="plan-feat"><div class="feat-check"><svg viewBox="0 0 10 10"><polyline points="2,5 4,8 8,2"/></svg></div>${f}</div>`).join('')}</div></div><div><button class="btn btn-g" onclick="openPaddle()">Subscribe with Lemon Squeezy →</button><div class="secure" style="margin-top:10px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Secured by</span><span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;"><span class="p-ico"><svg viewBox="0 0 10 12"><path d="M2 0h4a4 4 0 0 1 0 8H2V0z"/><rect x="2" y="9" width="2" height="3"/></svg></span>Lemon Squeezy</span>· Cancel anytime</div></div></div>`;
 }
-
+ 
 /* ── PADDLE MODAL ── */
 function openPaddle(){
-  document.getElementById('modals').innerHTML=`<div class="overlay-wrap" id="povl" onclick="closePaddle(event)"><div class="paddle-modal" onclick="event.stopPropagation()"><div class="paddle-header"><div class="paddle-brand"><div class="paddle-p-icon"><svg viewBox="0 0 10 12"><path d="M2 0h4a4 4 0 0 1 0 8H2V0z"/><rect x="2" y="9" width="2" height="3"/></svg></div>Paddle Checkout</div><button class="p-close" onclick="closePaddleBtn()">✕</button></div><div class="paddle-body"><div class="paddle-summary"><div><div class="psl">LuminFin Pro</div><div class="pss">Billed monthly · Cancel anytime</div></div><div class="psr">$5.00</div></div><div class="p-flabel">Email address</div><input class="p-input" id="pe" type="email" placeholder="you@example.com"/><div class="p-flabel">Cardholder name</div><input class="p-input" id="pn" type="text" placeholder="As it appears on your card"/><div class="p-flabel">Card number</div><div class="p-card-wrap"><input class="p-input" id="pc" type="text" placeholder="1234 5678 9012 3456" maxlength="19" oninput="fmtCard(this)" style="padding-right:36px;margin-bottom:0"/><span class="p-card-icon">💳</span></div><div style="height:12px"></div><div class="p-row"><div><div class="p-flabel">Expiry</div><input class="p-input" id="px" type="text" placeholder="MM / YY" maxlength="7" oninput="fmtExp(this)" style="margin-bottom:0"/></div><div><div class="p-flabel">CVC</div><input class="p-input" id="pv" type="text" placeholder="123" maxlength="3" style="margin-bottom:0"/></div></div><button class="paddle-pay-btn" onclick="processPaddle()"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Pay $5.00</button></div><div class="paddle-footer">Payments processed securely. By subscribing you agree to our <a href="#">Terms</a>.<div class="paddle-powered"><div class="paddle-powered-box"><svg viewBox="0 0 10 12"><path d="M2 0h4a4 4 0 0 1 0 8H2V0z"/><rect x="2" y="9" width="2" height="3"/></svg></div>Powered by Paddle</div></div></div></div>`;
+  document.getElementById('modals').innerHTML=`<div class="overlay-wrap" id="povl" onclick="closePaddle(event)"><div class="paddle-modal" onclick="event.stopPropagation()"><div class="paddle-header"><div class="paddle-brand"><div class="paddle-p-icon"><svg viewBox="0 0 10 12"><path d="M2 0h4a4 4 0 0 1 0 8H2V0z"/><rect x="2" y="9" width="2" height="3"/></svg></div>Lemon Squeezy Checkout</div><button class="p-close" onclick="closePaddleBtn()">✕</button></div><div class="paddle-body"><div class="paddle-summary"><div><div class="psl">LuminFin Pro</div><div class="pss">Billed monthly · Cancel anytime</div></div><div class="psr">$5.00</div></div><div class="p-flabel">Email address</div><input class="p-input" id="pe" type="email" placeholder="you@example.com"/><div class="p-flabel">Cardholder name</div><input class="p-input" id="pn" type="text" placeholder="As it appears on your card"/><div class="p-flabel">Card number</div><div class="p-card-wrap"><input class="p-input" id="pc" type="text" placeholder="1234 5678 9012 3456" maxlength="19" oninput="fmtCard(this)" style="padding-right:36px;margin-bottom:0"/><span class="p-card-icon">💳</span></div><div style="height:12px"></div><div class="p-row"><div><div class="p-flabel">Expiry</div><input class="p-input" id="px" type="text" placeholder="MM / YY" maxlength="7" oninput="fmtExp(this)" style="margin-bottom:0"/></div><div><div class="p-flabel">CVC</div><input class="p-input" id="pv" type="text" placeholder="123" maxlength="3" style="margin-bottom:0"/></div></div><button class="paddle-pay-btn" onclick="processPaddle()"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Pay $5.00</button></div><div class="paddle-footer">Payments processed securely. By subscribing you agree to our <a href="#">Terms</a>.<div class="paddle-powered"><div class="paddle-powered-box"><svg viewBox="0 0 10 12"><path d="M2 0h4a4 4 0 0 1 0 8H2V0z"/><rect x="2" y="9" width="2" height="3"/></svg></div>Powered by Lemon Squeezy</div></div></div></div>`;
 }
 function closePaddle(e){if(!e||e.target.id==='povl')closePaddleBtn();}
 function closePaddleBtn(){document.getElementById('modals').innerHTML='';}
@@ -553,16 +553,16 @@ function processPaddle(){
   if(!e||!n||!c||!x||!v){alert('Please fill in all fields.');return;}
   closePaddleBtn();const now=new Date();S.subDate=now;S.nextBilling=new Date(now.getTime()+30*24*60*60*1000);S.subscribed=true;S.screen='success';render();
 }
-
+ 
 /* ── SUCCESS ── */
-function renderSuccess(){return`<div class="success-page"><div class="sicon" style="background:rgba(76,175,130,0.12);border:1.5px solid var(--success);"><svg viewBox="0 0 24 24" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><div style="font-family:'DM Serif Display',serif;font-size:28px;">You're subscribed!</div><div style="font-size:14px;color:var(--muted);line-height:1.7;max-width:300px;">Welcome to LuminFin Pro, <strong style="color:var(--text);">${S.profile.name.split(' ')[0]}</strong>. Payment processed via Paddle. Next billing: <strong style="color:var(--text);">${fmtD(S.nextBilling)}</strong>.</div><div style="background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);width:100%;max-width:320px;"><span class="p-ico" style="width:18px;height:18px;flex-shrink:0;"><svg viewBox="0 0 10 12" fill="#0d0f14"><path d="M2 0h4a4 4 0 0 1 0 8H2V0z"/><rect x="2" y="9" width="2" height="3"/></svg></span>Subscription managed by Paddle · Cancel anytime from settings</div><button class="btn btn-g" style="width:100%;max-width:300px;" onclick="S.screen='chat';render()">Open My Advisor →</button></div>`;}
-
+function renderSuccess(){return`<div class="success-page"><div class="sicon" style="background:rgba(76,175,130,0.12);border:1.5px solid var(--success);"><svg viewBox="0 0 24 24" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><div style="font-family:'DM Serif Display',serif;font-size:28px;">You're subscribed!</div><div style="font-size:14px;color:var(--muted);line-height:1.7;max-width:300px;">Welcome to LuminFin Pro, <strong style="color:var(--text);">${S.profile.name.split(' ')[0]}</strong>. Payment processed via Lemon Squeezy. Next billing: <strong style="color:var(--text);">${fmtD(S.nextBilling)}</strong>.</div><div style="background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);width:100%;max-width:320px;"><span class="p-ico" style="width:18px;height:18px;flex-shrink:0;"><svg viewBox="0 0 10 12" fill="#0d0f14"><path d="M2 0h4a4 4 0 0 1 0 8H2V0z"/><rect x="2" y="9" width="2" height="3"/></svg></span>Subscription managed by Lemon Squeezy · Cancel anytime from settings</div><button class="btn btn-g" style="width:100%;max-width:300px;" onclick="S.screen='chat';render()">Open My Advisor →</button></div>`;}
+ 
 /* ── CANCELLED ── */
 function renderCancelled(){return`<div class="success-page"><div class="sicon" style="background:rgba(224,82,82,0.1);border:1px solid var(--danger);"><svg viewBox="0 0 24 24" stroke="var(--danger)" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div><div style="font-family:'DM Serif Display',serif;font-size:28px;">Subscription cancelled</div><div style="font-size:14px;color:var(--muted);line-height:1.7;max-width:300px;">Your access remains active until <strong style="color:var(--text);">${fmtD(S.nextBilling)}</strong>.</div><button class="btn btn-g" style="width:100%;max-width:300px;" onclick="S.screen='subscribe';render()">Resubscribe →</button><button class="btn btn-o" style="width:100%;max-width:300px;" onclick="S.subscribed=true;S.screen='chat';render()">Continue until ${fmtD(S.nextBilling)} →</button></div>`;}
-
+ 
 /* ── CHAT ── */
 function sysprompt(){const p=S.profile,km={none:'no prior knowledge of finance',some:'some understanding of finance basics',expert:'expert-level knowledge including derivatives, MBS, and CDS'};return`You are LuminFin, an elite AI personal finance consultant combining Bloomberg's market intelligence with conversational AI. Expert in global markets, Pakistani/South Asian context (PKR, PSX, SBP), and international investing.\n\nUSER PROFILE: Name: ${p.name} | Age: ${p.age} | Occupation: ${p.occupation} | Risk: ${p.risk}/100 (${RL(p.risk)}) | Knowledge: ${km[p.knowledge]}\n\nRULES: Address user as ${p.name.split(' ')[0]}. Tailor all advice to profile. For 'none': plain language only. For 'some': moderate detail. For 'expert': full financial terminology and complex instruments freely. Always include Pakistani context alongside international options. Use web search for current data. Never guarantee returns. Be direct and structured. Max 250 words unless asked for more.`;}
-
+ 
 function renderChat(){
   const p=S.profile,av=ini(p.name);
   const msgs=S.messages.length===0?`<div class="msg assistant"><div class="mav">LF</div><div><div class="wcard"><div class="wcard-title">Welcome, ${p.name.split(' ')[0]}.</div><p>I'm LuminFin — your personal AI finance advisor, calibrated to your profile: age ${p.age}, risk ${p.risk}/100, ${KO.find(k=>k.id===p.knowledge)?.title.toLowerCase()} level.<br><br>Ask me anything about investing, markets, or financial strategy.</p></div></div></div>`:S.messages.map(m=>`<div class="msg ${m.role}"><div class="mav">${m.role==='assistant'?'LF':av}</div><div class="mbubble">${fmtM(m.content)}</div></div>`).join('');
@@ -574,17 +574,17 @@ function attachChat(){const ta=document.getElementById('cin');if(ta)ta.addEventL
 function hkey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}
 function scrollBot(){const el=document.getElementById('msgs');if(el)el.scrollTop=el.scrollHeight;}
 function doSug(t){const ta=document.getElementById('cin');if(ta)ta.value=t;send();}
-
+ 
 /* ── ACCOUNT SHEET ── */
 function openSheet(){
-  document.getElementById('modals').innerHTML=`<div class="sheet-wrap" id="sw" onclick="closeSheet(event)"><div class="sheet" onclick="event.stopPropagation()"><div class="handle"></div><div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:4px;">My Account</div><div style="font-size:13px;color:var(--muted);margin-bottom:20px;">${S.profile.name} · ${S.profile.occupation}</div><div class="srow"><div class="srow-l"><div class="slabel">SUBSCRIPTION</div><div class="sval">LuminFin Pro · $5 / month</div></div><div class="active-pill">${S.cancelled?'ENDING':'ACTIVE'}</div></div><div class="srow"><div class="srow-l"><div class="slabel">NEXT BILLING</div><div class="sval">${fmtD(S.nextBilling)}</div></div></div><div class="srow"><div class="srow-l"><div class="slabel">MEMBER SINCE</div><div class="sval">${fmtD(S.subDate)}</div></div></div><div class="srow" style="margin-bottom:0"><div class="srow-l"><div class="slabel">PAYMENT PROCESSOR</div><div class="sval" style="display:flex;align-items:center;gap:6px;"><span class="p-ico" style="width:18px;height:18px;"><svg viewBox="0 0 10 12" fill="#0d0f14"><path d="M2 0h4a4 4 0 0 1 0 8H2V0z"/><rect x="2" y="9" width="2" height="3"/></svg></span>Paddle</div></div></div><div class="divider"></div><button class="btn btn-d" onclick="confirmCancel()">Cancel Subscription</button><div class="cancel-note">Cancelling ends access at the end of the current billing period.</div></div></div>`;
+  document.getElementById('modals').innerHTML=`<div class="sheet-wrap" id="sw" onclick="closeSheet(event)"><div class="sheet" onclick="event.stopPropagation()"><div class="handle"></div><div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:4px;">My Account</div><div style="font-size:13px;color:var(--muted);margin-bottom:20px;">${S.profile.name} · ${S.profile.occupation}</div><div class="srow"><div class="srow-l"><div class="slabel">SUBSCRIPTION</div><div class="sval">LuminFin Pro · $5 / month</div></div><div class="active-pill">${S.cancelled?'ENDING':'ACTIVE'}</div></div><div class="srow"><div class="srow-l"><div class="slabel">NEXT BILLING</div><div class="sval">${fmtD(S.nextBilling)}</div></div></div><div class="srow"><div class="srow-l"><div class="slabel">MEMBER SINCE</div><div class="sval">${fmtD(S.subDate)}</div></div></div><div class="srow" style="margin-bottom:0"><div class="srow-l"><div class="slabel">PAYMENT PROCESSOR</div><div class="sval" style="display:flex;align-items:center;gap:6px;"><span class="p-ico" style="width:18px;height:18px;"><svg viewBox="0 0 10 12" fill="#0d0f14"><path d="M2 0h4a4 4 0 0 1 0 8H2V0z"/><rect x="2" y="9" width="2" height="3"/></svg></span>Lemon Squeezy</div></div></div><div class="divider"></div><button class="btn btn-d" onclick="confirmCancel()">Cancel Subscription</button><div class="cancel-note">Cancelling ends access at the end of the current billing period.</div></div></div>`;
 }
 function closeSheet(e){if(!e||e.target.id==='sw')document.getElementById('modals').innerHTML='';}
 function confirmCancel(){
-  document.getElementById('modals').innerHTML=`<div class="sheet-wrap" id="sw2" onclick="if(event.target.id==='sw2')document.getElementById('modals').innerHTML=''"><div class="sheet" style="border-top-color:rgba(224,82,82,.3);" onclick="event.stopPropagation()"><div class="handle"></div><div style="text-align:center;margin-bottom:20px;"><div style="width:52px;height:52px;border-radius:50%;background:rgba(224,82,82,0.1);border:1px solid var(--danger);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></div><div style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:8px;">Cancel subscription?</div><div style="font-size:13px;color:var(--muted);line-height:1.6;">You'll keep full access until <strong style="color:var(--text);">${fmtD(S.nextBilling)}</strong>. This cancellation is sent to Paddle.</div></div><div style="display:flex;flex-direction:column;gap:10px;"><button class="btn btn-d" onclick="doCancel()">Yes, cancel my subscription</button><button class="btn btn-o" onclick="openSheet()">Keep my subscription</button></div></div></div>`;
+  document.getElementById('modals').innerHTML=`<div class="sheet-wrap" id="sw2" onclick="if(event.target.id==='sw2')document.getElementById('modals').innerHTML=''"><div class="sheet" style="border-top-color:rgba(224,82,82,.3);" onclick="event.stopPropagation()"><div class="handle"></div><div style="text-align:center;margin-bottom:20px;"><div style="width:52px;height:52px;border-radius:50%;background:rgba(224,82,82,0.1);border:1px solid var(--danger);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></div><div style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:8px;">Cancel subscription?</div><div style="font-size:13px;color:var(--muted);line-height:1.6;">You'll keep full access until <strong style="color:var(--text);">${fmtD(S.nextBilling)}</strong>. This cancellation is sent to Lemon Squeezy.</div></div><div style="display:flex;flex-direction:column;gap:10px;"><button class="btn btn-d" onclick="doCancel()">Yes, cancel my subscription</button><button class="btn btn-o" onclick="openSheet()">Keep my subscription</button></div></div></div>`;
 }
 function doCancel(){S.cancelled=true;S.subscribed=false;document.getElementById('modals').innerHTML='';S.screen='cancelled';render();}
-
+ 
 /* ── AI SEND ── */
 async function send(){
   if(S.loading)return;
