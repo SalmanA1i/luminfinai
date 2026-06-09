@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="LuminFin">
 <link rel="manifest" href="/manifest.json">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -17,26 +17,26 @@
   --gold:#e8a020;--gold2:#f5c05a;--gold-dim:rgba(232,160,32,0.1);
   --text:#f0ece0;--text2:#9a9585;--muted:#555a6b;
   --border:rgba(255,255,255,0.07);--border2:rgba(232,160,32,0.25);
-  --danger:#e05252;--success:#3db87a;
-  --radius:10px;--radius-lg:16px;--radius-xl:20px;
-  --card:#111420;
-  --safe-top:env(safe-area-inset-top,0px);
-  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --danger:#e05252;--success:#3db87a;--green-dim:rgba(61,184,122,0.12);
+  --radius:10px;--radius-lg:16px;--radius-xl:20px;--card:#111420;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
 }
 html,body{height:100%;overflow:hidden;background:var(--bg)}
 body{font-family:'Inter',sans-serif;color:var(--text)}
 #root{height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto;background:var(--bg);position:relative}
+.mono{font-family:'Space Mono',monospace}
+.up{color:var(--success)}.dn{color:var(--danger)}
  
 /* ── ONBOARDING ── */
-#ob{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;flex-direction:column;align-items:center;padding:calc(var(--safe-top)+40px) 24px calc(var(--safe-bottom)+24px);max-width:430px;margin:0 auto;left:50%;transform:translateX(-50%);width:100%}
+#ob{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;flex-direction:column;align-items:center;padding:calc(var(--safe-top)+36px) 24px calc(var(--safe-bottom)+20px);max-width:430px;margin:0 auto;left:50%;transform:translateX(-50%);width:100%}
 .ob-logo{font-family:'Space Mono',monospace;font-size:13px;letter-spacing:2px;color:var(--text2);display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .ob-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);animation:glow 2s infinite}
 @keyframes glow{0%,100%{box-shadow:0 0 6px var(--gold)}50%{box-shadow:0 0 16px var(--gold),0 0 28px rgba(232,160,32,.3)}}
-.ob-tag{font-size:13px;color:var(--muted);text-align:center;margin-bottom:28px;line-height:1.6}
-.ob-pbar{width:100%;margin-bottom:24px}
+.ob-tag{font-size:13px;color:var(--muted);text-align:center;margin-bottom:24px;line-height:1.6}
+.ob-pbar{width:100%;margin-bottom:22px}
 .ob-pbar-bg{height:2px;background:var(--bg4);border-radius:2px;position:relative;overflow:hidden}
 .ob-pbar-fill{position:absolute;left:0;top:0;bottom:0;background:var(--gold);border-radius:2px;transition:width .4s ease}
-.ob-card{width:100%;background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius-xl);padding:26px 22px;display:flex;flex-direction:column;gap:18px;flex:1;max-height:600px;overflow-y:auto}
+.ob-card{width:100%;background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius-xl);padding:24px 22px;display:flex;flex-direction:column;gap:18px;flex:1;max-height:620px;overflow-y:auto}
 .ob-card::-webkit-scrollbar{display:none}
 .ob-step{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--muted)}
 .ob-title{font-size:20px;font-weight:600;line-height:1.3}
@@ -49,7 +49,7 @@ body{font-family:'Inter',sans-serif;color:var(--text)}
 .risk-lbl{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);text-align:center;margin-top:3px}
 input[type=range]{-webkit-appearance:none;width:100%;height:3px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,var(--gold) var(--pct,50%),var(--bg4) var(--pct,50%));margin:14px 0 4px}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--gold);border:3px solid var(--bg);cursor:pointer}
-.slider-ends{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.5px}
+.slider-ends{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)}
 .kopts{display:flex;flex-direction:column;gap:9px}
 .kopt{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:13px 14px;cursor:pointer;display:flex;align-items:center;gap:11px;transition:border-color .2s,background .2s}
 .kopt.sel{border-color:var(--gold);background:var(--gold-dim)}
@@ -57,24 +57,23 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .kopt.sel .krad{border-color:var(--gold);background:var(--gold)}
 .kopt.sel .krad::after{content:'';width:6px;height:6px;background:var(--bg);border-radius:50%;display:block}
 .kt{font-size:13px;font-weight:500}.kd{font-size:11px;color:var(--text2);margin-top:2px}
+.amt-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.amt-chip{background:var(--bg3);border:0.5px solid var(--border);border-radius:20px;padding:7px 13px;font-size:12px;cursor:pointer;font-family:'Space Mono',monospace;transition:border-color .2s,background .2s}
+.amt-chip.sel{border-color:var(--gold);background:var(--gold-dim);color:var(--gold)}
 .sec-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .sec-card{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px;cursor:pointer;transition:border-color .2s,background .2s}
 .sec-card.sel{border-color:var(--gold);background:var(--gold-dim)}
-.sec-emo{font-size:20px;margin-bottom:5px}
-.sec-name{font-size:12px;font-weight:600}
-.sec-desc{font-size:10px;color:var(--text2);margin-top:2px}
-.ob-btn{width:100%;background:var(--gold);color:#0a0c12;border:none;border-radius:var(--radius);padding:13px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:auto;letter-spacing:.2px}
+.sec-emo{font-size:20px;margin-bottom:5px}.sec-name{font-size:12px;font-weight:600}.sec-desc{font-size:10px;color:var(--text2);margin-top:2px}
+.ob-btn{width:100%;background:var(--gold);color:#0a0c12;border:none;border-radius:var(--radius);padding:13px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:auto}
 .ob-btn:active{transform:scale(.98)}.ob-btn:disabled{opacity:.3;cursor:not-allowed}
  
 /* ── APP ── */
 #app{display:none;flex:1;flex-direction:column;height:100%;overflow:hidden}
-.appbar{padding:calc(var(--safe-top)+12px) 18px 11px;display:flex;align-items:center;justify-content:space-between;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0}
+.appbar{padding:calc(var(--safe-top)+12px) 16px 11px;display:flex;align-items:center;justify-content:space-between;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0}
 .appbar-logo{font-family:'Space Mono',monospace;font-size:13px;letter-spacing:1px;color:var(--gold);display:flex;align-items:center;gap:7px}
 .appbar-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px var(--gold);animation:glow 2s infinite}
 .appbar-right{display:flex;align-items:center;gap:9px}
-.live-tag{font-family:'Space Mono',monospace;font-size:9px;color:var(--success);border:0.5px solid var(--success);padding:3px 8px;border-radius:20px;letter-spacing:.5px;display:flex;align-items:center;gap:4px}
-.live-dot{width:4px;height:4px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+.kse-pill{font-family:'Space Mono',monospace;font-size:9px;padding:4px 9px;border-radius:20px;background:var(--bg3);border:0.5px solid var(--border);display:flex;align-items:center;gap:5px}
 .av-btn{width:29px;height:29px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);cursor:pointer;flex-shrink:0}
 #screens{flex:1;overflow:hidden;position:relative}
 .screen{position:absolute;inset:0;overflow-y:auto;display:none;padding-bottom:72px}
@@ -84,37 +83,103 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:5px 0}
 .nav-btn svg{width:19px;height:19px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
 .nav-btn span{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.5px;transition:color .2s}
-.nav-btn.active svg{stroke:var(--gold)}
-.nav-btn.active span{color:var(--gold)}
+.nav-btn.active svg{stroke:var(--gold)}.nav-btn.active span{color:var(--gold)}
  
 /* SHARED */
 .sh{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase}
-.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 10px}
 .sec-more{font-size:11px;color:var(--muted);cursor:pointer}
 .shimmer{background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%);background-size:200% 100%;animation:shim 1.5s infinite;border-radius:6px}
 @keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.up{color:var(--success)}.dn{color:var(--danger)}
  
-/* HOME */
-.home-hero{padding:18px;background:linear-gradient(160deg,var(--bg2),var(--bg));border-bottom:0.5px solid var(--border)}
-.home-greet{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-bottom:4px}
-.home-name{font-size:22px;font-weight:600}
-.home-secs{font-size:11px;color:var(--text2);margin-top:5px}
-.stocks-row{display:flex;gap:11px;padding:4px 18px 14px;overflow-x:auto}
-.stocks-row::-webkit-scrollbar{display:none}
-.scard{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px;min-width:132px;flex-shrink:0;cursor:pointer;transition:border-color .2s}
-.scard:active{border-color:var(--border2)}
-.scard-ticker{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:.5px;margin-bottom:4px}
-.scard-name{font-size:10px;color:var(--text2);margin-bottom:9px;line-height:1.4}
-.mchart{height:28px;margin-bottom:7px}
-.mchart svg{width:100%;height:100%}
-.scard-price{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px}
-.scard-chg{font-family:'Space Mono',monospace;font-size:10px}
-.ai-tag{display:inline-block;margin-top:7px;font-size:9px;font-family:'Space Mono',monospace;background:var(--gold-dim);color:var(--gold);padding:2px 7px;border-radius:20px;letter-spacing:.5px}
+/* INDEX BAR */
+.index-bar{padding:14px 16px;background:linear-gradient(160deg,var(--bg2),var(--bg));border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.index-left .idx-name{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:3px}
+.index-left .idx-val{font-family:'Space Mono',monospace;font-size:22px;font-weight:700}
+.index-right{text-align:right}
+.index-right .idx-chg{font-family:'Space Mono',monospace;font-size:14px;font-weight:700}
+.index-right .idx-pct{font-family:'Space Mono',monospace;font-size:11px;margin-top:2px}
+ 
+/* PORTFOLIO */
+.pf-card{margin:14px 16px;background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:16px}
+.pf-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.pf-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--gold);margin-bottom:6px}
+.pf-value{font-family:'Space Mono',monospace;font-size:26px;font-weight:700}
+.pf-change{font-family:'Space Mono',monospace;font-size:12px;margin-top:4px}
+.pf-badge{font-family:'Space Mono',monospace;font-size:9px;padding:4px 9px;border-radius:20px;background:var(--gold-dim);color:var(--gold);border:0.5px solid var(--border2);letter-spacing:.5px}
+.pie-wrap{display:flex;align-items:center;gap:16px;margin:14px 0}
+.pie-legend{flex:1;display:flex;flex-direction:column;gap:7px}
+.legend-row{display:flex;align-items:center;gap:8px;font-size:11px}
+.legend-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.legend-name{flex:1;color:var(--text2)}
+.legend-pct{font-family:'Space Mono',monospace;font-weight:700}
+.holdings-table{margin-top:8px}
+.holding-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-top:0.5px solid var(--border)}
+.holding-left{display:flex;align-items:center;gap:10px}
+.holding-icon{width:32px;height:32px;border-radius:8px;background:var(--bg3);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.holding-ticker{font-family:'Space Mono',monospace;font-size:12px;font-weight:700}
+.holding-name{font-size:10px;color:var(--muted);margin-top:1px}
+.holding-right{text-align:right}
+.holding-alloc{font-family:'Space Mono',monospace;font-size:12px;font-weight:700}
+.holding-amt{font-size:10px;color:var(--text2);margin-top:1px}
+.pf-actions{display:flex;gap:8px;margin-top:14px}
+.pf-action-btn{flex:1;border:0.5px solid var(--border);background:var(--bg3);color:var(--text);border-radius:var(--radius);padding:11px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:border-color .2s;text-align:center}
+.pf-action-btn:active{border-color:var(--gold)}
+.pf-action-btn.primary{background:var(--gold-dim);color:var(--gold);border-color:var(--border2)}
+.pf-building{text-align:center;padding:30px 16px}
+.pf-building .mono{font-size:11px;color:var(--muted);letter-spacing:1px;margin-top:14px}
+.spinner{width:36px;height:36px;border:2px solid var(--bg4);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+ 
+/* MARKET BOARDS */
+.board-tabs{display:flex;padding:12px 16px 0;gap:0;border-bottom:0.5px solid var(--border);overflow-x:auto}
+.board-tabs::-webkit-scrollbar{display:none}
+.board-tab{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);padding:8px 12px;cursor:pointer;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;letter-spacing:.5px;white-space:nowrap}
+.board-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.mkt-list{display:flex;flex-direction:column}
+.mkt-row{padding:12px 16px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .15s}
+.mkt-row:active{background:var(--bg2)}
+.mkt-left{display:flex;align-items:center;gap:11px}
+.mkt-icon{width:35px;height:35px;border-radius:9px;background:var(--bg3);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;font-family:'Space Mono',monospace;font-weight:700;color:var(--gold)}
+.mkt-ticker{font-family:'Space Mono',monospace;font-size:12px;font-weight:700}
+.mkt-name{font-size:10px;color:var(--muted);margin-top:2px}
+.mkt-right{text-align:right}
+.mkt-price{font-family:'Space Mono',monospace;font-size:12px;font-weight:700}
+.mkt-chg{font-family:'Space Mono',monospace;font-size:10px;margin-top:2px}
+.mkt-vol{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:1px}
+ 
+/* IMPACT / SUGGESTIONS */
+.impact-card{margin:0 16px 12px;background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px;display:flex;gap:11px}
+.impact-icon{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px}
+.impact-icon.pos{background:var(--green-dim);border:0.5px solid var(--success)}
+.impact-icon.neg{background:rgba(224,82,82,0.1);border:0.5px solid var(--danger)}
+.impact-body{flex:1}
+.impact-title{font-size:12px;font-weight:600;margin-bottom:4px}
+.impact-text{font-size:11px;color:var(--text2);line-height:1.5}
+.sugg-card{margin:0 16px 10px;background:var(--card);border:0.5px solid var(--border2);border-radius:var(--radius-lg);padding:14px;cursor:pointer;transition:border-color .2s}
+.sugg-card:active{border-color:var(--gold)}
+.sugg-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--gold);margin-bottom:6px}
+.sugg-text{font-size:12px;color:var(--text);line-height:1.5}
+ 
+/* STOCK DETAIL MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.modal-box{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:22px 22px calc(22px + var(--safe-bottom));border-top:0.5px solid var(--border);max-height:85vh;overflow-y:auto}
+.modal-box::-webkit-scrollbar{display:none}
+.modal-handle{width:32px;height:2px;background:var(--border);border-radius:2px;margin:0 auto 18px}
+.country-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px}
+.country-opt{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:13px;cursor:pointer;transition:border-color .2s,background .2s;text-align:center}
+.country-opt:active{border-color:var(--gold);background:var(--gold-dim)}
+.country-flag{font-size:22px;margin-bottom:5px}
+.country-name{font-size:12px;font-weight:600}
+.country-close{width:100%;background:transparent;border:0.5px solid var(--border);border-radius:var(--radius);padding:11px;font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);cursor:pointer}
+ 
+/* CUSTOMIZE MODAL */
+.cust-input{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;padding:12px 14px;outline:none;resize:none;min-height:80px;line-height:1.5;margin-bottom:12px}
+.cust-input:focus{border-color:var(--gold)}.cust-input::placeholder{color:var(--muted)}
  
 /* NEWS */
 .news-list{display:flex;flex-direction:column}
-.ncard{padding:14px 18px;border-bottom:0.5px solid var(--border);display:flex;gap:11px;cursor:pointer;transition:background .15s}
+.ncard{padding:14px 16px;border-bottom:0.5px solid var(--border);display:flex;gap:11px;cursor:pointer;transition:background .15s}
 .ncard:active{background:var(--bg2)}
 .nbody{flex:1}
 .nsource{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:4px}
@@ -123,44 +188,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .ntag{font-family:'Space Mono',monospace;font-size:9px;border:0.5px solid var(--border2);color:var(--text2);padding:2px 6px;border-radius:10px}
 .nthumb{width:54px;height:54px;border-radius:9px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
  
-/* MARKETS */
-.mkt-tabs{display:flex;padding:12px 18px 0;gap:0;border-bottom:0.5px solid var(--border);overflow-x:auto}
-.mkt-tabs::-webkit-scrollbar{display:none}
-.mkt-tab{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);padding:7px 12px;cursor:pointer;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;letter-spacing:.5px;white-space:nowrap}
-.mkt-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
-.ai-banner{margin:14px 18px;background:var(--card);border:0.5px solid var(--border2);border-radius:var(--radius-lg);padding:15px}
-.ai-banner-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--gold);margin-bottom:9px}
-.ai-banner-ticker{font-family:'Space Mono',monospace;font-size:17px;font-weight:700;margin-bottom:3px}
-.ai-banner-name{font-size:11px;color:var(--text2);margin-bottom:8px}
-.ai-banner-reason{font-size:12px;color:var(--text2);line-height:1.6}
-.mkt-list{display:flex;flex-direction:column}
-.mkt-row{padding:12px 18px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .15s}
-.mkt-row:active{background:var(--bg2)}
-.mkt-left{display:flex;align-items:center;gap:11px}
-.mkt-icon{width:35px;height:35px;border-radius:9px;background:var(--bg3);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.mkt-ticker{font-family:'Space Mono',monospace;font-size:12px;font-weight:700}
-.mkt-name{font-size:10px;color:var(--muted);margin-top:2px}
-.mkt-right{text-align:right}
-.mkt-price{font-family:'Space Mono',monospace;font-size:12px;font-weight:700}
-.mkt-chg{font-family:'Space Mono',monospace;font-size:10px;margin-top:2px}
-.country-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:flex-end;justify-content:center}
-.country-box{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:22px 22px calc(22px + var(--safe-bottom));border-top:0.5px solid var(--border)}
-.country-handle{width:32px;height:2px;background:var(--border);border-radius:2px;margin:0 auto 18px}
-.country-title{font-size:17px;font-weight:600;margin-bottom:5px}
-.country-sub{font-size:12px;color:var(--muted);margin-bottom:18px}
-.country-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:18px}
-.country-opt{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:13px;cursor:pointer;transition:border-color .2s,background .2s;text-align:center}
-.country-opt:active{border-color:var(--gold);background:var(--gold-dim)}
-.country-flag{font-size:22px;margin-bottom:5px}
-.country-name{font-size:12px;font-weight:600}
-.country-close{width:100%;background:transparent;border:0.5px solid var(--border);border-radius:var(--radius);padding:11px;font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);cursor:pointer}
- 
 /* CHAT */
 .chat-shell{display:flex;flex-direction:column;height:100%}
 .chat-top{padding:12px 16px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;background:var(--bg)}
 .chat-av{width:32px;height:32px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:11px;color:var(--gold);flex-shrink:0}
 .chat-name{font-size:13px;font-weight:600}
-.chat-status{font-family:'Space Mono',monospace;font-size:9px;color:var(--success);display:flex;align-items:center;gap:4px;margin-top:2px;letter-spacing:.5px}
+.chat-status{font-family:'Space Mono',monospace;font-size:9px;color:var(--success);display:flex;align-items:center;gap:4px;margin-top:2px}
 .chat-sdot{width:4px;height:4px;border-radius:50%;background:var(--success)}
 .msgs{flex:1;overflow-y:auto;padding:13px 14px;display:flex;flex-direction:column;gap:11px}
 .msgs::-webkit-scrollbar{display:none}
@@ -185,25 +218,22 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .sendbtn{width:36px;height:36px;border-radius:9px;background:var(--gold);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .2s,transform .1s}
 .sendbtn:active{transform:scale(.92)}.sendbtn:disabled{opacity:.3;cursor:not-allowed}
 .sendbtn svg{width:13px;height:13px}
- 
-/* NEWS SUMMARY in chat */
 .news-summary-card{background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);padding:12px;margin-bottom:8px}
 .news-summary-source{font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:1px;margin-bottom:5px}
 .news-summary-title{font-size:12px;font-weight:600;margin-bottom:8px;line-height:1.4}
-.news-portfolio-btn{width:100%;background:var(--gold-dim);color:var(--gold);border:0.5px solid var(--border2);border-radius:8px;padding:9px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:background .2s;letter-spacing:.2px}
-.news-portfolio-btn:active{background:rgba(232,160,32,0.2)}
+.news-portfolio-btn{width:100%;background:var(--gold-dim);color:var(--gold);border:0.5px solid var(--border2);border-radius:8px;padding:9px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer}
  
 /* PROFILE */
-.prof-hero{padding:24px 18px 18px;display:flex;flex-direction:column;align-items:center;gap:11px;border-bottom:0.5px solid var(--border)}
+.prof-hero{padding:24px 16px 18px;display:flex;flex-direction:column;align-items:center;gap:11px;border-bottom:0.5px solid var(--border)}
 .prof-av{width:68px;height:68px;border-radius:50%;background:var(--gold-dim);border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:20px;color:var(--gold)}
 .prof-name{font-size:20px;font-weight:600}
 .prof-tags{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
 .ptag{font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);border:0.5px solid var(--border2);padding:3px 8px;border-radius:20px;letter-spacing:.5px}
-.prof-rows{padding:14px 18px;display:flex;flex-direction:column;gap:8px}
+.prof-rows{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
 .prow{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
 .prow-lbl{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px}
 .prow-val{font-size:13px;font-weight:500}
-.prof-secs{padding:0 18px 18px}
+.prof-secs{padding:0 16px 18px}
 .prof-secs-lbl{font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:1.5px;margin-bottom:9px}
 .prof-chips{display:flex;flex-wrap:wrap;gap:7px}
 .pchip{font-size:12px;background:var(--gold-dim);color:var(--gold);border:0.5px solid var(--border2);padding:4px 11px;border-radius:20px}
@@ -215,17 +245,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 <!-- ═══ ONBOARDING ═══ -->
 <div id="ob">
   <div class="ob-logo"><span class="ob-dot"></span>LUMINFIN</div>
-  <div class="ob-tag">Your personal AI finance consultant<br>— tailored to you.</div>
-  <div class="ob-pbar"><div class="ob-pbar-bg"><div class="ob-pbar-fill" id="ob-fill" style="width:20%"></div></div></div>
+  <div class="ob-tag">AI-powered investing, built for Pakistan.</div>
+  <div class="ob-pbar"><div class="ob-pbar-bg"><div class="ob-pbar-fill" id="ob-fill" style="width:16%"></div></div></div>
   <div class="ob-card" id="ob-card"></div>
 </div>
  
-<!-- ═══ MAIN APP ═══ -->
+<!-- ═══ APP ═══ -->
 <div id="app">
   <div class="appbar">
     <div class="appbar-logo"><span class="appbar-dot"></span>LUMINFIN</div>
     <div class="appbar-right">
-      <div class="live-tag"><span class="live-dot"></span>LIVE</div>
+      <div class="kse-pill"><span style="color:var(--muted)">KSE-100</span><span class="up">▲ 0.81%</span></div>
       <div class="av-btn" id="av-btn" onclick="goTab('profile')"></div>
     </div>
   </div>
@@ -270,105 +300,96 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
     </div>
   </nav>
 </div>
- 
 <div id="modals"></div>
  
 <script>
-/* ── STATE ── */
-const S={step:0,P:{name:'',age:'',occupation:'',risk:50,knowledge:'',sectors:[]},msgs:[],loading:false,tab:'home',stocks:[],news:[],aiPick:null,mktFilter:'All',mktCountry:null};
+const S={step:0,P:{name:'',age:'',occupation:'',risk:50,knowledge:'',amount:'',sectors:[]},msgs:[],loading:false,tab:'home',portfolio:null,pfBuilding:false};
  
 const SECTORS=[
-  {id:'tech',emoji:'💻',name:'Technology',desc:'AI, software, chips'},
-  {id:'crypto',emoji:'₿',name:'Crypto',desc:'Bitcoin, Ethereum, DeFi'},
-  {id:'energy',emoji:'⚡',name:'Energy',desc:'Oil, gas, renewables'},
-  {id:'stocks',emoji:'📈',name:'Stocks',desc:'Global equity markets'},
-  {id:'finance',emoji:'🏦',name:'Finance',desc:'Banks, fintech'},
-  {id:'realestate',emoji:'🏢',name:'Real Estate',desc:'REITs, property'},
-  {id:'health',emoji:'💊',name:'Healthcare',desc:'Pharma, biotech'},
-  {id:'commodities',emoji:'🥇',name:'Commodities',desc:'Gold, oil, wheat'}
+  {id:'banks',emoji:'🏦',name:'Banks',desc:'HBL, UBL, MCB'},
+  {id:'energy',emoji:'⚡',name:'Energy',desc:'OGDC, PPL, PSO'},
+  {id:'tech',emoji:'💻',name:'Technology',desc:'SYS, TRG, AVN'},
+  {id:'cement',emoji:'🏗️',name:'Cement',desc:'LUCK, DGKC, MLCF'},
+  {id:'fertilizer',emoji:'🌾',name:'Fertilizer',desc:'ENGRO, FFC, EFERT'},
+  {id:'intl',emoji:'🌍',name:'Global',desc:'US stocks, ETFs'},
+  {id:'crypto',emoji:'₿',name:'Crypto',desc:'BTC, ETH'},
+  {id:'commodities',emoji:'🥇',name:'Commodities',desc:'Gold, oil'}
 ];
- 
 const KO=[
   {id:'none',title:'No knowledge',desc:'New to investing — keep it simple'},
   {id:'some',title:'Some understanding',desc:'Familiar with stocks and bonds'},
-  {id:'expert',title:'Very well-versed',desc:'Derivatives, MBS, CDS and more'}
+  {id:'expert',title:'Very well-versed',desc:'Derivatives, MBS, technicals'}
 ];
+const AMOUNTS=['PKR 50K','PKR 100K','PKR 500K','PKR 1M','PKR 5M','PKR 10M+'];
+const SUGS=['Rebalance my portfolio','Best PSX stock right now?','Is KSE-100 overvalued?','Explain dividend stocks'];
  
-const COUNTRIES=[
-  {code:'US',flag:'🇺🇸',name:'United States'},
-  {code:'PK',flag:'🇵🇰',name:'Pakistan'},
-  {code:'GB',flag:'🇬🇧',name:'United Kingdom'},
-  {code:'IN',flag:'🇮🇳',name:'India'},
-  {code:'SA',flag:'🇸🇦',name:'Saudi Arabia'},
-  {code:'CN',flag:'🇨🇳',name:'China'},
-  {code:'AE',flag:'🇦🇪',name:'UAE'},
-  {code:'DE',flag:'🇩🇪',name:'Germany'},
+// PSX + global stocks
+const PSX=[
+  {ticker:'OGDC',name:'Oil & Gas Dev Co',price:'319.63',chg:'+1.56',pct:'+0.49%',up:true,vol:'2.78M',sector:'energy'},
+  {ticker:'PPL',name:'Pakistan Petroleum',price:'225.30',chg:'+0.48',pct:'+0.21%',up:true,vol:'2.49M',sector:'energy'},
+  {ticker:'PSO',name:'Pak State Oil',price:'412.80',chg:'+5.20',pct:'+1.28%',up:true,vol:'1.92M',sector:'energy'},
+  {ticker:'HBL',name:'Habib Bank Ltd',price:'178.30',chg:'+3.10',pct:'+1.77%',up:true,vol:'3.10M',sector:'banks'},
+  {ticker:'UBL',name:'United Bank Ltd',price:'367.45',chg:'+4.80',pct:'+1.32%',up:true,vol:'1.45M',sector:'banks'},
+  {ticker:'MCB',name:'MCB Bank Ltd',price:'289.10',chg:'-1.20',pct:'-0.41%',up:false,vol:'0.98M',sector:'banks'},
+  {ticker:'SYS',name:'Systems Ltd',price:'412.50',chg:'+6.20',pct:'+1.52%',up:true,vol:'1.20M',sector:'tech'},
+  {ticker:'TRG',name:'TRG Pakistan',price:'71.67',chg:'+2.13',pct:'+3.06%',up:true,vol:'19.52M',sector:'tech'},
+  {ticker:'AVN',name:'Avanceon Ltd',price:'68.40',chg:'+1.10',pct:'+1.63%',up:true,vol:'0.76M',sector:'tech'},
+  {ticker:'LUCK',name:'Lucky Cement',price:'1,142.00',chg:'+12.50',pct:'+1.11%',up:true,vol:'0.42M',sector:'cement'},
+  {ticker:'DGKC',name:'DG Khan Cement',price:'128.90',chg:'-0.80',pct:'-0.62%',up:false,vol:'1.10M',sector:'cement'},
+  {ticker:'ENGRO',name:'Engro Corp',price:'342.20',chg:'+3.90',pct:'+1.15%',up:true,vol:'0.88M',sector:'fertilizer'},
+  {ticker:'FFC',name:'Fauji Fertilizer',price:'412.30',chg:'+2.10',pct:'+0.51%',up:true,vol:'1.34M',sector:'fertilizer'},
+  {ticker:'EFERT',name:'Engro Fertilizers',price:'198.50',chg:'+1.40',pct:'+0.71%',up:true,vol:'1.02M',sector:'fertilizer'},
 ];
- 
-const STOCK_DATA=[
-  {ticker:'AAPL',name:'Apple Inc.',price:'189.42',chg:'+1.24',pct:'+0.66%',up:true,emoji:'🍎',country:'US',sectors:['tech','stocks']},
-  {ticker:'MSFT',name:'Microsoft Corp.',price:'415.30',chg:'+3.18',pct:'+0.77%',up:true,emoji:'🪟',country:'US',sectors:['tech','stocks']},
-  {ticker:'NVDA',name:'NVIDIA Corp.',price:'875.40',chg:'+36.80',pct:'+4.39%',up:true,emoji:'🎮',country:'US',sectors:['tech','stocks']},
-  {ticker:'GOOGL',name:'Alphabet Inc.',price:'178.54',chg:'-0.52',pct:'-0.29%',up:false,emoji:'🔍',country:'US',sectors:['tech','stocks']},
-  {ticker:'META',name:'Meta Platforms',price:'527.80',chg:'+10.92',pct:'+2.11%',up:true,emoji:'📘',country:'US',sectors:['tech','stocks']},
-  {ticker:'BTC-USD',name:'Bitcoin',price:'67,420',chg:'+2,210',pct:'+3.39%',up:true,emoji:'₿',country:'GLOBAL',sectors:['crypto']},
-  {ticker:'ETH-USD',name:'Ethereum',price:'3,842',chg:'+95',pct:'+2.54%',up:true,emoji:'⟠',country:'GLOBAL',sectors:['crypto']},
-  {ticker:'XOM',name:'ExxonMobil',price:'118.34',chg:'-0.88',pct:'-0.74%',up:false,emoji:'🛢️',country:'US',sectors:['energy','stocks']},
-  {ticker:'SYS',name:'Systems Ltd',price:'412.50',chg:'+6.20',pct:'+1.52%',up:true,emoji:'🇵🇰',country:'PK',sectors:['tech','stocks']},
-  {ticker:'HBL',name:'HBL Pakistan',price:'178.30',chg:'+3.10',pct:'+1.77%',up:true,emoji:'🏦',country:'PK',sectors:['finance','stocks']},
-  {ticker:'TRG',name:'TRG Pakistan',price:'97.30',chg:'+1.90',pct:'+1.99%',up:true,emoji:'💼',country:'PK',sectors:['stocks']},
-  {ticker:'JPM',name:'JPMorgan Chase',price:'198.72',chg:'+1.44',pct:'+0.73%',up:true,emoji:'🏛️',country:'US',sectors:['finance','stocks']},
-  {ticker:'GLD',name:'SPDR Gold ETF',price:'231.40',chg:'+1.80',pct:'+0.78%',up:true,emoji:'🥇',country:'US',sectors:['commodities','stocks']},
-  {ticker:'JNJ',name:'Johnson & Johnson',price:'152.34',chg:'-0.62',pct:'-0.41%',up:false,emoji:'💊',country:'US',sectors:['health','stocks']},
-  {ticker:'RELIANCE',name:'Reliance Industries',price:'2,941',chg:'+42',pct:'+1.45%',up:true,emoji:'🇮🇳',country:'IN',sectors:['energy','stocks']},
-  {ticker:'ARAMCO',name:'Saudi Aramco',price:'8.24',chg:'+0.12',pct:'+1.48%',up:true,emoji:'🇸🇦',country:'SA',sectors:['energy','stocks']},
-  {ticker:'BABA',name:'Alibaba Group',price:'78.32',chg:'-1.20',pct:'-1.51%',up:false,emoji:'🇨🇳',country:'CN',sectors:['tech','stocks']},
-  {ticker:'HSBA',name:'HSBC Holdings',price:'647.20',chg:'+8.40',pct:'+1.31%',up:true,emoji:'🇬🇧',country:'GB',sectors:['finance','stocks']},
+const GLOBAL=[
+  {ticker:'AAPL',name:'Apple Inc.',price:'$189.42',chg:'+1.24',pct:'+0.66%',up:true,vol:'52M',sector:'intl',country:'US'},
+  {ticker:'NVDA',name:'NVIDIA Corp.',price:'$875.40',chg:'+36.80',pct:'+4.39%',up:true,vol:'48M',sector:'intl',country:'US'},
+  {ticker:'MSFT',name:'Microsoft',price:'$415.30',chg:'+3.18',pct:'+0.77%',up:true,vol:'22M',sector:'intl',country:'US'},
+  {ticker:'BTC',name:'Bitcoin',price:'$67,420',chg:'+2,210',pct:'+3.39%',up:true,vol:'—',sector:'crypto',country:'GLOBAL'},
+  {ticker:'ETH',name:'Ethereum',price:'$3,842',chg:'+95',pct:'+2.54%',up:true,vol:'—',sector:'crypto',country:'GLOBAL'},
+  {ticker:'GOLD',name:'Gold (oz)',price:'$2,400',chg:'+18',pct:'+0.76%',up:true,vol:'—',sector:'commodities',country:'GLOBAL'},
 ];
+const ALL_STOCKS=[...PSX,...GLOBAL];
  
 const NEWS=[
-  {source:'REUTERS',title:'Federal Reserve signals rate cuts amid cooling inflation data',sectors:['finance'],emoji:'🏦',time:'2h ago',summary:'The Federal Reserve has indicated it may begin cutting interest rates following a sustained decline in inflation. Officials cited improving CPI data and a cooling labor market as key factors in their revised outlook.'},
-  {source:'BLOOMBERG',title:'NVIDIA surpasses $2 trillion market cap on AI chip demand',sectors:['tech'],emoji:'💻',time:'3h ago',summary:'NVIDIA crossed the $2 trillion market cap milestone as demand for its H100 AI chips continues to outstrip supply. The company has raised its revenue forecast for the coming quarter by 22%.'},
-  {source:'ARY NEWS',title:'PSX hits record high as foreign investors return',sectors:['stocks'],emoji:'📈',time:'1h ago',summary:'Pakistan Stock Exchange (PSX) reached an all-time high of 79,000 points, fueled by returning foreign institutional investors and improving macroeconomic indicators including declining inflation.'},
-  {source:'DAWN BIZ',title:'SBP holds interest rates steady at 21%',sectors:['finance'],emoji:'🏦',time:'4h ago',summary:'The State Bank of Pakistan maintained its benchmark rate at 21%, citing the need for sustained monetary tightening to anchor inflation expectations despite recent improvements in CPI data.'},
-  {source:'COINDESK',title:'Bitcoin breaks $68,000 on institutional demand surge',sectors:['crypto'],emoji:'₿',time:'30m ago',summary:'Bitcoin hit $68,000 as spot ETF inflows accelerated, with BlackRock and Fidelity recording their largest single-day purchases. Analysts point to the upcoming halving as a key catalyst.'},
-  {source:'FT',title:'Oil climbs on Middle East supply concerns and OPEC+ cuts',sectors:['energy'],emoji:'🛢️',time:'5h ago',summary:'Crude oil prices rose 2.3% amid escalating tensions in key shipping lanes and OPEC+ reaffirming its production cut commitments through the end of the year. Brent crude touched $87 per barrel.'},
-  {source:'BLOOMBERG',title:'Gold hits all-time high as dollar weakens on Fed pivot hopes',sectors:['commodities'],emoji:'🥇',time:'6h ago',summary:'Gold prices surged to a new all-time high of $2,400 per ounce as the US dollar weakened following dovish signals from the Federal Reserve. Safe-haven demand also supported the rally.'},
-  {source:'CNBC',title:'Healthcare M&A boom as pharma chases biotech targets',sectors:['health'],emoji:'💊',time:'8h ago',summary:'Major pharmaceutical companies including Pfizer and AstraZeneca are pursuing aggressive acquisition strategies targeting biotech firms with promising oncology and GLP-1 drug pipelines.'},
-  {source:'BRECORDER',title:'Systems Ltd wins major contract, shares surge on PSX',sectors:['stocks','tech'],emoji:'🇵🇰',time:'1h ago',summary:'Systems Limited secured a $40 million digital transformation contract with a Gulf state government, sending its shares up 8.2% on the PSX and making it the top gainer for the session.'},
+  {source:'BR',title:'KSE-100 hits record 170,330 as foreign buying accelerates',sectors:['banks'],emoji:'📈',time:'1h ago',summary:'The KSE-100 index closed at an all-time high of 170,330 points, up 0.81%, driven by strong foreign institutional inflows and improving macroeconomic indicators including a declining current account deficit.'},
+  {source:'DAWN',title:'SBP holds policy rate at 21% citing inflation caution',sectors:['banks'],emoji:'🏦',time:'3h ago',summary:'The State Bank of Pakistan kept its benchmark interest rate unchanged at 21%, citing the need for continued monetary tightening despite recent improvements in headline inflation figures.'},
+  {source:'BR',title:'OGDC announces higher dividend after strong quarterly results',sectors:['energy'],emoji:'⚡',time:'2h ago',summary:'Oil & Gas Development Company posted a 14% increase in quarterly profit and announced an enhanced dividend, citing higher production volumes and favorable oil prices.'},
+  {source:'PROFIT',title:'TRG Pakistan surges 3% on subsidiary growth outlook',sectors:['tech'],emoji:'💻',time:'1h ago',summary:'TRG Pakistan shares jumped 3.06% after its subsidiary Ibex reported strong revenue growth, with analysts upgrading their price targets on the technology holding company.'},
+  {source:'TRIBUNE',title:'Cement sector volumes rise on infrastructure spending',sectors:['cement'],emoji:'🏗️',time:'4h ago',summary:'Pakistani cement manufacturers reported a 9% rise in dispatches as government infrastructure projects and a recovering construction sector boosted demand across the north and south regions.'},
+  {source:'BLOOMBERG',title:'NVIDIA crosses $2 trillion on sustained AI chip demand',sectors:['intl'],emoji:'🌍',time:'5h ago',summary:'NVIDIA became the third company to cross a $2 trillion valuation as demand for its AI accelerator chips continues to outpace supply, with data center revenue up 200% year-over-year.'},
+  {source:'COINDESK',title:'Bitcoin breaks $68,000 on record ETF inflows',sectors:['crypto'],emoji:'₿',time:'30m ago',summary:'Bitcoin reached $68,000 as spot ETF inflows hit record levels, with institutional investors continuing to accumulate ahead of the upcoming supply halving event.'},
 ];
  
-const SUGS=['What stocks suit my profile?','Is now a good time to invest?','Explain ETFs simply','How do I hedge against inflation?'];
 const RL=v=>v<20?'Capital Preservation':v<40?'Conservative':v<60?'Balanced':v<80?'Growth':'Aggressive';
 const ini=n=>n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()||'U';
 const fmt=t=>t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/^[•\-] /gm,'&bull; ').replace(/\n/g,'<br>');
  
 /* ── ONBOARDING ── */
-const STEPS=['Tell us about yourself','Your occupation','Your risk appetite','Finance knowledge','Pick your interests'];
+const STEPS=['Tell us about yourself','Your occupation','Risk appetite','Finance knowledge','Investment amount','Your interests'];
+const TOTAL=6;
  
 function renderOB(){
-  document.getElementById('ob-fill').style.width=((S.step+1)/5*100)+'%';
-  document.getElementById('ob-card').innerHTML=`
-    <div class="ob-step">STEP ${S.step+1} OF 5</div>
-    <div class="ob-title">${STEPS[S.step]}</div>
-    ${[s0,s1,s2,s3,s4][S.step]()}`;
+  document.getElementById('ob-fill').style.width=((S.step+1)/TOTAL*100)+'%';
+  document.getElementById('ob-card').innerHTML=`<div class="ob-step">STEP ${S.step+1} OF ${TOTAL}</div><div class="ob-title">${STEPS[S.step]}</div>${[s0,s1,s2,s3,s4,s5][S.step]()}`;
   if(S.step===2){const r=document.getElementById('fr');if(r)r.addEventListener('input',function(){const v=parseInt(this.value);S.P.risk=v;this.style.setProperty('--pct',v+'%');const d=document.getElementById('rv'),l=document.getElementById('rl');if(d)d.textContent=v;if(l)l.textContent=RL(v);});}
 }
- 
 function s0(){return`<div class="fgroup"><div class="field"><div class="flbl">Your name</div><input class="finput" id="fn" type="text" placeholder="e.g. Ahmed Khan" value="${S.P.name}"/></div><div class="field"><div class="flbl">Your age</div><input class="finput" id="fa" type="number" placeholder="e.g. 25" min="13" max="100" value="${S.P.age}"/></div></div><button class="ob-btn" onclick="obNext()">Continue →</button>`;}
-function s1(){return`<div class="field"><div class="flbl">Occupation</div><input class="finput" id="fo" type="text" placeholder="e.g. Engineer, Student, Business Owner" value="${S.P.occupation}"/></div><button class="ob-btn" onclick="obNext()">Continue →</button>`;}
+function s1(){return`<div class="field"><div class="flbl">Occupation</div><input class="finput" id="fo" type="text" placeholder="e.g. Engineer, Business Owner" value="${S.P.occupation}"/></div><button class="ob-btn" onclick="obNext()">Continue →</button>`;}
 function s2(){return`<div style="text-align:center;padding:6px 0"><div class="risk-num" id="rv">${S.P.risk}</div><div class="risk-lbl" id="rl">${RL(S.P.risk)}</div></div><input type="range" id="fr" min="0" max="100" step="1" value="${S.P.risk}" style="--pct:${S.P.risk}%"/><div class="slider-ends"><span>SAFE</span><span>AGGRESSIVE</span></div><button class="ob-btn" onclick="obNext()">Continue →</button>`;}
 function s3(){return`<div class="kopts">${KO.map(k=>`<div class="kopt ${S.P.knowledge===k.id?'sel':''}" onclick="selK('${k.id}')"><div class="krad"></div><div><div class="kt">${k.title}</div><div class="kd">${k.desc}</div></div></div>`).join('')}</div><button class="ob-btn" id="kbtn" onclick="obNext()" ${!S.P.knowledge?'disabled':''}>Continue →</button>`;}
-function s4(){return`<div class="sec-grid" style="overflow-y:auto;flex:1;">${SECTORS.map(s=>`<div class="sec-card ${S.P.sectors.includes(s.id)?'sel':''}" onclick="toggleSec('${s.id}')"><div class="sec-emo">${s.emoji}</div><div class="sec-name">${s.name}</div><div class="sec-desc">${s.desc}</div></div>`).join('')}</div><button class="ob-btn" id="lbtn" onclick="launch()" ${S.P.sectors.length===0?'disabled':''}>Launch My App →</button>`;}
+function s4(){return`<div><div class="flbl" style="margin-bottom:10px;">How much do you want to invest?</div><div class="amt-chips">${AMOUNTS.map(a=>`<div class="amt-chip ${S.P.amount===a?'sel':''}" onclick="selAmt('${a}')">${a}</div>`).join('')}</div></div><button class="ob-btn" id="abtn" onclick="obNext()" ${!S.P.amount?'disabled':''}>Continue →</button>`;}
+function s5(){return`<div class="sec-grid" style="overflow-y:auto;flex:1;">${SECTORS.map(s=>`<div class="sec-card ${S.P.sectors.includes(s.id)?'sel':''}" onclick="toggleSec('${s.id}')"><div class="sec-emo">${s.emoji}</div><div class="sec-name">${s.name}</div><div class="sec-desc">${s.desc}</div></div>`).join('')}</div><button class="ob-btn" id="lbtn" onclick="launch()" ${S.P.sectors.length===0?'disabled':''}>Build My Portfolio →</button>`;}
  
 function obNext(){
   if(S.step===0){const n=document.getElementById('fn')?.value.trim(),a=document.getElementById('fa')?.value.trim();if(!n||!a||isNaN(a)||a<13)return;S.P.name=n;S.P.age=a;}
   else if(S.step===1){const o=document.getElementById('fo')?.value.trim();if(!o)return;S.P.occupation=o;}
   else if(S.step===2){S.P.risk=parseInt(document.getElementById('fr')?.value||50);}
   else if(S.step===3){if(!S.P.knowledge)return;}
+  else if(S.step===4){if(!S.P.amount)return;}
   S.step++;renderOB();
 }
 function selK(id){S.P.knowledge=id;document.querySelectorAll('.kopt').forEach(el=>el.classList.toggle('sel',el.getAttribute('onclick').includes(`'${id}'`)));const b=document.getElementById('kbtn');if(b)b.disabled=false;}
+function selAmt(a){S.P.amount=a;document.querySelectorAll('.amt-chip').forEach(el=>el.classList.toggle('sel',el.textContent===a));const b=document.getElementById('abtn');if(b)b.disabled=false;}
 function toggleSec(id){const i=S.P.sectors.indexOf(id);if(i>-1)S.P.sectors.splice(i,1);else S.P.sectors.push(id);document.querySelectorAll('.sec-card').forEach(el=>el.classList.toggle('sel',el.getAttribute('onclick').includes(`'${id}'`)&&S.P.sectors.includes(id)));const b=document.getElementById('lbtn');if(b)b.disabled=S.P.sectors.length===0;}
  
 function launch(){
@@ -376,7 +397,8 @@ function launch(){
   document.getElementById('ob').style.display='none';
   const a=document.getElementById('app');a.style.display='flex';a.style.flexDirection='column';a.style.flex='1';
   document.getElementById('av-btn').textContent=ini(S.P.name);
-  buildHome();buildProfile();loadStocks();loadNews();initChat();
+  buildHome();buildMarkets();buildNews();buildProfile();initChat();
+  generatePortfolio();
 }
  
 /* ── TABS ── */
@@ -389,190 +411,205 @@ function goTab(tab){
   if(idx>-1)document.querySelectorAll('.nav-btn')[idx].classList.add('active');
 }
  
-/* ── HOME ── */
-function buildHome(){
-  const secs=S.P.sectors.map(id=>SECTORS.find(s=>s.id===id)?.name).filter(Boolean).slice(0,3).join(', ');
-  document.getElementById('sc-home').innerHTML=`
-    <div class="home-hero">
-      <div class="home-greet">GOOD DAY,</div>
-      <div class="home-name">${S.P.name.split(' ')[0]} 👋</div>
-      <div class="home-secs">Tracking: ${secs}</div>
-    </div>
-    <div class="sec-hdr"><span class="sh">AI Stock Picks</span><span class="sec-more" onclick="goTab('markets')">See all →</span></div>
-    <div class="stocks-row" id="home-stocks">${[1,2,3].map(()=>`<div class="scard"><div class="shimmer" style="height:9px;width:50%;margin-bottom:7px;"></div><div class="shimmer" style="height:8px;width:80%;margin-bottom:10px;"></div><div class="shimmer" style="height:26px;margin-bottom:7px;"></div><div class="shimmer" style="height:14px;width:45%;"></div></div>`).join('')}</div>
-    <div class="sec-hdr"><span class="sh">Top News</span><span class="sec-more" onclick="goTab('news')">See all →</span></div>
-    <div id="home-news"><div style="padding:18px;text-align:center;color:var(--muted);font-size:11px;font-family:'Space Mono',monospace;">LOADING NEWS…</div></div>`;
-}
+/* ── PORTFOLIO GENERATION ── */
+const PIE_COLORS=['#e8a020','#3db87a','#4a9eff','#e05252','#9b59b6','#1abc9c','#f39c12'];
  
-/* ── STOCKS ── */
-function miniSVG(up){
-  const pts=Array.from({length:8},(_,i)=>i===7?100:Math.random()*40+(up?40:20));
-  const mx=Math.max(...pts),mn=Math.min(...pts);
-  const norm=pts.map(p=>((p-mn)/(mx-mn||1))*24);
-  const coords=norm.map((y,i)=>`${i*(100/7)},${24-y}`).join(' ');
-  const c=up?'#3db87a':'#e05252';
-  return`<svg viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="${coords}" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-}
- 
-function loadStocks(){
-  const rel=STOCK_DATA.filter(s=>s.sectors.some(sec=>S.P.sectors.includes(sec)));
-  S.stocks=rel.length>0?rel:STOCK_DATA.slice(0,8);
-  const hs=document.getElementById('home-stocks');
-  if(hs)hs.innerHTML=S.stocks.slice(0,5).map(s=>`
-    <div class="scard" onclick="showStock('${s.ticker}')">
-      <div class="scard-ticker">${s.ticker}</div>
-      <div class="scard-name">${s.name}</div>
-      <div class="mchart">${miniSVG(s.up)}</div>
-      <div class="scard-price">$${s.price}</div>
-      <div class="scard-chg ${s.up?'up':'dn'}">${s.up?'▲':'▼'} ${s.pct}</div>
-      <div class="ai-tag">AI PICK</div>
-    </div>`).join('');
-  genAIPick(S.stocks[0]);
-  buildMarkets(S.stocks);
-}
- 
-async function genAIPick(stock){
-  if(!stock)return;
+async function generatePortfolio(extra){
+  S.pfBuilding=true;buildHome();
   try{
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      system:`You are a concise stock analyst. ONE sentence max 20 words: why ${stock.ticker} suits a ${S.P.age}-year-old with ${S.P.risk}/100 risk interested in ${S.P.sectors.join(', ')}.`,
-      messages:[{role:'user',content:`Why ${stock.ticker}?`}]
-    })});
+    const prompt=`You are a portfolio manager for the Pakistan Stock Exchange (PSX). Build an investment portfolio for this investor:
+Name: ${S.P.name}, Age: ${S.P.age}, Occupation: ${S.P.occupation}, Risk: ${S.P.risk}/100 (${RL(S.P.risk)}), Knowledge: ${S.P.knowledge}, Amount: ${S.P.amount}, Interested sectors: ${S.P.sectors.join(', ')}.
+${extra?'IMPORTANT custom request from user: '+extra:''}
+ 
+Pick 4-6 real holdings (prefer PSX tickers like OGDC, PPL, HBL, UBL, LUCK, ENGRO, SYS, TRG, FFC; include some global like AAPL/NVDA/BTC/GOLD only if they chose Global/Crypto/Commodities). Respond ONLY with valid JSON, no markdown, in this exact format:
+{"strategy":"one short sentence describing the strategy","holdings":[{"ticker":"OGDC","name":"Oil & Gas Dev","alloc":25,"reason":"short reason"}],"expectedReturn":"12-15% annually","riskNote":"one short sentence"}
+Allocations must sum to 100.`;
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a precise JSON-only portfolio API. Output only valid JSON, never markdown or prose.',messages:[{role:'user',content:prompt}]})});
     const d=await res.json();
-    S.aiPick={...stock,reason:d.content?.find(b=>b.type==='text')?.text||'Strong fundamentals match your risk profile.'};
-    const b=document.getElementById('ai-banner-inner');if(b)b.innerHTML=bannerHTML();
-  }catch(e){console.log('AI pick error:',e);}
+    let txt=d.content?.find(b=>b.type==='text')?.text||'';
+    txt=txt.replace(/```json|```/g,'').trim();
+    const pf=JSON.parse(txt);
+    S.portfolio=pf;
+  }catch(e){
+    // Fallback portfolio
+    S.portfolio=fallbackPortfolio();
+  }
+  S.pfBuilding=false;buildHome();
 }
  
-function bannerHTML(){
-  if(!S.aiPick)return`<div class="shimmer" style="height:80px;"></div>`;
-  return`<div class="ai-banner-lbl">⚡ AI TOP PICK FOR YOU</div>
-    <div class="ai-banner-ticker">${S.aiPick.emoji} ${S.aiPick.ticker}</div>
-    <div class="ai-banner-name">${S.aiPick.name}</div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-      <span style="font-family:'Space Mono',monospace;font-size:13px;">$${S.aiPick.price}</span>
-      <span class="${S.aiPick.up?'up':'dn'}" style="font-family:'Space Mono',monospace;font-size:10px;">${S.aiPick.up?'▲':'▼'} ${S.aiPick.pct}</span>
+function fallbackPortfolio(){
+  const aggressive=S.P.risk>=60;
+  if(aggressive)return{strategy:'Growth-focused with high-beta PSX tech and energy exposure.',holdings:[{ticker:'TRG',name:'TRG Pakistan',alloc:25,reason:'High-growth tech holding'},{ticker:'SYS',name:'Systems Ltd',alloc:25,reason:'IT export leader'},{ticker:'OGDC',name:'Oil & Gas Dev',alloc:20,reason:'Energy upside'},{ticker:'LUCK',name:'Lucky Cement',alloc:15,reason:'Infrastructure play'},{ticker:'BTC',name:'Bitcoin',alloc:15,reason:'High-risk diversifier'}],expectedReturn:'18-25% annually',riskNote:'High volatility — suitable for aggressive investors only.'};
+  return{strategy:'Balanced PSX blue-chips with stable dividend income.',holdings:[{ticker:'HBL',name:'Habib Bank',alloc:25,reason:'Stable dividend bank'},{ticker:'FFC',name:'Fauji Fertilizer',alloc:25,reason:'Defensive dividend'},{ticker:'OGDC',name:'Oil & Gas Dev',alloc:20,reason:'Energy stability'},{ticker:'ENGRO',name:'Engro Corp',alloc:20,reason:'Diversified conglomerate'},{ticker:'LUCK',name:'Lucky Cement',alloc:10,reason:'Growth kicker'}],expectedReturn:'10-14% annually',riskNote:'Moderate risk with steady income focus.'};
+}
+ 
+/* ── HOME (3 sections: Portfolio, Market, Impact+Suggestions) ── */
+function buildHome(){
+  const el=document.getElementById('sc-home');
+  el.innerHTML=`
+    <div class="index-bar">
+      <div class="index-left"><div class="idx-name">KSE-100 INDEX</div><div class="idx-val">170,330.56</div></div>
+      <div class="index-right"><div class="idx-chg up">▲ 1,376.86</div><div class="idx-pct up">+0.81%</div></div>
     </div>
-    <div class="ai-banner-reason">${S.aiPick.reason}</div>`;
+    <div class="sec-hdr"><span class="sh">Your AI Portfolio</span></div>
+    <div id="pf-container">${pfHTML()}</div>
+    <div class="sec-hdr"><span class="sh">PSX Market</span><span class="sec-more" onclick="goTab('markets')">See all →</span></div>
+    <div class="mkt-list">${PSX.slice(0,4).map(s=>mktRow(s)).join('')}</div>
+    <div class="sec-hdr"><span class="sh">How Your Portfolio Is Affected</span></div>
+    <div id="impact-container">${impactHTML()}</div>
+    <div class="sec-hdr"><span class="sh">Suggestions</span></div>
+    <div id="sugg-container">${suggHTML()}</div>
+  `;
 }
  
-function buildMarkets(stocks){
-  const tabs=['All','Tech','Crypto','Energy','Finance','Stocks'];
-  document.getElementById('sc-markets').innerHTML=`
-    <div class="mkt-tabs">${tabs.map((t,i)=>`<div class="mkt-tab ${i===0?'active':''}" onclick="filterMkt(this,'${t}')">${t}</div>`).join('')}</div>
-    <div class="ai-banner"><div id="ai-banner-inner">${bannerHTML()}</div></div>
-    <div class="sec-hdr"><span class="sh">All Markets</span></div>
-    <div class="mkt-list" id="mkt-list">${stocks.map(s=>mktRow(s)).join('')}</div>`;
-}
- 
-function mktRow(s){return`<div class="mkt-row" onclick="showStock('${s.ticker}')"><div class="mkt-left"><div class="mkt-icon">${s.emoji}</div><div><div class="mkt-ticker">${s.ticker}</div><div class="mkt-name">${s.name}${s.country&&s.country!=='GLOBAL'?' · '+s.country:''}</div></div></div><div class="mkt-right"><div class="mkt-price">$${s.price}</div><div class="mkt-chg ${s.up?'up':'dn'}">${s.up?'▲':'▼'} ${s.pct}</div></div></div>`;}
- 
-function filterMkt(el,f){
-  document.querySelectorAll('.mkt-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
-  if(f==='Stocks'){showCountryPicker();return;}
-  const map={'All':null,'Tech':'tech','Crypto':'crypto','Energy':'energy','Finance':'finance'};
-  const sec=map[f];
-  const filtered=sec?STOCK_DATA.filter(s=>s.sectors.includes(sec)):STOCK_DATA;
-  const list=document.getElementById('mkt-list');
-  if(list)list.innerHTML=filtered.length>0?filtered.map(s=>mktRow(s)).join(''):`<div style="padding:28px;text-align:center;color:var(--muted);font-size:11px;font-family:'Space Mono',monospace;">NO STOCKS IN THIS CATEGORY.</div>`;
-}
- 
-function showCountryPicker(){
-  document.getElementById('modals').innerHTML=`
-    <div class="country-modal" onclick="closeCountry(event)">
-      <div class="country-box" onclick="event.stopPropagation()">
-        <div class="country-handle"></div>
-        <div class="country-title">Select a country</div>
-        <div class="country-sub">Which market would you like to explore?</div>
-        <div class="country-grid">
-          ${COUNTRIES.map(c=>`<div class="country-opt" onclick="filterByCountry('${c.code}')">
-            <div class="country-flag">${c.flag}</div>
-            <div class="country-name">${c.name}</div>
-          </div>`).join('')}
-        </div>
-        <button class="country-close" onclick="closeCountry()">Show All Stocks</button>
+function pfHTML(){
+  if(S.pfBuilding)return`<div class="pf-card"><div class="pf-building"><div class="spinner"></div><div class="mono">BUILDING YOUR PORTFOLIO…</div></div></div>`;
+  if(!S.portfolio)return`<div class="pf-card"><div class="pf-building"><div class="mono">Tap to generate your portfolio</div><button class="ob-btn" style="margin-top:14px;" onclick="generatePortfolio()">Generate →</button></div></div>`;
+  const pf=S.portfolio;
+  // Build pie chart (conic gradient)
+  let acc=0;const stops=pf.holdings.map((h,i)=>{const start=acc;acc+=h.alloc;return `${PIE_COLORS[i%PIE_COLORS.length]} ${start}% ${acc}%`;}).join(',');
+  const legend=pf.holdings.map((h,i)=>`<div class="legend-row"><span class="legend-dot" style="background:${PIE_COLORS[i%PIE_COLORS.length]}"></span><span class="legend-name">${h.ticker}</span><span class="legend-pct">${h.alloc}%</span></div>`).join('');
+  const holdings=pf.holdings.map((h,i)=>{
+    const amt=calcAmount(h.alloc);
+    return`<div class="holding-row" onclick="showHolding('${h.ticker}')"><div class="holding-left"><div class="holding-icon">${h.ticker.slice(0,3)}</div><div><div class="holding-ticker">${h.ticker}</div><div class="holding-name">${h.name}</div></div></div><div class="holding-right"><div class="holding-alloc">${h.alloc}%</div><div class="holding-amt">${amt}</div></div></div>`;
+  }).join('');
+  return`<div class="pf-card">
+    <div class="pf-top">
+      <div><div class="pf-label">TOTAL ALLOCATION</div><div class="pf-value">${S.P.amount}</div><div class="pf-change up">Expected: ${pf.expectedReturn||'—'}</div></div>
+      <div class="pf-badge">${RL(S.P.risk).toUpperCase()}</div>
+    </div>
+    <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">${pf.strategy||''}</div>
+    <div class="pie-wrap">
+      <div style="width:96px;height:96px;border-radius:50%;background:conic-gradient(${stops});flex-shrink:0;position:relative;">
+        <div style="position:absolute;inset:22px;background:var(--card);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);">${pf.holdings.length}<br>STKS</div>
       </div>
-    </div>`;
-}
- 
-function filterByCountry(code){
-  closeCountry();
-  const filtered=STOCK_DATA.filter(s=>s.country===code||s.country==='GLOBAL');
-  const list=document.getElementById('mkt-list');
-  if(list)list.innerHTML=filtered.length>0?filtered.map(s=>mktRow(s)).join(''):`<div style="padding:28px;text-align:center;color:var(--muted);font-size:11px;font-family:'Space Mono',monospace;">NO STOCKS FOUND FOR THIS COUNTRY.</div>`;
-}
- 
-function closeCountry(e){if(!e||e.target.classList.contains('country-modal'))document.getElementById('modals').innerHTML='';}
- 
-function showStock(ticker){
-  const s=STOCK_DATA.find(s=>s.ticker===ticker);if(!s)return;
-  document.getElementById('modals').innerHTML=`
-    <div class="country-modal" onclick="closeModal(event)">
-      <div class="country-box" onclick="event.stopPropagation()">
-        <div class="country-handle"></div>
-        <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px;">
-          <div style="width:44px;height:44px;border-radius:10px;background:var(--bg3);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;">${s.emoji}</div>
-          <div><div style="font-size:16px;font-weight:600;">${s.name}</div><div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);margin-top:2px;letter-spacing:.5px;">${s.ticker}</div></div>
-        </div>
-        <div style="display:flex;gap:18px;margin-bottom:16px;">
-          <div><div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">PRICE</div><div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;">$${s.price}</div></div>
-          <div><div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">CHANGE</div><div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:${s.up?'var(--success)':'var(--danger)'};">${s.up?'+':''}${s.chg}</div></div>
-        </div>
-        <div style="height:52px;margin-bottom:16px;">${miniSVG(s.up)}</div>
-        <button class="ob-btn" style="margin-top:0;" onclick="askStock('${s.ticker}');closeModal()">Ask Advisor about ${s.ticker} →</button>
-      </div>
-    </div>`;
-}
- 
-function askStock(t){goTab('chat');const ta=document.getElementById('cin');if(ta)ta.value=`Tell me about ${t} and whether it suits my profile.`;setTimeout(()=>sendMsg(),300);}
- 
-/* ── NEWS ── */
-function loadNews(){
-  const rel=NEWS.filter(n=>n.sectors.some(sec=>S.P.sectors.includes(sec)));
-  S.news=rel.length>2?rel:NEWS;
-  document.getElementById('sc-news').innerHTML=`
-    <div style="padding:14px 18px 10px;border-bottom:0.5px solid var(--border);">
-      <div style="font-size:18px;font-weight:600;">Financial News</div>
-      <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:.5px;">TAILORED TO YOUR INTERESTS</div>
+      <div class="pie-legend">${legend}</div>
     </div>
-    <div class="news-list">${S.news.map(n=>nCard(n)).join('')}</div>`;
-  const hn=document.getElementById('home-news');
-  if(hn)hn.innerHTML=`<div class="news-list">${S.news.slice(0,3).map(n=>nCard(n)).join('')}</div>`;
-}
- 
-function nCard(n){
-  // Encode title and summary safely
-  const safeTitle=encodeURIComponent(n.title);
-  const safeSummary=encodeURIComponent(n.summary||'');
-  return`<div class="ncard" onclick="openNews('${safeTitle}','${safeSummary}','${n.source}')">
-    <div class="nbody">
-      <div class="nsource">${n.source}</div>
-      <div class="ntitle">${n.title}</div>
-      <div class="nmeta">${n.sectors.map(s=>`<span class="ntag">${s.toUpperCase()}</span>`).join('')}${n.time}</div>
+    <div class="holdings-table">${holdings}</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5;">⚠ ${pf.riskNote||'All investments carry risk.'}</div>
+    <div class="pf-actions">
+      <button class="pf-action-btn" onclick="generatePortfolio()">↻ Suggest Another</button>
+      <button class="pf-action-btn primary" onclick="customizePortfolio()">✎ Customize</button>
     </div>
-    <div class="nthumb">${n.emoji}</div>
   </div>`;
 }
  
-function openNews(encTitle, encSummary, source){
-  const title=decodeURIComponent(encTitle);
-  const summary=decodeURIComponent(encSummary);
+function calcAmount(alloc){
+  const map={'PKR 50K':50000,'PKR 100K':100000,'PKR 500K':500000,'PKR 1M':1000000,'PKR 5M':5000000,'PKR 10M+':10000000};
+  const base=map[S.P.amount]||100000;
+  const val=Math.round(base*alloc/100);
+  if(val>=1000000)return'PKR '+(val/1000000).toFixed(1)+'M';
+  if(val>=1000)return'PKR '+(val/1000).toFixed(0)+'K';
+  return'PKR '+val;
+}
+ 
+function impactHTML(){
+  if(!S.portfolio)return`<div class="impact-card"><div class="impact-text" style="padding:4px;">Generate a portfolio to see market impact analysis.</div></div>`;
+  return`
+    <div class="impact-card"><div class="impact-icon pos">📈</div><div class="impact-body"><div class="impact-title">KSE-100 rally is lifting your holdings</div><div class="impact-text">The index is up 0.81% today. Your bank and energy positions are benefiting from foreign buying inflows.</div></div></div>
+    <div class="impact-card"><div class="impact-icon pos">⚡</div><div class="impact-body"><div class="impact-title">OGDC dividend boost</div><div class="impact-text">OGDC announced a higher dividend — positive for your energy allocation and overall yield.</div></div></div>`;
+}
+ 
+function suggHTML(){
+  if(!S.portfolio)return'';
+  return`
+    <div class="sugg-card" onclick="askSugg('Should I rebalance my portfolio given the current KSE-100 levels?')"><div class="sugg-label">⚡ REBALANCE</div><div class="sugg-text">KSE-100 is at record highs. Consider taking some profit on your tech holdings and rotating into defensive dividend stocks.</div></div>
+    <div class="sugg-card" onclick="askSugg('What dividend stocks should I add to my portfolio?')"><div class="sugg-label">💰 INCOME</div><div class="sugg-text">Adding high-dividend names like FFC or HUBC could improve your portfolio's income stability.</div></div>`;
+}
+ 
+function askSugg(q){goTab('chat');const ta=document.getElementById('cin');if(ta)ta.value=q;setTimeout(()=>sendMsg(),300);}
+ 
+function customizePortfolio(){
+  document.getElementById('modals').innerHTML=`
+    <div class="modal-bg" onclick="closeModal(event)">
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div style="font-size:18px;font-weight:600;margin-bottom:6px;">Customize your portfolio</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5;">Tell the AI exactly what you want. e.g. "More tech exposure", "Only dividend stocks", "Add gold", "Lower risk".</div>
+        <textarea class="cust-input" id="cust-text" placeholder="What would you like to change?"></textarea>
+        <button class="ob-btn" style="margin-top:0;" onclick="applyCustomize()">Rebuild Portfolio →</button>
+      </div>
+    </div>`;
+}
+ 
+function applyCustomize(){
+  const t=document.getElementById('cust-text')?.value.trim();
+  closeModal();
+  if(t)generatePortfolio(t);
+}
+ 
+function showHolding(ticker){
+  const s=ALL_STOCKS.find(x=>x.ticker===ticker)||{ticker,name:ticker,price:'—',chg:'',pct:'',up:true};
+  const h=S.portfolio?.holdings.find(x=>x.ticker===ticker);
+  document.getElementById('modals').innerHTML=`
+    <div class="modal-bg" onclick="closeModal(event)">
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px;">
+          <div style="width:44px;height:44px;border-radius:10px;background:var(--bg3);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-weight:700;color:var(--gold);">${ticker.slice(0,3)}</div>
+          <div><div style="font-size:16px;font-weight:600;">${s.name}</div><div class="mono" style="font-size:10px;color:var(--gold);margin-top:2px;">${ticker}</div></div>
+        </div>
+        <div style="display:flex;gap:18px;margin-bottom:14px;">
+          <div><div class="mono" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">PRICE</div><div class="mono" style="font-size:18px;font-weight:700;">${s.price}</div></div>
+          ${s.pct?`<div><div class="mono" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">CHANGE</div><div class="mono ${s.up?'up':'dn'}" style="font-size:18px;font-weight:700;">${s.up?'+':''}${s.chg}</div></div>`:''}
+        </div>
+        ${h?`<div style="background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;"><div class="mono" style="font-size:9px;color:var(--gold);letter-spacing:1px;margin-bottom:6px;">IN YOUR PORTFOLIO</div><div style="font-size:13px;">${h.alloc}% · ${calcAmount(h.alloc)}</div><div style="font-size:11px;color:var(--text2);margin-top:6px;line-height:1.5;">${h.reason||''}</div></div>`:''}
+        <button class="ob-btn" style="margin-top:0;" onclick="askStock('${ticker}');closeModal()">Ask Advisor about ${ticker} →</button>
+      </div>
+    </div>`;
+}
+ 
+function askStock(t){goTab('chat');const ta=document.getElementById('cin');if(ta)ta.value=`Tell me about ${t} and whether I should hold, buy more, or sell it.`;setTimeout(()=>sendMsg(),300);}
+ 
+/* ── MARKETS ── */
+function buildMarkets(){
+  const tabs=['PSX Main','Top Gainers','Top Losers','Global'];
+  document.getElementById('sc-markets').innerHTML=`
+    <div class="index-bar">
+      <div class="index-left"><div class="idx-name">KSE-100 INDEX</div><div class="idx-val">170,330.56</div></div>
+      <div class="index-right"><div class="idx-chg up">▲ 1,376.86</div><div class="idx-pct up">+0.81%</div></div>
+    </div>
+    <div class="board-tabs">${tabs.map((t,i)=>`<div class="board-tab ${i===0?'active':''}" onclick="filterBoard(this,'${t}')">${t}</div>`).join('')}</div>
+    <div class="mkt-list" id="board-list">${PSX.map(s=>mktRow(s)).join('')}</div>`;
+}
+ 
+function mktRow(s){return`<div class="mkt-row" onclick="showHolding('${s.ticker}')"><div class="mkt-left"><div class="mkt-icon">${s.ticker.slice(0,3)}</div><div><div class="mkt-ticker">${s.ticker}</div><div class="mkt-name">${s.name}</div></div></div><div class="mkt-right"><div class="mkt-price">${s.price}</div><div class="mkt-chg ${s.up?'up':'dn'}">${s.up?'▲':'▼'} ${s.pct}</div><div class="mkt-vol">VOL ${s.vol}</div></div></div>`;}
+ 
+function filterBoard(el,f){
+  document.querySelectorAll('.board-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  let list=PSX;
+  if(f==='Top Gainers')list=[...PSX].filter(s=>s.up).sort((a,b)=>parseFloat(b.pct)-parseFloat(a.pct));
+  else if(f==='Top Losers')list=[...PSX].filter(s=>!s.up).sort((a,b)=>parseFloat(a.pct)-parseFloat(b.pct));
+  else if(f==='Global')list=GLOBAL;
+  const c=document.getElementById('board-list');
+  if(c)c.innerHTML=list.length>0?list.map(s=>mktRow(s)).join(''):`<div style="padding:28px;text-align:center;color:var(--muted);font-size:11px;" class="mono">NO STOCKS IN THIS BOARD.</div>`;
+}
+ 
+/* ── NEWS ── */
+function buildNews(){
+  const rel=NEWS.filter(n=>n.sectors.some(sec=>S.P.sectors.includes(sec)));
+  S.news=rel.length>2?rel:NEWS;
+  document.getElementById('sc-news').innerHTML=`
+    <div style="padding:14px 16px 10px;border-bottom:0.5px solid var(--border);">
+      <div style="font-size:18px;font-weight:600;">Market News</div>
+      <div class="mono" style="font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:.5px;">PSX & GLOBAL · TAILORED TO YOU</div>
+    </div>
+    <div class="news-list">${S.news.map(n=>nCard(n)).join('')}</div>`;
+}
+ 
+function nCard(n){
+  const t=encodeURIComponent(n.title),su=encodeURIComponent(n.summary||'');
+  return`<div class="ncard" onclick="openNews('${t}','${su}','${n.source}')"><div class="nbody"><div class="nsource">${n.source}</div><div class="ntitle">${n.title}</div><div class="nmeta">${n.sectors.map(s=>`<span class="ntag">${s.toUpperCase()}</span>`).join('')}${n.time}</div></div><div class="nthumb">${n.emoji}</div></div>`;
+}
+ 
+function openNews(t,su,source){
+  const title=decodeURIComponent(t),summary=decodeURIComponent(su);
   goTab('chat');
-  // Inject a news card message into the chat
-  S.msgs.push({
-    role:'assistant',
-    content:`<div class="news-summary-card"><div class="news-summary-source">${source}</div><div class="news-summary-title">${title}</div><div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:10px;">${summary}</div><button class="news-portfolio-btn" onclick="askPortfolioImpact('${encTitle}')">How will this affect my portfolio? →</button></div>`,
-    isHTML:true
-  });
+  S.msgs.push({role:'assistant',isHTML:true,content:`<div class="news-summary-card"><div class="news-summary-source">${source}</div><div class="news-summary-title">${title}</div><div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:10px;">${summary}</div><button class="news-portfolio-btn" onclick="askImpact('${t}')">How will this affect my portfolio? →</button></div>`});
   renderMsgs();
 }
  
-function askPortfolioImpact(encTitle){
-  const title=decodeURIComponent(encTitle);
-  const ta=document.getElementById('cin');
-  if(ta)ta.value=`How will this news affect my portfolio: "${title}"?`;
-  sendMsg();
-}
+function askImpact(t){const title=decodeURIComponent(t);const ta=document.getElementById('cin');if(ta)ta.value=`How will this news affect my portfolio: "${title}"? Reference my actual holdings.`;sendMsg();}
  
 /* ── PROFILE ── */
 function buildProfile(){
@@ -585,6 +622,7 @@ function buildProfile(){
     </div>
     <div class="prof-rows">
       <div class="prow"><div><div class="prow-lbl">Occupation</div><div class="prow-val">${p.occupation}</div></div></div>
+      <div class="prow"><div><div class="prow-lbl">Investment Amount</div><div class="prow-val">${p.amount}</div></div></div>
       <div class="prow"><div><div class="prow-lbl">Risk Tolerance</div><div class="prow-val">${p.risk}/100 · ${RL(p.risk)}</div></div></div>
       <div class="prow"><div><div class="prow-lbl">Finance Level</div><div class="prow-val">${km[p.knowledge]||p.knowledge}</div></div></div>
     </div>
@@ -596,13 +634,15 @@ function buildProfile(){
  
 /* ── CHAT ── */
 function sysprompt(){
-  const p=S.P,km={none:'no prior finance knowledge',some:'some finance basics',expert:'expert-level knowledge including derivatives'};
+  const p=S.P,km={none:'no prior finance knowledge',some:'some finance basics',expert:'expert-level knowledge'};
   const secs=p.sectors.map(id=>SECTORS.find(s=>s.id===id)?.name).filter(Boolean).join(', ');
-  return`You are LuminFin, an elite AI personal finance advisor. Expert in global markets, Pakistani context (PKR, PSX), and international investing.\n\nUSER: ${p.name}, age ${p.age}, ${p.occupation}, risk ${p.risk}/100 (${RL(p.risk)}), ${km[p.knowledge]}, interested in: ${secs}\n\nRULES: Address as ${p.name.split(' ')[0]}. Tailor advice to profile. Match language to knowledge level. Include Pakistani context where relevant. Never guarantee returns. Be direct and concise — max 200 words.`;
+  let pf='';
+  if(S.portfolio)pf=`\n\nUSER'S CURRENT PORTFOLIO (${p.amount}): ${S.portfolio.holdings.map(h=>`${h.ticker} ${h.alloc}%`).join(', ')}. Strategy: ${S.portfolio.strategy}`;
+  return`You are LuminFin, an elite AI investment advisor specializing in the Pakistan Stock Exchange (PSX) and global markets. You think like a top-tier banker/portfolio manager.\n\nUSER: ${p.name}, age ${p.age}, ${p.occupation}, risk ${p.risk}/100 (${RL(p.risk)}), ${km[p.knowledge]}, investing ${p.amount}, sectors: ${secs}${pf}\n\nRULES: Address as ${p.name.split(' ')[0]}. Reference their actual portfolio holdings when relevant. Prioritize PSX context (KSE-100, SBP rates, local tickers). Match language to knowledge level. Never guarantee returns. Be direct, specific, and concise — max 200 words.`;
 }
  
 function initChat(){
-  S.msgs=[{role:'assistant',content:`Welcome, ${S.P.name.split(' ')[0]}! 👋<br><br>I'm your LuminFin advisor — calibrated to your profile, tracking <strong>${S.P.sectors.slice(0,3).map(id=>SECTORS.find(s=>s.id===id)?.name).filter(Boolean).join(', ')}</strong>.<br><br>Tap a news story or stock to get instant analysis, or ask me anything below.`,isHTML:true}];
+  S.msgs=[{role:'assistant',isHTML:true,content:`Welcome, ${S.P.name.split(' ')[0]}! 👋<br><br>I'm your LuminFin advisor. I've built your portfolio based on your ${RL(S.P.risk).toLowerCase()} risk profile and ${S.P.amount} budget.<br><br>Ask me to adjust it, explain any holding, or analyze how news affects you.`}];
   renderMsgs();renderSugs();
 }
  
@@ -611,12 +651,7 @@ function renderMsgs(){
   el.innerHTML=S.msgs.map(m=>`<div class="msg ${m.role}"><div class="mav">${m.role==='assistant'?'LF':av}</div><div class="mbub">${m.isHTML?m.content:fmt(m.content)}</div></div>`).join('')+(S.loading?`<div class="msg assistant"><div class="mav">LF</div><div class="typing"><span></span><span></span><span></span></div></div>`:'');
   el.scrollTop=el.scrollHeight;
 }
- 
-function renderSugs(){
-  const el=document.getElementById('sugs');if(!el)return;
-  el.innerHTML=S.msgs.length>2?'':SUGS.map(s=>`<div class="sug" onclick="doSug('${s}')">${s}</div>`).join('');
-}
- 
+function renderSugs(){const el=document.getElementById('sugs');if(!el)return;el.innerHTML=S.msgs.length>2?'':SUGS.map(s=>`<div class="sug" onclick="doSug('${s}')">${s}</div>`).join('');}
 function hkey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
 function doSug(t){const ta=document.getElementById('cin');if(ta)ta.value=t;sendMsg();}
  
@@ -626,22 +661,21 @@ async function sendMsg(){
   if(!txt)return;if(ta){ta.value='';ta.style.height='auto';}
   S.msgs.push({role:'user',content:txt});S.loading=true;renderMsgs();renderSugs();
   try{
-    // Only send text messages to API (not HTML cards)
     const apiMsgs=S.msgs.filter(m=>!m.isHTML).map(m=>({role:m.role,content:m.content}));
     const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:sysprompt(),messages:apiMsgs})});
-    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    if(!res.ok)throw new Error('HTTP '+res.status);
     const d=await res.json();
     const reply=d.content?.find(b=>b.type==='text')?.text||'Sorry, I had trouble responding.';
     S.msgs.push({role:'assistant',content:reply});
-  }catch(e){S.msgs.push({role:'assistant',content:'Connection error — please check the app is deployed correctly and try again.'});}
+  }catch(e){S.msgs.push({role:'assistant',content:'Connection error — please try again.'});}
   S.loading=false;renderMsgs();renderSugs();
 }
  
-function closeModal(e){if(!e||e.target.classList.contains('country-modal'))document.getElementById('modals').innerHTML='';}
+function closeModal(e){if(!e||e.target.classList.contains('modal-bg'))document.getElementById('modals').innerHTML='';}
  
-/* ── INIT ── */
 renderOB();
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 </script>
 </body>
 </html>
+ 
