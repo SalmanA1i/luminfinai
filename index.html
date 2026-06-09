@@ -26,7 +26,7 @@ body{font-family:'Inter',sans-serif;color:var(--text)}
 #root{height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto;background:var(--bg);position:relative}
 .mono{font-family:'Space Mono',monospace}
 .up{color:var(--success)}.dn{color:var(--danger)}
- 
+
 /* ── ONBOARDING ── */
 #ob{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;flex-direction:column;align-items:center;padding:calc(var(--safe-top)+36px) 24px calc(var(--safe-bottom)+20px);max-width:430px;margin:0 auto;left:50%;transform:translateX(-50%);width:100%}
 .ob-logo{font-family:'Space Mono',monospace;font-size:13px;letter-spacing:2px;color:var(--text2);display:flex;align-items:center;gap:8px;margin-bottom:6px}
@@ -66,7 +66,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .sec-emo{font-size:20px;margin-bottom:5px}.sec-name{font-size:12px;font-weight:600}.sec-desc{font-size:10px;color:var(--text2);margin-top:2px}
 .ob-btn{width:100%;background:var(--gold);color:#0a0c12;border:none;border-radius:var(--radius);padding:13px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:auto}
 .ob-btn:active{transform:scale(.98)}.ob-btn:disabled{opacity:.3;cursor:not-allowed}
- 
+
 /* ── APP ── */
 #app{display:none;flex:1;flex-direction:column;height:100%;overflow:hidden}
 .appbar{padding:calc(var(--safe-top)+12px) 16px 11px;display:flex;align-items:center;justify-content:space-between;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0}
@@ -84,14 +84,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .nav-btn svg{width:19px;height:19px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
 .nav-btn span{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.5px;transition:color .2s}
 .nav-btn.active svg{stroke:var(--gold)}.nav-btn.active span{color:var(--gold)}
- 
+
 /* SHARED */
 .sh{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase}
 .sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 10px}
 .sec-more{font-size:11px;color:var(--muted);cursor:pointer}
 .shimmer{background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%);background-size:200% 100%;animation:shim 1.5s infinite;border-radius:6px}
 @keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
- 
+
 /* INDEX BAR */
 .index-bar{padding:14px 16px;background:linear-gradient(160deg,var(--bg2),var(--bg));border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .index-left .idx-name{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:3px}
@@ -99,7 +99,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .index-right{text-align:right}
 .index-right .idx-chg{font-family:'Space Mono',monospace;font-size:14px;font-weight:700}
 .index-right .idx-pct{font-family:'Space Mono',monospace;font-size:11px;margin-top:2px}
- 
+
 /* PORTFOLIO */
 .pf-card{margin:14px 16px;background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:16px}
 .pf-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
@@ -130,7 +130,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .pf-building .mono{font-size:11px;color:var(--muted);letter-spacing:1px;margin-top:14px}
 .spinner{width:36px;height:36px;border:2px solid var(--bg4);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto}
 @keyframes spin{to{transform:rotate(360deg)}}
- 
+
 /* MARKET BOARDS */
 .board-tabs{display:flex;padding:12px 16px 0;gap:0;border-bottom:0.5px solid var(--border);overflow-x:auto}
 .board-tabs::-webkit-scrollbar{display:none}
@@ -147,7 +147,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .mkt-price{font-family:'Space Mono',monospace;font-size:12px;font-weight:700}
 .mkt-chg{font-family:'Space Mono',monospace;font-size:10px;margin-top:2px}
 .mkt-vol{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:1px}
- 
+
 /* IMPACT / SUGGESTIONS */
 .impact-card{margin:0 16px 12px;background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px;display:flex;gap:11px}
 .impact-icon{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px}
@@ -160,7 +160,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .sugg-card:active{border-color:var(--gold)}
 .sugg-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--gold);margin-bottom:6px}
 .sugg-text{font-size:12px;color:var(--text);line-height:1.5}
- 
+
 /* STOCK DETAIL MODAL */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:flex-end;justify-content:center}
 .modal-box{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:22px 22px calc(22px + var(--safe-bottom));border-top:0.5px solid var(--border);max-height:85vh;overflow-y:auto}
@@ -172,11 +172,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .country-flag{font-size:22px;margin-bottom:5px}
 .country-name{font-size:12px;font-weight:600}
 .country-close{width:100%;background:transparent;border:0.5px solid var(--border);border-radius:var(--radius);padding:11px;font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);cursor:pointer}
- 
+
 /* CUSTOMIZE MODAL */
 .cust-input{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;padding:12px 14px;outline:none;resize:none;min-height:80px;line-height:1.5;margin-bottom:12px}
 .cust-input:focus{border-color:var(--gold)}.cust-input::placeholder{color:var(--muted)}
- 
+
 /* NEWS */
 .news-list{display:flex;flex-direction:column}
 .ncard{padding:14px 16px;border-bottom:0.5px solid var(--border);display:flex;gap:11px;cursor:pointer;transition:background .15s}
@@ -187,7 +187,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .nmeta{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .ntag{font-family:'Space Mono',monospace;font-size:9px;border:0.5px solid var(--border2);color:var(--text2);padding:2px 6px;border-radius:10px}
 .nthumb{width:54px;height:54px;border-radius:9px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
- 
+
 /* CHAT */
 .chat-shell{display:flex;flex-direction:column;height:100%}
 .chat-top{padding:12px 16px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;background:var(--bg)}
@@ -222,7 +222,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .news-summary-source{font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:1px;margin-bottom:5px}
 .news-summary-title{font-size:12px;font-weight:600;margin-bottom:8px;line-height:1.4}
 .news-portfolio-btn{width:100%;background:var(--gold-dim);color:var(--gold);border:0.5px solid var(--border2);border-radius:8px;padding:9px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer}
- 
+
 /* PROFILE */
 .prof-hero{padding:24px 16px 18px;display:flex;flex-direction:column;align-items:center;gap:11px;border-bottom:0.5px solid var(--border)}
 .prof-av{width:68px;height:68px;border-radius:50%;background:var(--gold-dim);border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:20px;color:var(--gold)}
@@ -241,7 +241,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 </head>
 <body>
 <div id="root">
- 
+
 <!-- ═══ ONBOARDING ═══ -->
 <div id="ob">
   <div class="ob-logo"><span class="ob-dot"></span>LUMINFIN</div>
@@ -249,7 +249,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
   <div class="ob-pbar"><div class="ob-pbar-bg"><div class="ob-pbar-fill" id="ob-fill" style="width:16%"></div></div></div>
   <div class="ob-card" id="ob-card"></div>
 </div>
- 
+
 <!-- ═══ APP ═══ -->
 <div id="app">
   <div class="appbar">
@@ -301,10 +301,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
   </nav>
 </div>
 <div id="modals"></div>
- 
+
 <script>
 const S={step:0,P:{name:'',age:'',occupation:'',risk:50,knowledge:'',amount:'',sectors:[]},msgs:[],loading:false,tab:'home',portfolio:null,pfBuilding:false};
- 
+
 const SECTORS=[
   {id:'banks',emoji:'🏦',name:'Banks',desc:'HBL, UBL, MCB'},
   {id:'energy',emoji:'⚡',name:'Energy',desc:'OGDC, PPL, PSO'},
@@ -322,7 +322,7 @@ const KO=[
 ];
 const AMOUNTS=['PKR 50K','PKR 100K','PKR 500K','PKR 1M','PKR 5M','PKR 10M+'];
 const SUGS=['Rebalance my portfolio','Best PSX stock right now?','Is KSE-100 overvalued?','Explain dividend stocks'];
- 
+
 // PSX + global stocks
 const PSX=[
   {ticker:'OGDC',name:'Oil & Gas Dev Co',price:'319.63',chg:'+1.56',pct:'+0.49%',up:true,vol:'2.78M',sector:'energy'},
@@ -349,7 +349,7 @@ const GLOBAL=[
   {ticker:'GOLD',name:'Gold (oz)',price:'$2,400',chg:'+18',pct:'+0.76%',up:true,vol:'—',sector:'commodities',country:'GLOBAL'},
 ];
 const ALL_STOCKS=[...PSX,...GLOBAL];
- 
+
 const NEWS=[
   {source:'BR',title:'KSE-100 hits record 170,330 as foreign buying accelerates',sectors:['banks'],emoji:'📈',time:'1h ago',summary:'The KSE-100 index closed at an all-time high of 170,330 points, up 0.81%, driven by strong foreign institutional inflows and improving macroeconomic indicators including a declining current account deficit.'},
   {source:'DAWN',title:'SBP holds policy rate at 21% citing inflation caution',sectors:['banks'],emoji:'🏦',time:'3h ago',summary:'The State Bank of Pakistan kept its benchmark interest rate unchanged at 21%, citing the need for continued monetary tightening despite recent improvements in headline inflation figures.'},
@@ -359,15 +359,15 @@ const NEWS=[
   {source:'BLOOMBERG',title:'NVIDIA crosses $2 trillion on sustained AI chip demand',sectors:['intl'],emoji:'🌍',time:'5h ago',summary:'NVIDIA became the third company to cross a $2 trillion valuation as demand for its AI accelerator chips continues to outpace supply, with data center revenue up 200% year-over-year.'},
   {source:'COINDESK',title:'Bitcoin breaks $68,000 on record ETF inflows',sectors:['crypto'],emoji:'₿',time:'30m ago',summary:'Bitcoin reached $68,000 as spot ETF inflows hit record levels, with institutional investors continuing to accumulate ahead of the upcoming supply halving event.'},
 ];
- 
+
 const RL=v=>v<20?'Capital Preservation':v<40?'Conservative':v<60?'Balanced':v<80?'Growth':'Aggressive';
 const ini=n=>n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()||'U';
 const fmt=t=>t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/^[•\-] /gm,'&bull; ').replace(/\n/g,'<br>');
- 
+
 /* ── ONBOARDING ── */
 const STEPS=['Tell us about yourself','Your occupation','Risk appetite','Finance knowledge','Investment amount','Your interests'];
 const TOTAL=6;
- 
+
 function renderOB(){
   document.getElementById('ob-fill').style.width=((S.step+1)/TOTAL*100)+'%';
   document.getElementById('ob-card').innerHTML=`<div class="ob-step">STEP ${S.step+1} OF ${TOTAL}</div><div class="ob-title">${STEPS[S.step]}</div>${[s0,s1,s2,s3,s4,s5][S.step]()}`;
@@ -379,7 +379,7 @@ function s2(){return`<div style="text-align:center;padding:6px 0"><div class="ri
 function s3(){return`<div class="kopts">${KO.map(k=>`<div class="kopt ${S.P.knowledge===k.id?'sel':''}" onclick="selK('${k.id}')"><div class="krad"></div><div><div class="kt">${k.title}</div><div class="kd">${k.desc}</div></div></div>`).join('')}</div><button class="ob-btn" id="kbtn" onclick="obNext()" ${!S.P.knowledge?'disabled':''}>Continue →</button>`;}
 function s4(){return`<div><div class="flbl" style="margin-bottom:10px;">How much do you want to invest?</div><div class="amt-chips">${AMOUNTS.map(a=>`<div class="amt-chip ${S.P.amount===a?'sel':''}" onclick="selAmt('${a}')">${a}</div>`).join('')}</div></div><button class="ob-btn" id="abtn" onclick="obNext()" ${!S.P.amount?'disabled':''}>Continue →</button>`;}
 function s5(){return`<div class="sec-grid" style="overflow-y:auto;flex:1;">${SECTORS.map(s=>`<div class="sec-card ${S.P.sectors.includes(s.id)?'sel':''}" onclick="toggleSec('${s.id}')"><div class="sec-emo">${s.emoji}</div><div class="sec-name">${s.name}</div><div class="sec-desc">${s.desc}</div></div>`).join('')}</div><button class="ob-btn" id="lbtn" onclick="launch()" ${S.P.sectors.length===0?'disabled':''}>Build My Portfolio →</button>`;}
- 
+
 function obNext(){
   if(S.step===0){const n=document.getElementById('fn')?.value.trim(),a=document.getElementById('fa')?.value.trim();if(!n||!a||isNaN(a)||a<13)return;S.P.name=n;S.P.age=a;}
   else if(S.step===1){const o=document.getElementById('fo')?.value.trim();if(!o)return;S.P.occupation=o;}
@@ -390,8 +390,8 @@ function obNext(){
 }
 function selK(id){S.P.knowledge=id;document.querySelectorAll('.kopt').forEach(el=>el.classList.toggle('sel',el.getAttribute('onclick').includes(`'${id}'`)));const b=document.getElementById('kbtn');if(b)b.disabled=false;}
 function selAmt(a){S.P.amount=a;document.querySelectorAll('.amt-chip').forEach(el=>el.classList.toggle('sel',el.textContent===a));const b=document.getElementById('abtn');if(b)b.disabled=false;}
-function toggleSec(id){const i=S.P.sectors.indexOf(id);if(i>-1)S.P.sectors.splice(i,1);else S.P.sectors.push(id);document.querySelectorAll('.sec-card').forEach(el=>el.classList.toggle('sel',el.getAttribute('onclick').includes(`'${id}'`)&&S.P.sectors.includes(id)));const b=document.getElementById('lbtn');if(b)b.disabled=S.P.sectors.length===0;}
- 
+function toggleSec(id){const i=S.P.sectors.indexOf(id);if(i>-1)S.P.sectors.splice(i,1);else S.P.sectors.push(id);document.querySelectorAll('.sec-card').forEach(el=>{const m=el.getAttribute('onclick').match(/toggleSec\('([^']+)'\)/);if(m)el.classList.toggle('sel',S.P.sectors.includes(m[1]));});const b=document.getElementById('lbtn');if(b)b.disabled=S.P.sectors.length===0;}
+
 function launch(){
   if(S.P.sectors.length===0)return;
   document.getElementById('ob').style.display='none';
@@ -400,7 +400,7 @@ function launch(){
   buildHome();buildMarkets();buildNews();buildProfile();initChat();
   generatePortfolio();
 }
- 
+
 /* ── TABS ── */
 function goTab(tab){
   S.tab=tab;
@@ -410,17 +410,17 @@ function goTab(tab){
   const idx=['home','markets','news','chat'].indexOf(tab);
   if(idx>-1)document.querySelectorAll('.nav-btn')[idx].classList.add('active');
 }
- 
+
 /* ── PORTFOLIO GENERATION ── */
 const PIE_COLORS=['#e8a020','#3db87a','#4a9eff','#e05252','#9b59b6','#1abc9c','#f39c12'];
- 
+
 async function generatePortfolio(extra){
   S.pfBuilding=true;buildHome();
   try{
     const prompt=`You are a portfolio manager for the Pakistan Stock Exchange (PSX). Build an investment portfolio for this investor:
 Name: ${S.P.name}, Age: ${S.P.age}, Occupation: ${S.P.occupation}, Risk: ${S.P.risk}/100 (${RL(S.P.risk)}), Knowledge: ${S.P.knowledge}, Amount: ${S.P.amount}, Interested sectors: ${S.P.sectors.join(', ')}.
 ${extra?'IMPORTANT custom request from user: '+extra:''}
- 
+
 Pick 4-6 real holdings (prefer PSX tickers like OGDC, PPL, HBL, UBL, LUCK, ENGRO, SYS, TRG, FFC; include some global like AAPL/NVDA/BTC/GOLD only if they chose Global/Crypto/Commodities). Respond ONLY with valid JSON, no markdown, in this exact format:
 {"strategy":"one short sentence describing the strategy","holdings":[{"ticker":"OGDC","name":"Oil & Gas Dev","alloc":25,"reason":"short reason"}],"expectedReturn":"12-15% annually","riskNote":"one short sentence"}
 Allocations must sum to 100.`;
@@ -436,13 +436,13 @@ Allocations must sum to 100.`;
   }
   S.pfBuilding=false;buildHome();
 }
- 
+
 function fallbackPortfolio(){
   const aggressive=S.P.risk>=60;
   if(aggressive)return{strategy:'Growth-focused with high-beta PSX tech and energy exposure.',holdings:[{ticker:'TRG',name:'TRG Pakistan',alloc:25,reason:'High-growth tech holding'},{ticker:'SYS',name:'Systems Ltd',alloc:25,reason:'IT export leader'},{ticker:'OGDC',name:'Oil & Gas Dev',alloc:20,reason:'Energy upside'},{ticker:'LUCK',name:'Lucky Cement',alloc:15,reason:'Infrastructure play'},{ticker:'BTC',name:'Bitcoin',alloc:15,reason:'High-risk diversifier'}],expectedReturn:'18-25% annually',riskNote:'High volatility — suitable for aggressive investors only.'};
   return{strategy:'Balanced PSX blue-chips with stable dividend income.',holdings:[{ticker:'HBL',name:'Habib Bank',alloc:25,reason:'Stable dividend bank'},{ticker:'FFC',name:'Fauji Fertilizer',alloc:25,reason:'Defensive dividend'},{ticker:'OGDC',name:'Oil & Gas Dev',alloc:20,reason:'Energy stability'},{ticker:'ENGRO',name:'Engro Corp',alloc:20,reason:'Diversified conglomerate'},{ticker:'LUCK',name:'Lucky Cement',alloc:10,reason:'Growth kicker'}],expectedReturn:'10-14% annually',riskNote:'Moderate risk with steady income focus.'};
 }
- 
+
 /* ── HOME (3 sections: Portfolio, Market, Impact+Suggestions) ── */
 function buildHome(){
   const el=document.getElementById('sc-home');
@@ -461,7 +461,7 @@ function buildHome(){
     <div id="sugg-container">${suggHTML()}</div>
   `;
 }
- 
+
 function pfHTML(){
   if(S.pfBuilding)return`<div class="pf-card"><div class="pf-building"><div class="spinner"></div><div class="mono">BUILDING YOUR PORTFOLIO…</div></div></div>`;
   if(!S.portfolio)return`<div class="pf-card"><div class="pf-building"><div class="mono">Tap to generate your portfolio</div><button class="ob-btn" style="margin-top:14px;" onclick="generatePortfolio()">Generate →</button></div></div>`;
@@ -493,7 +493,7 @@ function pfHTML(){
     </div>
   </div>`;
 }
- 
+
 function calcAmount(alloc){
   const map={'PKR 50K':50000,'PKR 100K':100000,'PKR 500K':500000,'PKR 1M':1000000,'PKR 5M':5000000,'PKR 10M+':10000000};
   const base=map[S.P.amount]||100000;
@@ -502,23 +502,23 @@ function calcAmount(alloc){
   if(val>=1000)return'PKR '+(val/1000).toFixed(0)+'K';
   return'PKR '+val;
 }
- 
+
 function impactHTML(){
   if(!S.portfolio)return`<div class="impact-card"><div class="impact-text" style="padding:4px;">Generate a portfolio to see market impact analysis.</div></div>`;
   return`
     <div class="impact-card"><div class="impact-icon pos">📈</div><div class="impact-body"><div class="impact-title">KSE-100 rally is lifting your holdings</div><div class="impact-text">The index is up 0.81% today. Your bank and energy positions are benefiting from foreign buying inflows.</div></div></div>
     <div class="impact-card"><div class="impact-icon pos">⚡</div><div class="impact-body"><div class="impact-title">OGDC dividend boost</div><div class="impact-text">OGDC announced a higher dividend — positive for your energy allocation and overall yield.</div></div></div>`;
 }
- 
+
 function suggHTML(){
   if(!S.portfolio)return'';
   return`
     <div class="sugg-card" onclick="askSugg('Should I rebalance my portfolio given the current KSE-100 levels?')"><div class="sugg-label">⚡ REBALANCE</div><div class="sugg-text">KSE-100 is at record highs. Consider taking some profit on your tech holdings and rotating into defensive dividend stocks.</div></div>
     <div class="sugg-card" onclick="askSugg('What dividend stocks should I add to my portfolio?')"><div class="sugg-label">💰 INCOME</div><div class="sugg-text">Adding high-dividend names like FFC or HUBC could improve your portfolio's income stability.</div></div>`;
 }
- 
+
 function askSugg(q){goTab('chat');const ta=document.getElementById('cin');if(ta)ta.value=q;setTimeout(()=>sendMsg(),300);}
- 
+
 function customizePortfolio(){
   document.getElementById('modals').innerHTML=`
     <div class="modal-bg" onclick="closeModal(event)">
@@ -531,13 +531,13 @@ function customizePortfolio(){
       </div>
     </div>`;
 }
- 
+
 function applyCustomize(){
   const t=document.getElementById('cust-text')?.value.trim();
   closeModal();
   if(t)generatePortfolio(t);
 }
- 
+
 function showHolding(ticker){
   const s=ALL_STOCKS.find(x=>x.ticker===ticker)||{ticker,name:ticker,price:'—',chg:'',pct:'',up:true};
   const h=S.portfolio?.holdings.find(x=>x.ticker===ticker);
@@ -558,9 +558,9 @@ function showHolding(ticker){
       </div>
     </div>`;
 }
- 
+
 function askStock(t){goTab('chat');const ta=document.getElementById('cin');if(ta)ta.value=`Tell me about ${t} and whether I should hold, buy more, or sell it.`;setTimeout(()=>sendMsg(),300);}
- 
+
 /* ── MARKETS ── */
 function buildMarkets(){
   const tabs=['PSX Main','Top Gainers','Top Losers','Global'];
@@ -572,9 +572,9 @@ function buildMarkets(){
     <div class="board-tabs">${tabs.map((t,i)=>`<div class="board-tab ${i===0?'active':''}" onclick="filterBoard(this,'${t}')">${t}</div>`).join('')}</div>
     <div class="mkt-list" id="board-list">${PSX.map(s=>mktRow(s)).join('')}</div>`;
 }
- 
+
 function mktRow(s){return`<div class="mkt-row" onclick="showHolding('${s.ticker}')"><div class="mkt-left"><div class="mkt-icon">${s.ticker.slice(0,3)}</div><div><div class="mkt-ticker">${s.ticker}</div><div class="mkt-name">${s.name}</div></div></div><div class="mkt-right"><div class="mkt-price">${s.price}</div><div class="mkt-chg ${s.up?'up':'dn'}">${s.up?'▲':'▼'} ${s.pct}</div><div class="mkt-vol">VOL ${s.vol}</div></div></div>`;}
- 
+
 function filterBoard(el,f){
   document.querySelectorAll('.board-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
   let list=PSX;
@@ -584,7 +584,7 @@ function filterBoard(el,f){
   const c=document.getElementById('board-list');
   if(c)c.innerHTML=list.length>0?list.map(s=>mktRow(s)).join(''):`<div style="padding:28px;text-align:center;color:var(--muted);font-size:11px;" class="mono">NO STOCKS IN THIS BOARD.</div>`;
 }
- 
+
 /* ── NEWS ── */
 function buildNews(){
   const rel=NEWS.filter(n=>n.sectors.some(sec=>S.P.sectors.includes(sec)));
@@ -596,21 +596,21 @@ function buildNews(){
     </div>
     <div class="news-list">${S.news.map(n=>nCard(n)).join('')}</div>`;
 }
- 
+
 function nCard(n){
   const t=encodeURIComponent(n.title),su=encodeURIComponent(n.summary||'');
   return`<div class="ncard" onclick="openNews('${t}','${su}','${n.source}')"><div class="nbody"><div class="nsource">${n.source}</div><div class="ntitle">${n.title}</div><div class="nmeta">${n.sectors.map(s=>`<span class="ntag">${s.toUpperCase()}</span>`).join('')}${n.time}</div></div><div class="nthumb">${n.emoji}</div></div>`;
 }
- 
+
 function openNews(t,su,source){
   const title=decodeURIComponent(t),summary=decodeURIComponent(su);
   goTab('chat');
   S.msgs.push({role:'assistant',isHTML:true,content:`<div class="news-summary-card"><div class="news-summary-source">${source}</div><div class="news-summary-title">${title}</div><div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:10px;">${summary}</div><button class="news-portfolio-btn" onclick="askImpact('${t}')">How will this affect my portfolio? →</button></div>`});
   renderMsgs();
 }
- 
+
 function askImpact(t){const title=decodeURIComponent(t);const ta=document.getElementById('cin');if(ta)ta.value=`How will this news affect my portfolio: "${title}"? Reference my actual holdings.`;sendMsg();}
- 
+
 /* ── PROFILE ── */
 function buildProfile(){
   const p=S.P,km={none:'Beginner',some:'Intermediate',expert:'Expert'};
@@ -631,7 +631,7 @@ function buildProfile(){
       <div class="prof-chips">${p.sectors.map(id=>{const s=SECTORS.find(s=>s.id===id);return s?`<div class="pchip">${s.emoji} ${s.name}</div>`:''}).join('')}</div>
     </div>`;
 }
- 
+
 /* ── CHAT ── */
 function sysprompt(){
   const p=S.P,km={none:'no prior finance knowledge',some:'some finance basics',expert:'expert-level knowledge'};
@@ -640,12 +640,12 @@ function sysprompt(){
   if(S.portfolio)pf=`\n\nUSER'S CURRENT PORTFOLIO (${p.amount}): ${S.portfolio.holdings.map(h=>`${h.ticker} ${h.alloc}%`).join(', ')}. Strategy: ${S.portfolio.strategy}`;
   return`You are LuminFin, an elite AI investment advisor specializing in the Pakistan Stock Exchange (PSX) and global markets. You think like a top-tier banker/portfolio manager.\n\nUSER: ${p.name}, age ${p.age}, ${p.occupation}, risk ${p.risk}/100 (${RL(p.risk)}), ${km[p.knowledge]}, investing ${p.amount}, sectors: ${secs}${pf}\n\nRULES: Address as ${p.name.split(' ')[0]}. Reference their actual portfolio holdings when relevant. Prioritize PSX context (KSE-100, SBP rates, local tickers). Match language to knowledge level. Never guarantee returns. Be direct, specific, and concise — max 200 words.`;
 }
- 
+
 function initChat(){
   S.msgs=[{role:'assistant',isHTML:true,content:`Welcome, ${S.P.name.split(' ')[0]}! 👋<br><br>I'm your LuminFin advisor. I've built your portfolio based on your ${RL(S.P.risk).toLowerCase()} risk profile and ${S.P.amount} budget.<br><br>Ask me to adjust it, explain any holding, or analyze how news affects you.`}];
   renderMsgs();renderSugs();
 }
- 
+
 function renderMsgs(){
   const av=ini(S.P.name),el=document.getElementById('msgs');if(!el)return;
   el.innerHTML=S.msgs.map(m=>`<div class="msg ${m.role}"><div class="mav">${m.role==='assistant'?'LF':av}</div><div class="mbub">${m.isHTML?m.content:fmt(m.content)}</div></div>`).join('')+(S.loading?`<div class="msg assistant"><div class="mav">LF</div><div class="typing"><span></span><span></span><span></span></div></div>`:'');
@@ -654,7 +654,7 @@ function renderMsgs(){
 function renderSugs(){const el=document.getElementById('sugs');if(!el)return;el.innerHTML=S.msgs.length>2?'':SUGS.map(s=>`<div class="sug" onclick="doSug('${s}')">${s}</div>`).join('');}
 function hkey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
 function doSug(t){const ta=document.getElementById('cin');if(ta)ta.value=t;sendMsg();}
- 
+
 async function sendMsg(){
   if(S.loading)return;
   const ta=document.getElementById('cin'),txt=ta?ta.value.trim():'';
@@ -670,12 +670,11 @@ async function sendMsg(){
   }catch(e){S.msgs.push({role:'assistant',content:'Connection error — please try again.'});}
   S.loading=false;renderMsgs();renderSugs();
 }
- 
+
 function closeModal(e){if(!e||e.target.classList.contains('modal-bg'))document.getElementById('modals').innerHTML='';}
- 
+
 renderOB();
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 </script>
 </body>
 </html>
- 
