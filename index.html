@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="LuminFin">
 <link rel="manifest" href="/manifest.json">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -414,6 +415,23 @@ function goTab(tab){
 /* ── PORTFOLIO GENERATION ── */
 const PIE_COLORS=['#e8a020','#3db87a','#4a9eff','#e05252','#9b59b6','#1abc9c','#f39c12'];
  
+// Robustly pull a JSON object out of an LLM response that may contain extra text
+function extractJSON(txt){
+  if(!txt)return null;
+  txt=txt.replace(/```json/gi,'').replace(/```/g,'').trim();
+  // Try direct parse first
+  try{return JSON.parse(txt);}catch(e){}
+  // Otherwise grab the substring between the first { and last }
+  const a=txt.indexOf('{'),b=txt.lastIndexOf('}');
+  if(a>-1&&b>a){
+    let slice=txt.slice(a,b+1);
+    try{return JSON.parse(slice);}catch(e){}
+    // Remove trailing commas which break parse
+    try{return JSON.parse(slice.replace(/,(\s*[}\]])/g,'$1'));}catch(e){}
+  }
+  return null;
+}
+ 
 async function generatePortfolio(extra){
   S.pfBuilding=true;buildHome();
   try{
@@ -428,7 +446,8 @@ Allocations must sum to 100.`;
     const d=await res.json();
     let txt=d.content?.find(b=>b.type==='text')?.text||'';
     txt=txt.replace(/```json|```/g,'').trim();
-    const pf=JSON.parse(txt);
+    const pf=extractJSON(txt);
+    if(!pf)throw new Error('parse');
     S.portfolio=pf;
   }catch(e){
     // Fallback portfolio
@@ -554,12 +573,210 @@ function showHolding(ticker){
           ${s.pct?`<div><div class="mono" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">CHANGE</div><div class="mono ${s.up?'up':'dn'}" style="font-size:18px;font-weight:700;">${s.up?'+':''}${s.chg}</div></div>`:''}
         </div>
         ${h?`<div style="background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;"><div class="mono" style="font-size:9px;color:var(--gold);letter-spacing:1px;margin-bottom:6px;">IN YOUR PORTFOLIO</div><div style="font-size:13px;">${h.alloc}% · ${calcAmount(h.alloc)}</div><div style="font-size:11px;color:var(--text2);margin-top:6px;line-height:1.5;">${h.reason||''}</div></div>`:''}
-        <button class="ob-btn" style="margin-top:0;" onclick="askStock('${ticker}');closeModal()">Ask Advisor about ${ticker} →</button>
+        <button class="ob-btn" style="margin-top:0;margin-bottom:9px;" onclick="generateRiskReport('${ticker}')">📊 Generate Risk Report</button>
+        <button class="pf-action-btn" style="width:100%;" onclick="askStock('${ticker}');closeModal()">Ask Advisor about ${ticker} →</button>
       </div>
     </div>`;
 }
  
 function askStock(t){goTab('chat');const ta=document.getElementById('cin');if(ta)ta.value=`Tell me about ${t} and whether I should hold, buy more, or sell it.`;setTimeout(()=>sendMsg(),300);}
+ 
+/* ── RISK REPORT ── */
+async function generateRiskReport(ticker){
+  const s=ALL_STOCKS.find(x=>x.ticker===ticker)||{ticker,name:ticker,price:'—'};
+  // Show loading overlay
+  document.getElementById('modals').innerHTML=`
+    <div class="modal-bg" style="align-items:center;">
+      <div style="text-align:center;color:var(--text2);">
+        <div class="spinner"></div>
+        <div class="mono" style="font-size:11px;letter-spacing:1px;margin-top:14px;">ANALYZING ${ticker}…</div>
+      </div>
+    </div>`;
+  try{
+    const prompt=`You are an equity research analyst. Generate a detailed risk analysis for ${ticker} (${s.name}), a stock${s.country&&s.country!=='GLOBAL'?' on '+(s.country==='US'?'the US market':s.country):' on the Pakistan Stock Exchange (PSX)'}. Current price: ${s.price}.
+ 
+Use your knowledge to produce realistic figures. Respond ONLY with valid JSON (no markdown):
+{
+"ticker":"${ticker}","name":"${s.name}","price":"${s.price}","riskScore":62,"rating":"BUY",
+"kpis":[{"label":"P/E","value":"12.4"},{"label":"Div Yield","value":"6.2%"},{"label":"Mkt Cap","value":"PKR 420B"},{"label":"52W High","value":"340"}],
+"priceChart":[100,105,98,110,115,108,120,118,125,130,128,135],
+"chartMarkers":[{"i":3,"label":"Q1 beat"},{"i":8,"label":"Dividend"}],
+"valuation":[{"metric":"P/E Ratio","value":"12.4x","status":"green","note":"Below sector avg"},{"metric":"P/B","value":"1.8x","status":"amber","note":"Fair"},{"metric":"EV/EBITDA","value":"6.2x","status":"green","note":"Attractive"}],
+"financialHealth":[{"metric":"Debt/Equity","value":"0.4","status":"green","note":"Low leverage"},{"metric":"Current Ratio","value":"1.6","status":"green","note":"Healthy"},{"metric":"ROE","value":"18%","status":"green","note":"Strong"}],
+"growth":[{"metric":"Rev Growth","value":"14%","status":"green","note":"Solid"},{"metric":"EPS Growth","value":"9%","status":"amber","note":"Moderate"},{"metric":"Margin Trend","value":"+2pp","status":"green","note":"Expanding"}],
+"scoreBreakdown":{"valuation":28,"health":30,"growth":22},
+"quarterly":[{"q":"Q1 FY25","rev":"45.2B","eps":"8.1","change":"+12%"},{"q":"Q2 FY25","rev":"48.7B","eps":"9.3","change":"+15%"},{"q":"Q3 FY25","rev":"51.1B","eps":"9.8","change":"+5%"}],
+"earningsUpdate":"Latest quarter beat estimates with revenue up 15% YoY driven by higher volumes.",
+"catalysts":["Rising sector demand","Dividend increase expected","Margin expansion"],
+"risks":["Currency volatility","Regulatory changes","Commodity price swings"],
+"bottomLine":"A fundamentally sound stock with attractive valuation and steady growth, suitable for balanced portfolios."
+}
+scoreBreakdown values: valuation out of 35, health out of 35, growth out of 30. riskScore 0-100 (higher=better/safer). rating one of STRONG BUY/BUY/HOLD/SELL. Make all data realistic for this specific company.`;
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a JSON-only equity research API. Output only valid JSON.',messages:[{role:'user',content:prompt}]})});
+    const d=await res.json();
+    let txt=d.content?.find(b=>b.type==='text')?.text||'';
+    const r=extractJSON(txt);
+    if(!r)throw new Error('parse');
+    renderRiskReport(r);
+  }catch(e){
+    document.getElementById('modals').innerHTML=`<div class="modal-bg" onclick="closeModal(event)"><div class="modal-box" onclick="event.stopPropagation()"><div class="modal-handle"></div><div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">Couldn't generate the report. Please try again.</div></div></div>`;
+  }
+}
+ 
+function statusColor(s){return s==='green'?'#3db87a':s==='red'?'#e05252':'#e8a020';}
+ 
+function cardGrid(items){
+  return items.map(c=>`<div style="background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-left:2px solid ${statusColor(c.status)};border-radius:8px;padding:10px;"><div style="font-size:10px;color:#888;margin-bottom:3px;">${c.metric}</div><div style="font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:${statusColor(c.status)};">${c.value}</div><div style="font-size:9px;color:#666;margin-top:2px;">${c.note}</div></div>`).join('');
+}
+ 
+function priceChartSVG(data,markers){
+  if(!data||!data.length)return'';
+  const w=320,h=110,pad=8;
+  const mx=Math.max(...data),mn=Math.min(...data);
+  const pts=data.map((v,i)=>{const x=pad+i*((w-2*pad)/(data.length-1));const y=h-pad-((v-mn)/(mx-mn||1))*(h-2*pad);return[x,y];});
+  const line=pts.map(p=>`${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+  const area=`${pad},${h-pad} ${line} ${w-pad},${h-pad}`;
+  const up=data[data.length-1]>=data[0];
+  const col=up?'#3db87a':'#e05252';
+  const markerDots=(markers||[]).map(m=>{const p=pts[m.i];if(!p)return'';return`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.5" fill="${col}" stroke="#08090d" stroke-width="1.5"/><text x="${p[0].toFixed(1)}" y="${(p[1]-8).toFixed(1)}" fill="#888" font-size="7" text-anchor="middle" font-family="monospace">${m.label}</text>`;}).join('');
+  return`<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;"><defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${col}" stop-opacity="0.25"/><stop offset="100%" stop-color="${col}" stop-opacity="0"/></linearGradient></defs><polygon points="${area}" fill="url(#ag)"/><polyline points="${line}" fill="none" stroke="${col}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>${markerDots}</svg>`;
+}
+ 
+function gaugeSVG(score){
+  const angle=(score/100)*180;
+  const r=70,cx=90,cy=90;
+  const rad=(180-angle)*Math.PI/180;
+  const x=cx+r*Math.cos(rad),y=cy-r*Math.sin(rad);
+  const col=score>=66?'#3db87a':score>=40?'#e8a020':'#e05252';
+  return`<svg viewBox="0 0 180 105" style="width:150px;height:auto;"><path d="M 20 90 A 70 70 0 0 1 160 90" fill="none" stroke="#1e2230" stroke-width="10" stroke-linecap="round"/><path d="M 20 90 A 70 70 0 0 1 ${x.toFixed(1)} ${y.toFixed(1)}" fill="none" stroke="${col}" stroke-width="10" stroke-linecap="round"/><text x="90" y="78" fill="${col}" font-size="26" font-weight="700" text-anchor="middle" font-family="monospace">${score}</text><text x="90" y="94" fill="#666" font-size="9" text-anchor="middle" font-family="monospace">RISK SCORE</text></svg>`;
+}
+ 
+function renderRiskReport(r){
+  const ratingColors={'STRONG BUY':'#3db87a','BUY':'#3db87a','HOLD':'#e8a020','SELL':'#e05252'};
+  const rc=ratingColors[r.rating]||'#e8a020';
+  const kpiStrip=(r.kpis||[]).map(k=>`<div style="flex:1;text-align:center;padding:8px 4px;border-right:0.5px solid rgba(255,255,255,0.06);"><div style="font-size:9px;color:#888;margin-bottom:3px;">${k.label}</div><div style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:#f0ece0;">${k.value}</div></div>`).join('');
+  const sb=r.scoreBreakdown||{valuation:0,health:0,growth:0};
+  const scoreBars=`
+    <div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:10px;color:#888;margin-bottom:3px;"><span>Valuation</span><span class="mono">${sb.valuation}/35</span></div><div style="height:5px;background:#1e2230;border-radius:3px;"><div style="height:100%;width:${(sb.valuation/35*100)}%;background:#e8a020;border-radius:3px;"></div></div></div>
+    <div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:10px;color:#888;margin-bottom:3px;"><span>Financial Health</span><span class="mono">${sb.health}/35</span></div><div style="height:5px;background:#1e2230;border-radius:3px;"><div style="height:100%;width:${(sb.health/35*100)}%;background:#3db87a;border-radius:3px;"></div></div></div>
+    <div><div style="display:flex;justify-content:space-between;font-size:10px;color:#888;margin-bottom:3px;"><span>Growth</span><span class="mono">${sb.growth}/30</span></div><div style="height:5px;background:#1e2230;border-radius:3px;"><div style="height:100%;width:${(sb.growth/30*100)}%;background:#4a9eff;border-radius:3px;"></div></div></div>`;
+  const quarterly=(r.quarterly||[]).map(q=>`<tr style="border-top:0.5px solid rgba(255,255,255,0.06);"><td style="padding:8px 6px;font-family:'Space Mono',monospace;font-size:11px;">${q.q}</td><td style="padding:8px 6px;font-family:'Space Mono',monospace;font-size:11px;text-align:right;">${q.rev}</td><td style="padding:8px 6px;font-family:'Space Mono',monospace;font-size:11px;text-align:right;">${q.eps}</td><td style="padding:8px 6px;font-family:'Space Mono',monospace;font-size:11px;text-align:right;color:#3db87a;">${q.change}</td></tr>`).join('');
+  const catalysts=(r.catalysts||[]).map(c=>`<div style="font-size:11px;color:#bbb;padding:5px 0;display:flex;gap:6px;"><span style="color:#3db87a;">▲</span>${c}</div>`).join('');
+  const risks=(r.risks||[]).map(c=>`<div style="font-size:11px;color:#bbb;padding:5px 0;display:flex;gap:6px;"><span style="color:#e05252;">▼</span>${c}</div>`).join('');
+ 
+  const reportHTML=`
+  <div style="background:#08090d;color:#f0ece0;font-family:'Inter',sans-serif;">
+    <!-- header bar -->
+    <div style="position:sticky;top:0;background:#08090d;border-bottom:0.5px solid rgba(255,255,255,0.08);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;z-index:5;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:36px;height:36px;border-radius:8px;background:#11131a;border:0.5px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-weight:700;color:#e8a020;">${r.ticker.slice(0,3)}</div>
+        <div><div style="font-size:14px;font-weight:700;">${r.ticker}</div><div style="font-size:10px;color:#888;">${r.name}</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button onclick="copyReport()" style="background:#11131a;border:0.5px solid rgba(255,255,255,0.1);color:#888;border-radius:7px;padding:7px 10px;font-size:11px;cursor:pointer;">📋 Copy</button>
+        <button onclick="closeModal()" style="background:#11131a;border:0.5px solid rgba(255,255,255,0.1);color:#888;border-radius:7px;width:30px;height:30px;cursor:pointer;font-size:14px;">✕</button>
+      </div>
+    </div>
+ 
+    <div id="report-content" style="padding:16px;">
+      <!-- PAGE 1 -->
+      <div style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:2px;margin-bottom:14px;">RISK SCORE REPORT · PAGE 1/2</div>
+ 
+      <!-- price + rating + gauge -->
+      <div style="display:flex;align-items:center;justify-content:space-between;background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px;margin-bottom:14px;">
+        <div>
+          <div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;">${r.price}</div>
+          <div style="display:inline-block;margin-top:6px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:${rc};border:1px solid ${rc};padding:2px 10px;border-radius:20px;">${r.rating}</div>
+        </div>
+        ${gaugeSVG(r.riskScore||50)}
+      </div>
+ 
+      <!-- KPI strip -->
+      <div style="display:flex;background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;margin-bottom:14px;overflow:hidden;">${kpiStrip}</div>
+ 
+      <!-- price chart -->
+      <div style="background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px;margin-bottom:16px;">
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:#888;letter-spacing:1px;margin-bottom:10px;">12-MONTH PRICE</div>
+        ${priceChartSVG(r.priceChart,r.chartMarkers)}
+      </div>
+ 
+      <!-- valuation -->
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:8px;">VALUATION</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">${cardGrid(r.valuation||[])}</div>
+ 
+      <!-- financial health -->
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:8px;">FINANCIAL HEALTH</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">${cardGrid(r.financialHealth||[])}</div>
+ 
+      <!-- growth -->
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:8px;">GROWTH</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">${cardGrid(r.growth||[])}</div>
+ 
+      <!-- score breakdown -->
+      <div style="background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px;margin-bottom:20px;">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:12px;">SCORE BREAKDOWN (35/35/30)</div>
+        ${scoreBars}
+      </div>
+ 
+      <!-- PAGE 2 -->
+      <div style="border-top:1px dashed rgba(255,255,255,0.1);padding-top:16px;">
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:2px;margin-bottom:14px;">RISK SCORE REPORT · PAGE 2/2</div>
+ 
+        <!-- quarterly table -->
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:8px;">QUARTERLY TREND</div>
+        <div style="background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;padding:8px 12px;margin-bottom:16px;">
+          <table style="width:100%;border-collapse:collapse;">
+            <tr style="color:#666;font-size:9px;font-family:'Space Mono',monospace;"><td style="padding:6px 6px;">QUARTER</td><td style="padding:6px 6px;text-align:right;">REVENUE</td><td style="padding:6px 6px;text-align:right;">EPS</td><td style="padding:6px 6px;text-align:right;">YOY</td></tr>
+            ${quarterly}
+          </table>
+        </div>
+ 
+        <!-- earnings update -->
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:8px;">LATEST EARNINGS</div>
+        <div style="background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px;font-size:12px;color:#bbb;line-height:1.6;margin-bottom:16px;">${r.earningsUpdate||'—'}</div>
+ 
+        <!-- catalysts vs risks -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+          <div style="background:#11131a;border:0.5px solid rgba(61,184,122,0.2);border-radius:10px;padding:12px;">
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:#3db87a;letter-spacing:1px;margin-bottom:6px;">CATALYSTS</div>${catalysts}
+          </div>
+          <div style="background:#11131a;border:0.5px solid rgba(224,82,82,0.2);border-radius:10px;padding:12px;">
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:#e05252;letter-spacing:1px;margin-bottom:6px;">RISKS</div>${risks}
+          </div>
+        </div>
+ 
+        <!-- bottom line -->
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:8px;">BOTTOM LINE</div>
+        <div style="background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px;margin-bottom:20px;">
+          <div style="height:6px;background:#1e2230;border-radius:3px;margin-bottom:12px;position:relative;">
+            <div style="height:100%;width:${r.riskScore||50}%;background:${rc};border-radius:3px;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span style="font-size:11px;color:#888;">Rating</span>
+            <span style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:${rc};">${r.rating}</span>
+          </div>
+          <div style="font-size:12px;color:#bbb;line-height:1.6;">${r.bottomLine||''}</div>
+        </div>
+ 
+        <div style="font-size:9px;color:#444;text-align:center;line-height:1.5;padding-bottom:10px;">AI-generated analysis for informational purposes only. Not financial advice. Figures are estimates, not live market data.</div>
+      </div>
+    </div>
+  </div>`;
+ 
+  document.getElementById('modals').innerHTML=`
+    <div class="modal-bg" style="align-items:stretch;" onclick="closeModal(event)">
+      <div onclick="event.stopPropagation()" style="background:#08090d;width:100%;max-width:430px;height:100%;overflow-y:auto;">${reportHTML}</div>
+    </div>`;
+  window._lastReport=r;
+}
+ 
+function copyReport(){
+  const r=window._lastReport;if(!r)return;
+  const txt=`${r.ticker} — ${r.name}\nPrice: ${r.price} | Rating: ${r.rating} | Risk Score: ${r.riskScore}/100\n\nVALUATION:\n${(r.valuation||[]).map(c=>`- ${c.metric}: ${c.value} (${c.note})`).join('\n')}\n\nFINANCIAL HEALTH:\n${(r.financialHealth||[]).map(c=>`- ${c.metric}: ${c.value} (${c.note})`).join('\n')}\n\nGROWTH:\n${(r.growth||[]).map(c=>`- ${c.metric}: ${c.value} (${c.note})`).join('\n')}\n\nCATALYSTS: ${(r.catalysts||[]).join(', ')}\nRISKS: ${(r.risks||[]).join(', ')}\n\nBOTTOM LINE: ${r.bottomLine}\n\n(AI-generated, not financial advice)`;
+  navigator.clipboard.writeText(txt).then(()=>{
+    const btn=event.target;const orig=btn.textContent;btn.textContent='✓ Copied';setTimeout(()=>btn.textContent=orig,1500);
+  }).catch(()=>{});
+}
  
 /* ── MARKETS ── */
 function buildMarkets(){
