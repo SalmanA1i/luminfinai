@@ -243,10 +243,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 <body>
 <div id="root">
  
+<!-- ═══ AUTH (LOGIN / SIGNUP) ═══ -->
+<div id="auth" style="position:fixed;inset:0;background:var(--bg);z-index:120;display:flex;flex-direction:column;align-items:center;padding:calc(var(--safe-top)+60px) 24px calc(var(--safe-bottom)+24px);max-width:430px;margin:0 auto;left:50%;transform:translateX(-50%);width:100%;">
+  <div class="ob-logo" style="font-size:16px;"><span class="ob-dot"></span>LUMINFIN</div>
+  <div class="ob-tag" style="margin-bottom:36px;">AI-powered investing for global markets.</div>
+  <div class="ob-card" id="auth-card" style="flex:none;max-height:none;"></div>
+</div>
+ 
 <!-- ═══ ONBOARDING ═══ -->
-<div id="ob">
+<div id="ob" style="display:none;">
   <div class="ob-logo"><span class="ob-dot"></span>LUMINFIN</div>
-  <div class="ob-tag">AI-powered investing, built for Pakistan.</div>
+  <div class="ob-tag">AI-powered investing, built for you.</div>
   <div class="ob-pbar"><div class="ob-pbar-bg"><div class="ob-pbar-fill" id="ob-fill" style="width:16%"></div></div></div>
   <div class="ob-card" id="ob-card"></div>
 </div>
@@ -304,7 +311,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 <div id="modals"></div>
  
 <script>
-const S={step:0,P:{name:'',age:'',occupation:'',risk:50,knowledge:'',amount:'',sectors:[]},msgs:[],loading:false,tab:'home',portfolio:null,pfBuilding:false};
+const S={step:0,P:{name:'',age:'',occupation:'',risk:50,knowledge:'',amount:'',sectors:[],domain:'',email:''},msgs:[],loading:false,tab:'home',portfolio:null,pfBuilding:false};
+const DOMAINS=[
+  {id:'tech',emoji:'💻',name:'Tech / IT'},
+  {id:'finance',emoji:'🏦',name:'Finance / Banking'},
+  {id:'medical',emoji:'⚕️',name:'Medical / Health'},
+  {id:'engineering',emoji:'⚙️',name:'Engineering'},
+  {id:'business',emoji:'📊',name:'Business / Trade'},
+  {id:'student',emoji:'🎓',name:'Student'},
+  {id:'energy',emoji:'⚡',name:'Energy / Oil'},
+  {id:'other',emoji:'🌐',name:'Other'}
+];
  
 const SECTORS=[
   {id:'banks',emoji:'🏦',name:'Banks',desc:'HBL, UBL, MCB'},
@@ -342,12 +359,44 @@ const PSX=[
   {ticker:'EFERT',name:'Engro Fertilizers',price:'198.50',chg:'+1.40',pct:'+0.71%',up:true,vol:'1.02M',sector:'fertilizer'},
 ];
 const GLOBAL=[
+  // United States
   {ticker:'AAPL',name:'Apple Inc.',price:'$189.42',chg:'+1.24',pct:'+0.66%',up:true,vol:'52M',sector:'intl',country:'US'},
   {ticker:'NVDA',name:'NVIDIA Corp.',price:'$875.40',chg:'+36.80',pct:'+4.39%',up:true,vol:'48M',sector:'intl',country:'US'},
   {ticker:'MSFT',name:'Microsoft',price:'$415.30',chg:'+3.18',pct:'+0.77%',up:true,vol:'22M',sector:'intl',country:'US'},
+  {ticker:'AMZN',name:'Amazon.com',price:'$184.70',chg:'+2.10',pct:'+1.15%',up:true,vol:'38M',sector:'intl',country:'US'},
+  {ticker:'TSLA',name:'Tesla Inc.',price:'$248.50',chg:'-3.20',pct:'-1.27%',up:false,vol:'95M',sector:'intl',country:'US'},
+  {ticker:'GOOGL',name:'Alphabet',price:'$178.54',chg:'-0.52',pct:'-0.29%',up:false,vol:'24M',sector:'intl',country:'US'},
+  {ticker:'META',name:'Meta Platforms',price:'$527.80',chg:'+10.92',pct:'+2.11%',up:true,vol:'18M',sector:'intl',country:'US'},
+  {ticker:'JPM',name:'JPMorgan Chase',price:'$198.72',chg:'+1.44',pct:'+0.73%',up:true,vol:'9M',sector:'intl',country:'US'},
+  // Europe
+  {ticker:'ASML',name:'ASML Holding',price:'€892.40',chg:'+12.30',pct:'+1.40%',up:true,vol:'1.2M',sector:'intl',country:'EU'},
+  {ticker:'MC',name:'LVMH',price:'€682.10',chg:'-4.50',pct:'-0.66%',up:false,vol:'0.4M',sector:'intl',country:'EU'},
+  {ticker:'SAP',name:'SAP SE',price:'€178.90',chg:'+2.20',pct:'+1.24%',up:true,vol:'1.8M',sector:'intl',country:'EU'},
+  {ticker:'NESN',name:'Nestlé',price:'CHF 92.40',chg:'+0.60',pct:'+0.65%',up:true,vol:'3.1M',sector:'intl',country:'EU'},
+  {ticker:'SIE',name:'Siemens AG',price:'€176.30',chg:'+1.80',pct:'+1.03%',up:true,vol:'1.5M',sector:'intl',country:'EU'},
+  // Hong Kong
+  {ticker:'0700.HK',name:'Tencent Holdings',price:'HK$378.20',chg:'+5.40',pct:'+1.45%',up:true,vol:'18M',sector:'intl',country:'HK'},
+  {ticker:'9988.HK',name:'Alibaba Group',price:'HK$78.65',chg:'-1.10',pct:'-1.38%',up:false,vol:'42M',sector:'intl',country:'HK'},
+  {ticker:'3690.HK',name:'Meituan',price:'HK$118.40',chg:'+2.60',pct:'+2.24%',up:true,vol:'15M',sector:'intl',country:'HK'},
+  {ticker:'1810.HK',name:'Xiaomi Corp',price:'HK$18.92',chg:'+0.34',pct:'+1.83%',up:true,vol:'88M',sector:'intl',country:'HK'},
+  // Singapore
+  {ticker:'D05.SI',name:'DBS Group',price:'S$36.80',chg:'+0.42',pct:'+1.15%',up:true,vol:'4.2M',sector:'intl',country:'SG'},
+  {ticker:'O39.SI',name:'OCBC Bank',price:'S$14.62',chg:'+0.18',pct:'+1.25%',up:true,vol:'8.1M',sector:'intl',country:'SG'},
+  {ticker:'Z74.SI',name:'Singtel',price:'S$3.18',chg:'-0.02',pct:'-0.62%',up:false,vol:'22M',sector:'intl',country:'SG'},
+  {ticker:'U11.SI',name:'UOB',price:'S$32.10',chg:'+0.28',pct:'+0.88%',up:true,vol:'3.4M',sector:'intl',country:'SG'},
+  // Global / Crypto / Commodities
   {ticker:'BTC',name:'Bitcoin',price:'$67,420',chg:'+2,210',pct:'+3.39%',up:true,vol:'—',sector:'crypto',country:'GLOBAL'},
   {ticker:'ETH',name:'Ethereum',price:'$3,842',chg:'+95',pct:'+2.54%',up:true,vol:'—',sector:'crypto',country:'GLOBAL'},
   {ticker:'GOLD',name:'Gold (oz)',price:'$2,400',chg:'+18',pct:'+0.76%',up:true,vol:'—',sector:'commodities',country:'GLOBAL'},
+];
+const IPOS=[
+  {name:'SpaceX',sector:'Aerospace',date:'Expected 2026',note:'Starlink spin-off speculation continues; most anticipated private listing.',emoji:'🚀',country:'US'},
+  {name:'Stripe',sector:'Fintech',date:'Expected 2026',note:'Payments giant valued ~$65B; repeatedly rumored for IPO.',emoji:'💳',country:'US'},
+  {name:'Databricks',sector:'AI / Data',date:'Expected 2026',note:'Data + AI platform, last valued at $43B in late funding round.',emoji:'🧠',country:'US'},
+  {name:'Shein',sector:'E-commerce',date:'Pending approval',date2:true,note:'Fast-fashion retailer eyeing London listing after US hurdles.',emoji:'🛍️',country:'EU'},
+  {name:'Revolut',sector:'Fintech',date:'Expected 2026',note:'UK neobank valued at $45B; preparing for eventual public debut.',emoji:'🏦',country:'EU'},
+  {name:'Klarna',sector:'BNPL Fintech',date:'2026',note:'Buy-now-pay-later leader filed confidentially for US IPO.',emoji:'💰',country:'EU'},
+  {name:'Discord',sector:'Social / Tech',date:'Rumored 2026',note:'Chat platform with 200M+ users exploring public markets.',emoji:'💬',country:'US'},
 ];
 const ALL_STOCKS=[...PSX,...GLOBAL];
  
@@ -366,32 +415,44 @@ const ini=n=>n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()||'U';
 const fmt=t=>t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/^[•\-] /gm,'&bull; ').replace(/\n/g,'<br>');
  
 /* ── ONBOARDING ── */
-const STEPS=['Tell us about yourself','Your occupation','Risk appetite','Finance knowledge','Investment amount','Your interests'];
-const TOTAL=6;
+const STEPS=['Your details','Your occupation','Which field are you in?','Risk appetite','Finance knowledge','Investment amount','Your interests'];
+const TOTAL=7;
  
 function renderOB(){
   document.getElementById('ob-fill').style.width=((S.step+1)/TOTAL*100)+'%';
-  document.getElementById('ob-card').innerHTML=`<div class="ob-step">STEP ${S.step+1} OF ${TOTAL}</div><div class="ob-title">${STEPS[S.step]}</div>${[s0,s1,s2,s3,s4,s5][S.step]()}`;
-  if(S.step===2){const r=document.getElementById('fr');if(r)r.addEventListener('input',function(){const v=parseInt(this.value);S.P.risk=v;this.style.setProperty('--pct',v+'%');const d=document.getElementById('rv'),l=document.getElementById('rl');if(d)d.textContent=v;if(l)l.textContent=RL(v);});}
+  document.getElementById('ob-card').innerHTML=`<div class="ob-step">STEP ${S.step+1} OF ${TOTAL}</div><div class="ob-title">${STEPS[S.step]}</div>${[s0,s1,sDomain,s2,s3,s4,s5][S.step]()}`;
+  if(S.step===3){const r=document.getElementById('fr');if(r)r.addEventListener('input',function(){const v=parseInt(this.value);S.P.risk=v;this.style.setProperty('--pct',v+'%');const d=document.getElementById('rv'),l=document.getElementById('rl');if(d)d.textContent=v;if(l)l.textContent=RL(v);});}
 }
-function s0(){return`<div class="fgroup"><div class="field"><div class="flbl">Your name</div><input class="finput" id="fn" type="text" placeholder="e.g. Ahmed Khan" value="${S.P.name}"/></div><div class="field"><div class="flbl">Your age</div><input class="finput" id="fa" type="number" placeholder="e.g. 25" min="13" max="100" value="${S.P.age}"/></div></div><button class="ob-btn" onclick="obNext()">Continue →</button>`;}
+function s0(){return`<div style="font-size:13px;color:var(--text2);margin-bottom:4px;">Welcome, ${S.P.name.split(' ')[0]}! Just a few quick questions.</div><div class="field"><div class="flbl">Your age</div><input class="finput" id="fa" type="number" placeholder="e.g. 25" min="13" max="100" value="${S.P.age}"/></div><button class="ob-btn" onclick="obNext()">Continue →</button>`;}
 function s1(){return`<div class="field"><div class="flbl">Occupation</div><input class="finput" id="fo" type="text" placeholder="e.g. Engineer, Business Owner" value="${S.P.occupation}"/></div><button class="ob-btn" onclick="obNext()">Continue →</button>`;}
+function sDomain(){return`<div style="font-size:13px;color:var(--text2);margin-bottom:4px;">We'll suggest stocks relevant to your field.</div><div class="sec-grid" id="domain-grid" style="overflow-y:auto;flex:1;">${DOMAINS.map(d=>`<div class="sec-card ${S.P.domain===d.id?'sel':''}" data-id="${d.id}" onclick="selDomain('${d.id}')"><div class="sec-emo" style="pointer-events:none;">${d.emoji}</div><div class="sec-name" style="pointer-events:none;">${d.name}</div></div>`).join('')}</div><button class="ob-btn" id="dbtn" onclick="obNext()" ${!S.P.domain?'disabled':''}>Continue →</button>`;}
 function s2(){return`<div style="text-align:center;padding:6px 0"><div class="risk-num" id="rv">${S.P.risk}</div><div class="risk-lbl" id="rl">${RL(S.P.risk)}</div></div><input type="range" id="fr" min="0" max="100" step="1" value="${S.P.risk}" style="--pct:${S.P.risk}%"/><div class="slider-ends"><span>SAFE</span><span>AGGRESSIVE</span></div><button class="ob-btn" onclick="obNext()">Continue →</button>`;}
 function s3(){return`<div class="kopts">${KO.map(k=>`<div class="kopt ${S.P.knowledge===k.id?'sel':''}" onclick="selK('${k.id}')"><div class="krad"></div><div><div class="kt">${k.title}</div><div class="kd">${k.desc}</div></div></div>`).join('')}</div><button class="ob-btn" id="kbtn" onclick="obNext()" ${!S.P.knowledge?'disabled':''}>Continue →</button>`;}
 function s4(){return`<div><div class="flbl" style="margin-bottom:10px;">How much do you want to invest?</div><div class="amt-chips">${AMOUNTS.map(a=>`<div class="amt-chip ${S.P.amount===a?'sel':''}" onclick="selAmt('${a}')">${a}</div>`).join('')}</div></div><button class="ob-btn" id="abtn" onclick="obNext()" ${!S.P.amount?'disabled':''}>Continue →</button>`;}
-function s5(){return`<div class="sec-grid" style="overflow-y:auto;flex:1;">${SECTORS.map(s=>`<div class="sec-card ${S.P.sectors.includes(s.id)?'sel':''}" onclick="toggleSec('${s.id}')"><div class="sec-emo">${s.emoji}</div><div class="sec-name">${s.name}</div><div class="sec-desc">${s.desc}</div></div>`).join('')}</div><button class="ob-btn" id="lbtn" onclick="launch()" ${S.P.sectors.length===0?'disabled':''}>Build My Portfolio →</button>`;}
+function s5(){return`<div class="sec-grid" id="sector-grid" style="overflow-y:auto;flex:1;">${SECTORS.map(s=>`<div class="sec-card ${S.P.sectors.includes(s.id)?'sel':''}" data-id="${s.id}" onclick="toggleSec('${s.id}')"><div class="sec-emo" style="pointer-events:none;">${s.emoji}</div><div class="sec-name" style="pointer-events:none;">${s.name}</div><div class="sec-desc" style="pointer-events:none;">${s.desc}</div></div>`).join('')}</div><button class="ob-btn" id="lbtn" onclick="launch()" ${S.P.sectors.length===0?'disabled':''}>Build My Portfolio →</button>`;}
  
 function obNext(){
-  if(S.step===0){const n=document.getElementById('fn')?.value.trim(),a=document.getElementById('fa')?.value.trim();if(!n||!a||isNaN(a)||a<13)return;S.P.name=n;S.P.age=a;}
+  if(S.step===0){const a=document.getElementById('fa')?.value.trim();if(!a||isNaN(a)||a<13)return;S.P.age=a;}
   else if(S.step===1){const o=document.getElementById('fo')?.value.trim();if(!o)return;S.P.occupation=o;}
-  else if(S.step===2){S.P.risk=parseInt(document.getElementById('fr')?.value||50);}
-  else if(S.step===3){if(!S.P.knowledge)return;}
-  else if(S.step===4){if(!S.P.amount)return;}
+  else if(S.step===2){if(!S.P.domain)return;}
+  else if(S.step===3){S.P.risk=parseInt(document.getElementById('fr')?.value||50);}
+  else if(S.step===4){if(!S.P.knowledge)return;}
+  else if(S.step===5){if(!S.P.amount)return;}
   S.step++;renderOB();
+}
+function selDomain(id){
+  S.P.domain=id;
+  document.querySelectorAll('#domain-grid .sec-card').forEach(el=>el.classList.toggle('sel',el.getAttribute('data-id')===id));
+  const b=document.getElementById('dbtn');if(b)b.disabled=false;
 }
 function selK(id){S.P.knowledge=id;document.querySelectorAll('.kopt').forEach(el=>el.classList.toggle('sel',el.getAttribute('onclick').includes(`'${id}'`)));const b=document.getElementById('kbtn');if(b)b.disabled=false;}
 function selAmt(a){S.P.amount=a;document.querySelectorAll('.amt-chip').forEach(el=>el.classList.toggle('sel',el.textContent===a));const b=document.getElementById('abtn');if(b)b.disabled=false;}
-function toggleSec(id){const i=S.P.sectors.indexOf(id);if(i>-1)S.P.sectors.splice(i,1);else S.P.sectors.push(id);document.querySelectorAll('.sec-card').forEach(el=>{const m=el.getAttribute('onclick').match(/toggleSec\('([^']+)'\)/);if(m)el.classList.toggle('sel',S.P.sectors.includes(m[1]));});const b=document.getElementById('lbtn');if(b)b.disabled=S.P.sectors.length===0;}
+function toggleSec(id){
+  const i=S.P.sectors.indexOf(id);
+  if(i>-1)S.P.sectors.splice(i,1);else S.P.sectors.push(id);
+  document.querySelectorAll('#sector-grid .sec-card').forEach(el=>el.classList.toggle('sel',S.P.sectors.includes(el.getAttribute('data-id'))));
+  const b=document.getElementById('lbtn');if(b)b.disabled=S.P.sectors.length===0;
+}
  
 function launch(){
   if(S.P.sectors.length===0)return;
@@ -436,7 +497,7 @@ async function generatePortfolio(extra){
   S.pfBuilding=true;buildHome();
   try{
     const prompt=`You are a portfolio manager for the Pakistan Stock Exchange (PSX). Build an investment portfolio for this investor:
-Name: ${S.P.name}, Age: ${S.P.age}, Occupation: ${S.P.occupation}, Risk: ${S.P.risk}/100 (${RL(S.P.risk)}), Knowledge: ${S.P.knowledge}, Amount: ${S.P.amount}, Interested sectors: ${S.P.sectors.join(', ')}.
+Name: ${S.P.name}, Age: ${S.P.age}, Occupation: ${S.P.occupation}, Professional field: ${S.P.domain}, Risk: ${S.P.risk}/100 (${RL(S.P.risk)}), Knowledge: ${S.P.knowledge}, Amount: ${S.P.amount}, Interested sectors: ${S.P.sectors.join(', ')}. Lean toward stocks relevant to their professional field (${S.P.domain}) where sensible.
 ${extra?'IMPORTANT custom request from user: '+extra:''}
  
 Pick 4-6 real holdings (prefer PSX tickers like OGDC, PPL, HBL, UBL, LUCK, ENGRO, SYS, TRG, FFC; include some global like AAPL/NVDA/BTC/GOLD only if they chose Global/Crypto/Commodities). Respond ONLY with valid JSON, no markdown, in this exact format:
@@ -466,20 +527,101 @@ function fallbackPortfolio(){
 function buildHome(){
   const el=document.getElementById('sc-home');
   el.innerHTML=`
-    <div class="index-bar">
+    <div style="padding:12px 16px 0;">
+      <div style="position:relative;">
+        <input id="home-search" class="finput" style="padding-left:38px;font-size:14px;" placeholder="Search any stock — e.g. Tesla, SpaceX, OGDC" onkeydown="if(event.key==='Enter')doSearch()"/>
+        <svg style="position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+    </div>
+    <div class="index-bar" style="margin-top:12px;">
       <div class="index-left"><div class="idx-name">KSE-100 INDEX</div><div class="idx-val">170,330.56</div></div>
       <div class="index-right"><div class="idx-chg up">▲ 1,376.86</div><div class="idx-pct up">+0.81%</div></div>
     </div>
     <div class="sec-hdr"><span class="sh">Your AI Portfolio</span></div>
     <div id="pf-container">${pfHTML()}</div>
-    <div class="sec-hdr"><span class="sh">PSX Market</span><span class="sec-more" onclick="goTab('markets')">See all →</span></div>
-    <div class="mkt-list">${PSX.slice(0,4).map(s=>mktRow(s)).join('')}</div>
+    <div class="sec-hdr"><span class="sh">Markets</span><span class="sec-more" onclick="goTab('markets')">See all →</span></div>
+    <div class="mkt-list">${homeMarketStocks().map(s=>mktRow(s)).join('')}</div>
+    <div class="sec-hdr"><span class="sh">🚀 Upcoming IPOs</span></div>
+    <div id="ipo-container">${ipoHTML()}</div>
     <div class="sec-hdr"><span class="sh">How Your Portfolio Is Affected</span></div>
     <div id="impact-container">${impactHTML()}</div>
     <div class="sec-hdr"><span class="sh">Suggestions</span></div>
     <div id="sugg-container">${suggHTML()}</div>
   `;
 }
+ 
+function homeMarketStocks(){
+  const pakSectors=['banks','energy','tech','cement','fertilizer'];
+  const wantsPak=S.P.sectors.some(s=>pakSectors.includes(s));
+  const wantsGlobal=S.P.sectors.includes('intl');
+  const wantsCrypto=S.P.sectors.includes('crypto')||S.P.sectors.includes('commodities');
+  let list=[];
+  if(wantsPak)list=list.concat(PSX);
+  if(wantsGlobal)list=list.concat(GLOBAL.filter(s=>s.sector==='intl'));
+  if(wantsCrypto)list=list.concat(GLOBAL.filter(s=>s.sector==='crypto'||s.sector==='commodities'));
+  if(list.length===0)list=PSX;
+  return list.slice(0,5);
+}
+ 
+function ipoHTML(){
+  return IPOS.map(ipo=>`<div class="impact-card" style="cursor:pointer;" onclick="showIPO('${encodeURIComponent(ipo.name)}')"><div class="impact-icon" style="background:var(--gold-dim);border:0.5px solid var(--border2);">${ipo.emoji}</div><div class="impact-body"><div style="display:flex;justify-content:space-between;align-items:center;"><div class="impact-title">${ipo.name}</div><div class="mono" style="font-size:9px;color:var(--gold);">${ipo.date}</div></div><div class="impact-text">${ipo.sector} · ${ipo.note}</div></div></div>`).join('');
+}
+ 
+function showIPO(encName){
+  const name=decodeURIComponent(encName);
+  const ipo=IPOS.find(i=>i.name===name);if(!ipo)return;
+  document.getElementById('modals').innerHTML=`
+    <div class="modal-bg" onclick="closeModal(event)">
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px;">
+          <div style="width:44px;height:44px;border-radius:10px;background:var(--bg3);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;">${ipo.emoji}</div>
+          <div><div style="font-size:16px;font-weight:600;">${ipo.name}</div><div class="mono" style="font-size:10px;color:var(--gold);margin-top:2px;">${ipo.sector} · ${ipo.date}</div></div>
+        </div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:14px;">${ipo.note}</div>
+        <button class="ob-btn" style="margin-top:0;" onclick="askIPO('${encName}');closeModal()">Ask Advisor about ${ipo.name} →</button>
+      </div>
+    </div>`;
+}
+function askIPO(encName){const name=decodeURIComponent(encName);goTab('chat');const ta=document.getElementById('cin');if(ta)ta.value=`Tell me about the upcoming ${name} IPO — should I be interested when it goes public?`;setTimeout(()=>sendMsg(),300);}
+ 
+/* ── UNIVERSAL SEARCH ── */
+async function doSearch(){
+  const q=document.getElementById('home-search')?.value.trim();
+  if(!q)return;
+  // Check fixed list first
+  const match=ALL_STOCKS.find(s=>s.ticker.toLowerCase()===q.toLowerCase()||s.name.toLowerCase().includes(q.toLowerCase()));
+  if(match){showHolding(match.ticker);return;}
+  // AI fallback
+  document.getElementById('modals').innerHTML=`<div class="modal-bg" style="align-items:center;"><div style="text-align:center;color:var(--text2);"><div class="spinner"></div><div class="mono" style="font-size:11px;letter-spacing:1px;margin-top:14px;">SEARCHING "${q.toUpperCase()}"…</div></div></div>`;
+  try{
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a JSON-only stock data API. Output only valid JSON, no markdown.',messages:[{role:'user',content:`Provide data for "${q}". If it is a private company not yet public (like SpaceX), set "public":false. Respond ONLY with JSON: {"ticker":"TSLA","name":"Tesla Inc.","price":"$248.50","exchange":"NASDAQ","public":true,"about":"2-sentence description","sector":"Automotive"}`}]})});
+    const d=await res.json();
+    const r=extractJSON(d.content?.find(b=>b.type==='text')?.text||'');
+    if(!r)throw new Error('parse');
+    showSearchResult(r,q);
+  }catch(e){
+    document.getElementById('modals').innerHTML=`<div class="modal-bg" onclick="closeModal(event)"><div class="modal-box" onclick="event.stopPropagation()"><div class="modal-handle"></div><div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">Couldn't find "${q}". Try another name or ticker.</div></div></div>`;
+  }
+}
+ 
+function showSearchResult(r,q){
+  const isPublic=r.public!==false;
+  document.getElementById('modals').innerHTML=`
+    <div class="modal-bg" onclick="closeModal(event)">
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px;">
+          <div style="width:44px;height:44px;border-radius:10px;background:var(--bg3);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-weight:700;color:var(--gold);">${(r.ticker||r.name||'?').slice(0,3)}</div>
+          <div><div style="font-size:16px;font-weight:600;">${r.name||q}</div><div class="mono" style="font-size:10px;color:var(--gold);margin-top:2px;">${r.ticker||'PRIVATE'} ${r.exchange?'· '+r.exchange:''}</div></div>
+        </div>
+        ${isPublic?`<div style="display:flex;gap:18px;margin-bottom:14px;"><div><div class="mono" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">PRICE</div><div class="mono" style="font-size:18px;font-weight:700;">${r.price||'—'}</div></div><div><div class="mono" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">SECTOR</div><div style="font-size:13px;font-weight:600;margin-top:3px;">${r.sector||'—'}</div></div></div>`:`<div style="background:var(--gold-dim);border:0.5px solid var(--border2);border-radius:10px;padding:11px;margin-bottom:14px;"><div class="mono" style="font-size:9px;color:var(--gold);letter-spacing:1px;margin-bottom:4px;">⚠ NOT YET PUBLIC</div><div style="font-size:12px;color:var(--text2);">This company is privately held and not currently traded on public markets.</div></div>`}
+        <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:14px;">${r.about||''}</div>
+        <button class="ob-btn" style="margin-top:0;" onclick="askSearchStock('${encodeURIComponent(r.name||q)}');closeModal()">Ask Advisor →</button>
+      </div>
+    </div>`;
+}
+function askSearchStock(encName){const name=decodeURIComponent(encName);goTab('chat');const ta=document.getElementById('cin');if(ta)ta.value=`Tell me about ${name} as a potential investment.`;setTimeout(()=>sendMsg(),300);}
  
 function pfHTML(){
   if(S.pfBuilding)return`<div class="pf-card"><div class="pf-building"><div class="spinner"></div><div class="mono">BUILDING YOUR PORTFOLIO…</div></div></div>`;
@@ -780,9 +922,15 @@ function copyReport(){
  
 /* ── MARKETS ── */
 function buildMarkets(){
-  const tabs=['PSX Main','Top Gainers','Top Losers','Global'];
+  const tabs=['🇵🇰 PSX','🇺🇸 US','🇪🇺 Europe','🇭🇰 HK','🇸🇬 Singapore','Gainers','Crypto'];
   document.getElementById('sc-markets').innerHTML=`
-    <div class="index-bar">
+    <div style="padding:12px 16px 0;">
+      <div style="position:relative;">
+        <input id="mkt-search" class="finput" style="padding-left:38px;font-size:14px;" placeholder="Search any stock worldwide" onkeydown="if(event.key==='Enter'){document.getElementById('home-search')?.setAttribute('value',this.value);searchFrom(this.value)}"/>
+        <svg style="position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+    </div>
+    <div class="index-bar" style="margin-top:12px;">
       <div class="index-left"><div class="idx-name">KSE-100 INDEX</div><div class="idx-val">170,330.56</div></div>
       <div class="index-right"><div class="idx-chg up">▲ 1,376.86</div><div class="idx-pct up">+0.81%</div></div>
     </div>
@@ -790,14 +938,21 @@ function buildMarkets(){
     <div class="mkt-list" id="board-list">${PSX.map(s=>mktRow(s)).join('')}</div>`;
 }
  
+function searchFrom(q){if(!q)return;const el=document.getElementById('home-search')||{};el.value=q;doSearchWith(q);}
+async function doSearchWith(q){const tmp=document.createElement('input');tmp.id='home-search';tmp.value=q;tmp.style.display='none';document.body.appendChild(tmp);await doSearch();tmp.remove();}
+ 
 function mktRow(s){return`<div class="mkt-row" onclick="showHolding('${s.ticker}')"><div class="mkt-left"><div class="mkt-icon">${s.ticker.slice(0,3)}</div><div><div class="mkt-ticker">${s.ticker}</div><div class="mkt-name">${s.name}</div></div></div><div class="mkt-right"><div class="mkt-price">${s.price}</div><div class="mkt-chg ${s.up?'up':'dn'}">${s.up?'▲':'▼'} ${s.pct}</div><div class="mkt-vol">VOL ${s.vol}</div></div></div>`;}
  
 function filterBoard(el,f){
   document.querySelectorAll('.board-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
   let list=PSX;
-  if(f==='Top Gainers')list=[...PSX].filter(s=>s.up).sort((a,b)=>parseFloat(b.pct)-parseFloat(a.pct));
-  else if(f==='Top Losers')list=[...PSX].filter(s=>!s.up).sort((a,b)=>parseFloat(a.pct)-parseFloat(b.pct));
-  else if(f==='Global')list=GLOBAL;
+  if(f.includes('PSX'))list=PSX;
+  else if(f.includes('US'))list=GLOBAL.filter(s=>s.country==='US');
+  else if(f.includes('Europe'))list=GLOBAL.filter(s=>s.country==='EU');
+  else if(f.includes('HK'))list=GLOBAL.filter(s=>s.country==='HK');
+  else if(f.includes('Singapore'))list=GLOBAL.filter(s=>s.country==='SG');
+  else if(f==='Gainers')list=[...PSX,...GLOBAL].filter(s=>s.up).sort((a,b)=>parseFloat(b.pct)-parseFloat(a.pct));
+  else if(f==='Crypto')list=GLOBAL.filter(s=>s.sector==='crypto'||s.sector==='commodities');
   const c=document.getElementById('board-list');
   if(c)c.innerHTML=list.length>0?list.map(s=>mktRow(s)).join(''):`<div style="padding:28px;text-align:center;color:var(--muted);font-size:11px;" class="mono">NO STOCKS IN THIS BOARD.</div>`;
 }
@@ -855,7 +1010,7 @@ function sysprompt(){
   const secs=p.sectors.map(id=>SECTORS.find(s=>s.id===id)?.name).filter(Boolean).join(', ');
   let pf='';
   if(S.portfolio)pf=`\n\nUSER'S CURRENT PORTFOLIO (${p.amount}): ${S.portfolio.holdings.map(h=>`${h.ticker} ${h.alloc}%`).join(', ')}. Strategy: ${S.portfolio.strategy}`;
-  return`You are LuminFin, an elite AI investment advisor specializing in the Pakistan Stock Exchange (PSX) and global markets. You think like a top-tier banker/portfolio manager.\n\nUSER: ${p.name}, age ${p.age}, ${p.occupation}, risk ${p.risk}/100 (${RL(p.risk)}), ${km[p.knowledge]}, investing ${p.amount}, sectors: ${secs}${pf}\n\nRULES: Address as ${p.name.split(' ')[0]}. Reference their actual portfolio holdings when relevant. Prioritize PSX context (KSE-100, SBP rates, local tickers). Match language to knowledge level. Never guarantee returns. Be direct, specific, and concise — max 200 words.`;
+  return`You are LuminFin, an elite AI investment advisor covering the Pakistan Stock Exchange (PSX), US, European, Hong Kong and Singapore markets. You think like a top-tier banker/portfolio manager.\n\nUSER: ${p.name}, age ${p.age}, ${p.occupation}, professional field: ${p.domain}, risk ${p.risk}/100 (${RL(p.risk)}), ${km[p.knowledge]}, investing ${p.amount}, sectors: ${secs}${pf}\n\nRULES: Address as ${p.name.split(' ')[0]}. Reference their actual portfolio holdings when relevant. Cover both Pakistani (KSE-100, SBP) and global markets depending on the question. Where sensible, lean toward stocks relevant to their professional field (${p.domain}). Match language to knowledge level. Never guarantee returns. Be direct, specific, and concise — max 200 words.`;
 }
  
 function initChat(){
@@ -890,7 +1045,96 @@ async function sendMsg(){
  
 function closeModal(e){if(!e||e.target.classList.contains('modal-bg'))document.getElementById('modals').innerHTML='';}
  
-renderOB();
+/* ── AUTH (on-device accounts) ── */
+let authMode='signup';
+function renderAuth(){
+  const c=document.getElementById('auth-card');
+  if(authMode==='signup'){
+    c.innerHTML=`
+      <div class="ob-step">CREATE ACCOUNT</div>
+      <div class="ob-title" style="margin-bottom:4px;">Get started</div>
+      <div class="fgroup">
+        <div class="field"><div class="flbl">Full name</div><input class="finput" id="au-name" type="text" placeholder="e.g. Ahmed Khan"/></div>
+        <div class="field"><div class="flbl">Email</div><input class="finput" id="au-email" type="email" placeholder="you@example.com"/></div>
+        <div class="field"><div class="flbl">Password</div><input class="finput" id="au-pass" type="password" placeholder="Create a password"/></div>
+      </div>
+      <div id="au-err" style="color:var(--danger);font-size:12px;display:none;"></div>
+      <button class="ob-btn" onclick="doSignup()">Create Account →</button>
+      <div style="text-align:center;font-size:12px;color:var(--muted);margin-top:6px;">Already have an account? <span style="color:var(--gold);cursor:pointer;" onclick="authMode='login';renderAuth()">Log in</span></div>`;
+  }else{
+    c.innerHTML=`
+      <div class="ob-step">WELCOME BACK</div>
+      <div class="ob-title" style="margin-bottom:4px;">Log in</div>
+      <div class="fgroup">
+        <div class="field"><div class="flbl">Email</div><input class="finput" id="au-email" type="email" placeholder="you@example.com"/></div>
+        <div class="field"><div class="flbl">Password</div><input class="finput" id="au-pass" type="password" placeholder="Your password"/></div>
+      </div>
+      <div id="au-err" style="color:var(--danger);font-size:12px;display:none;"></div>
+      <button class="ob-btn" onclick="doLogin()">Log In →</button>
+      <div style="text-align:center;font-size:12px;color:var(--muted);margin-top:6px;">No account? <span style="color:var(--gold);cursor:pointer;" onclick="authMode='signup';renderAuth()">Sign up</span></div>`;
+  }
+}
+ 
+function getUsers(){try{return JSON.parse(localStorage.getItem('lf_users')||'{}');}catch(e){return{};}}
+function saveUsers(u){try{localStorage.setItem('lf_users',JSON.stringify(u));}catch(e){}}
+function authErr(msg){const e=document.getElementById('au-err');if(e){e.textContent=msg;e.style.display='block';}}
+ 
+function doSignup(){
+  const name=document.getElementById('au-name')?.value.trim();
+  const email=document.getElementById('au-email')?.value.trim().toLowerCase();
+  const pass=document.getElementById('au-pass')?.value;
+  if(!name||!email||!pass){authErr('Please fill in all fields.');return;}
+  if(!email.includes('@')){authErr('Enter a valid email.');return;}
+  if(pass.length<4){authErr('Password must be at least 4 characters.');return;}
+  const users=getUsers();
+  if(users[email]){authErr('An account with this email already exists.');return;}
+  users[email]={name,pass};saveUsers(users);
+  try{localStorage.setItem('lf_session',email);}catch(e){}
+  S.P.name=name;S.P.email=email;
+  startOnboarding();
+}
+ 
+function doLogin(){
+  const email=document.getElementById('au-email')?.value.trim().toLowerCase();
+  const pass=document.getElementById('au-pass')?.value;
+  if(!email||!pass){authErr('Enter your email and password.');return;}
+  const users=getUsers();
+  if(!users[email]||users[email].pass!==pass){authErr('Incorrect email or password.');return;}
+  try{localStorage.setItem('lf_session',email);}catch(e){}
+  S.P.name=users[email].name;S.P.email=email;
+  // Returning user with saved profile?
+  let saved=null;try{saved=JSON.parse(localStorage.getItem('lf_profile_'+email)||'null');}catch(e){}
+  if(saved&&saved.amount){S.P=saved;launch();}
+  else startOnboarding();
+}
+ 
+function startOnboarding(){
+  document.getElementById('auth').style.display='none';
+  document.getElementById('ob').style.display='flex';
+  S.step=0;renderOB();
+}
+ 
+// Save profile on launch
+const _origLaunch=launch;
+launch=function(){
+  if(S.P.sectors.length===0)return;
+  try{localStorage.setItem('lf_profile_'+S.P.email,JSON.stringify(S.P));}catch(e){}
+  _origLaunch();
+};
+ 
+/* ── INIT ── */
+(function init(){
+  renderAuth();
+  // Auto-login if session exists with a complete profile
+  let sess=null;try{sess=localStorage.getItem('lf_session');}catch(e){}
+  if(sess){
+    const users=getUsers();
+    if(users[sess]){
+      let saved=null;try{saved=JSON.parse(localStorage.getItem('lf_profile_'+sess)||'null');}catch(e){}
+      if(saved&&saved.amount){S.P=saved;document.getElementById('auth').style.display='none';launch();}
+    }
+  }
+})();
 if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));if(window.caches)caches.keys().then(ks=>ks.forEach(k=>caches.delete(k)));}
 </script>
 </body>
