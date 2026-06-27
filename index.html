@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -311,7 +310,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 <div id="modals"></div>
  
 <script>
-const S={step:0,P:{name:'',age:'',occupation:'',risk:50,knowledge:'',amount:'',sectors:[],domain:'',email:''},msgs:[],loading:false,tab:'home',portfolio:null,pfBuilding:false};
+const S={step:0,P:{name:'',age:'',occupation:'',risk:50,knowledge:'',amount:'',sectors:[],domain:'',markets:[],email:''},msgs:[],loading:false,tab:'home',portfolio:null,pfBuilding:false};
+const MARKETS_LIST=[
+  {id:'PK',emoji:'🇵🇰',name:'Pakistan (PSX)'},
+  {id:'US',emoji:'🇺🇸',name:'United States'},
+  {id:'EU',emoji:'🇪🇺',name:'Europe'},
+  {id:'HK',emoji:'🇭🇰',name:'Hong Kong'},
+  {id:'SG',emoji:'🇸🇬',name:'Singapore'},
+  {id:'GLOBAL',emoji:'🌍',name:'Crypto & Global'}
+];
 const DOMAINS=[
   {id:'tech',emoji:'💻',name:'Tech / IT'},
   {id:'finance',emoji:'🏦',name:'Finance / Banking'},
@@ -360,6 +367,7 @@ const PSX=[
 ];
 const GLOBAL=[
   // United States
+  {ticker:'SPCX',name:'SpaceX',price:'$153.20',chg:'-6.80',pct:'-4.25%',up:false,vol:'244M',sector:'intl',country:'US',newlyListed:true},
   {ticker:'AAPL',name:'Apple Inc.',price:'$189.42',chg:'+1.24',pct:'+0.66%',up:true,vol:'52M',sector:'intl',country:'US'},
   {ticker:'NVDA',name:'NVIDIA Corp.',price:'$875.40',chg:'+36.80',pct:'+4.39%',up:true,vol:'48M',sector:'intl',country:'US'},
   {ticker:'MSFT',name:'Microsoft',price:'$415.30',chg:'+3.18',pct:'+0.77%',up:true,vol:'22M',sector:'intl',country:'US'},
@@ -390,7 +398,6 @@ const GLOBAL=[
   {ticker:'GOLD',name:'Gold (oz)',price:'$2,400',chg:'+18',pct:'+0.76%',up:true,vol:'—',sector:'commodities',country:'GLOBAL'},
 ];
 const IPOS=[
-  {name:'SpaceX',sector:'Aerospace',date:'Expected 2026',note:'Starlink spin-off speculation continues; most anticipated private listing.',emoji:'🚀',country:'US'},
   {name:'Stripe',sector:'Fintech',date:'Expected 2026',note:'Payments giant valued ~$65B; repeatedly rumored for IPO.',emoji:'💳',country:'US'},
   {name:'Databricks',sector:'AI / Data',date:'Expected 2026',note:'Data + AI platform, last valued at $43B in late funding round.',emoji:'🧠',country:'US'},
   {name:'Shein',sector:'E-commerce',date:'Pending approval',date2:true,note:'Fast-fashion retailer eyeing London listing after US hurdles.',emoji:'🛍️',country:'EU'},
@@ -415,17 +422,18 @@ const ini=n=>n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()||'U';
 const fmt=t=>t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/^[•\-] /gm,'&bull; ').replace(/\n/g,'<br>');
  
 /* ── ONBOARDING ── */
-const STEPS=['Your details','Your occupation','Which field are you in?','Risk appetite','Finance knowledge','Investment amount','Your interests'];
-const TOTAL=7;
+const STEPS=['Your details','Your occupation','Which field are you in?','Which markets to invest in?','Risk appetite','Finance knowledge','Investment amount','Your interests'];
+const TOTAL=8;
  
 function renderOB(){
   document.getElementById('ob-fill').style.width=((S.step+1)/TOTAL*100)+'%';
-  document.getElementById('ob-card').innerHTML=`<div class="ob-step">STEP ${S.step+1} OF ${TOTAL}</div><div class="ob-title">${STEPS[S.step]}</div>${[s0,s1,sDomain,s2,s3,s4,s5][S.step]()}`;
-  if(S.step===3){const r=document.getElementById('fr');if(r)r.addEventListener('input',function(){const v=parseInt(this.value);S.P.risk=v;this.style.setProperty('--pct',v+'%');const d=document.getElementById('rv'),l=document.getElementById('rl');if(d)d.textContent=v;if(l)l.textContent=RL(v);});}
+  document.getElementById('ob-card').innerHTML=`<div class="ob-step">STEP ${S.step+1} OF ${TOTAL}</div><div class="ob-title">${STEPS[S.step]}</div>${[s0,s1,sDomain,sMarket,s2,s3,s4,s5][S.step]()}`;
+  if(S.step===4){const r=document.getElementById('fr');if(r)r.addEventListener('input',function(){const v=parseInt(this.value);S.P.risk=v;this.style.setProperty('--pct',v+'%');const d=document.getElementById('rv'),l=document.getElementById('rl');if(d)d.textContent=v;if(l)l.textContent=RL(v);});}
 }
 function s0(){return`<div style="font-size:13px;color:var(--text2);margin-bottom:4px;">Welcome, ${S.P.name.split(' ')[0]}! Just a few quick questions.</div><div class="field"><div class="flbl">Your age</div><input class="finput" id="fa" type="number" placeholder="e.g. 25" min="13" max="100" value="${S.P.age}"/></div><button class="ob-btn" onclick="obNext()">Continue →</button>`;}
 function s1(){return`<div class="field"><div class="flbl">Occupation</div><input class="finput" id="fo" type="text" placeholder="e.g. Engineer, Business Owner" value="${S.P.occupation}"/></div><button class="ob-btn" onclick="obNext()">Continue →</button>`;}
 function sDomain(){return`<div style="font-size:13px;color:var(--text2);margin-bottom:4px;">We'll suggest stocks relevant to your field.</div><div class="sec-grid" id="domain-grid" style="overflow-y:auto;flex:1;">${DOMAINS.map(d=>`<div class="sec-card ${S.P.domain===d.id?'sel':''}" data-id="${d.id}" onclick="selDomain('${d.id}')"><div class="sec-emo" style="pointer-events:none;">${d.emoji}</div><div class="sec-name" style="pointer-events:none;">${d.name}</div></div>`).join('')}</div><button class="ob-btn" id="dbtn" onclick="obNext()" ${!S.P.domain?'disabled':''}>Continue →</button>`;}
+function sMarket(){return`<div style="font-size:13px;color:var(--text2);margin-bottom:4px;">Pick one or more markets you want to invest in. Tap to select multiple.</div><div class="sec-grid" id="market-grid" style="overflow-y:auto;flex:1;">${MARKETS_LIST.map(m=>`<div class="sec-card ${S.P.markets.includes(m.id)?'sel':''}" data-id="${m.id}" onclick="toggleMarket('${m.id}')"><div class="sec-emo" style="pointer-events:none;">${m.emoji}</div><div class="sec-name" style="pointer-events:none;">${m.name}</div></div>`).join('')}</div><button class="ob-btn" id="mbtn" onclick="obNext()" ${S.P.markets.length===0?'disabled':''}>Continue →</button>`;}
 function s2(){return`<div style="text-align:center;padding:6px 0"><div class="risk-num" id="rv">${S.P.risk}</div><div class="risk-lbl" id="rl">${RL(S.P.risk)}</div></div><input type="range" id="fr" min="0" max="100" step="1" value="${S.P.risk}" style="--pct:${S.P.risk}%"/><div class="slider-ends"><span>SAFE</span><span>AGGRESSIVE</span></div><button class="ob-btn" onclick="obNext()">Continue →</button>`;}
 function s3(){return`<div class="kopts">${KO.map(k=>`<div class="kopt ${S.P.knowledge===k.id?'sel':''}" onclick="selK('${k.id}')"><div class="krad"></div><div><div class="kt">${k.title}</div><div class="kd">${k.desc}</div></div></div>`).join('')}</div><button class="ob-btn" id="kbtn" onclick="obNext()" ${!S.P.knowledge?'disabled':''}>Continue →</button>`;}
 function s4(){return`<div><div class="flbl" style="margin-bottom:10px;">How much do you want to invest?</div><div class="amt-chips">${AMOUNTS.map(a=>`<div class="amt-chip ${S.P.amount===a?'sel':''}" onclick="selAmt('${a}')">${a}</div>`).join('')}</div></div><button class="ob-btn" id="abtn" onclick="obNext()" ${!S.P.amount?'disabled':''}>Continue →</button>`;}
@@ -435,15 +443,22 @@ function obNext(){
   if(S.step===0){const a=document.getElementById('fa')?.value.trim();if(!a||isNaN(a)||a<13)return;S.P.age=a;}
   else if(S.step===1){const o=document.getElementById('fo')?.value.trim();if(!o)return;S.P.occupation=o;}
   else if(S.step===2){if(!S.P.domain)return;}
-  else if(S.step===3){S.P.risk=parseInt(document.getElementById('fr')?.value||50);}
-  else if(S.step===4){if(!S.P.knowledge)return;}
-  else if(S.step===5){if(!S.P.amount)return;}
+  else if(S.step===3){if(S.P.markets.length===0)return;}
+  else if(S.step===4){S.P.risk=parseInt(document.getElementById('fr')?.value||50);}
+  else if(S.step===5){if(!S.P.knowledge)return;}
+  else if(S.step===6){if(!S.P.amount)return;}
   S.step++;renderOB();
 }
 function selDomain(id){
   S.P.domain=id;
   document.querySelectorAll('#domain-grid .sec-card').forEach(el=>el.classList.toggle('sel',el.getAttribute('data-id')===id));
   const b=document.getElementById('dbtn');if(b)b.disabled=false;
+}
+function toggleMarket(id){
+  const i=S.P.markets.indexOf(id);
+  if(i>-1)S.P.markets.splice(i,1);else S.P.markets.push(id);
+  document.querySelectorAll('#market-grid .sec-card').forEach(el=>el.classList.toggle('sel',S.P.markets.includes(el.getAttribute('data-id'))));
+  const b=document.getElementById('mbtn');if(b)b.disabled=S.P.markets.length===0;
 }
 function selK(id){S.P.knowledge=id;document.querySelectorAll('.kopt').forEach(el=>el.classList.toggle('sel',el.getAttribute('onclick').includes(`'${id}'`)));const b=document.getElementById('kbtn');if(b)b.disabled=false;}
 function selAmt(a){S.P.amount=a;document.querySelectorAll('.amt-chip').forEach(el=>el.classList.toggle('sel',el.textContent===a));const b=document.getElementById('abtn');if(b)b.disabled=false;}
@@ -497,7 +512,7 @@ async function generatePortfolio(extra){
   S.pfBuilding=true;buildHome();
   try{
     const prompt=`You are a portfolio manager for the Pakistan Stock Exchange (PSX). Build an investment portfolio for this investor:
-Name: ${S.P.name}, Age: ${S.P.age}, Occupation: ${S.P.occupation}, Professional field: ${S.P.domain}, Risk: ${S.P.risk}/100 (${RL(S.P.risk)}), Knowledge: ${S.P.knowledge}, Amount: ${S.P.amount}, Interested sectors: ${S.P.sectors.join(', ')}. Lean toward stocks relevant to their professional field (${S.P.domain}) where sensible.
+Name: ${S.P.name}, Age: ${S.P.age}, Occupation: ${S.P.occupation}, Professional field: ${S.P.domain}, Markets to invest in: ${(S.P.markets||[]).join(', ')||'Pakistan'}, Risk: ${S.P.risk}/100 (${RL(S.P.risk)}), Knowledge: ${S.P.knowledge}, Amount: ${S.P.amount}, Interested sectors: ${S.P.sectors.join(', ')}. ONLY pick holdings from the markets the user selected (${(S.P.markets||[]).join(', ')||'Pakistan'}). Lean toward stocks relevant to their professional field (${S.P.domain}) where sensible.
 ${extra?'IMPORTANT custom request from user: '+extra:''}
  
 Pick 4-6 real holdings (prefer PSX tickers like OGDC, PPL, HBL, UBL, LUCK, ENGRO, SYS, TRG, FFC; include some global like AAPL/NVDA/BTC/GOLD only if they chose Global/Crypto/Commodities). Respond ONLY with valid JSON, no markdown, in this exact format:
@@ -534,8 +549,7 @@ function buildHome(){
       </div>
     </div>
     <div class="index-bar" style="margin-top:12px;">
-      <div class="index-left"><div class="idx-name">KSE-100 INDEX</div><div class="idx-val">170,330.56</div></div>
-      <div class="index-right"><div class="idx-chg up">▲ 1,376.86</div><div class="idx-pct up">+0.81%</div></div>
+      ${indexBarHTML()}
     </div>
     <div class="sec-hdr"><span class="sh">Your AI Portfolio</span></div>
     <div id="pf-container">${pfHTML()}</div>
@@ -550,17 +564,25 @@ function buildHome(){
   `;
 }
  
+function indexBarHTML(){
+  const idx={PK:{n:'KSE-100 INDEX',v:'170,330.56',c:'\u25b2 1,376.86',p:'+0.81%',up:true},US:{n:'S&P 500',v:'5,460.20',c:'\u25b2 28.40',p:'+0.52%',up:true},EU:{n:'EURO STOXX 50',v:'5,012.80',c:'\u25b2 14.20',p:'+0.28%',up:true},HK:{n:'HANG SENG',v:'18,420.10',c:'\u25bc 92.30',p:'-0.50%',up:false},SG:{n:'STRAITS TIMES',v:'3,402.50',c:'\u25b2 8.10',p:'+0.24%',up:true},GLOBAL:{n:'BTC / USD',v:'$67,420',c:'\u25b2 2,210',p:'+3.39%',up:true}};
+  const first=(S.P.markets&&S.P.markets[0])||'PK';
+  const d=idx[first]||idx.PK;
+  return`<div class="index-left"><div class="idx-name">${d.n}</div><div class="idx-val">${d.v}</div></div><div class="index-right"><div class="idx-chg ${d.up?'up':'dn'}">${d.c}</div><div class="idx-pct ${d.up?'up':'dn'}">${d.p}</div></div>`;
+}
+ 
 function homeMarketStocks(){
-  const pakSectors=['banks','energy','tech','cement','fertilizer'];
-  const wantsPak=S.P.sectors.some(s=>pakSectors.includes(s));
-  const wantsGlobal=S.P.sectors.includes('intl');
-  const wantsCrypto=S.P.sectors.includes('crypto')||S.P.sectors.includes('commodities');
+  // Show stocks from the markets the user explicitly chose
   let list=[];
-  if(wantsPak)list=list.concat(PSX);
-  if(wantsGlobal)list=list.concat(GLOBAL.filter(s=>s.sector==='intl'));
-  if(wantsCrypto)list=list.concat(GLOBAL.filter(s=>s.sector==='crypto'||s.sector==='commodities'));
+  const m=S.P.markets||[];
+  if(m.includes('PK'))list=list.concat(PSX);
+  if(m.includes('US'))list=list.concat(GLOBAL.filter(s=>s.country==='US'));
+  if(m.includes('EU'))list=list.concat(GLOBAL.filter(s=>s.country==='EU'));
+  if(m.includes('HK'))list=list.concat(GLOBAL.filter(s=>s.country==='HK'));
+  if(m.includes('SG'))list=list.concat(GLOBAL.filter(s=>s.country==='SG'));
+  if(m.includes('GLOBAL'))list=list.concat(GLOBAL.filter(s=>s.country==='GLOBAL'));
   if(list.length===0)list=PSX;
-  return list.slice(0,5);
+  return list.slice(0,6);
 }
  
 function ipoHTML(){
@@ -579,11 +601,31 @@ function showIPO(encName){
           <div><div style="font-size:16px;font-weight:600;">${ipo.name}</div><div class="mono" style="font-size:10px;color:var(--gold);margin-top:2px;">${ipo.sector} · ${ipo.date}</div></div>
         </div>
         <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:14px;">${ipo.note}</div>
-        <button class="ob-btn" style="margin-top:0;" onclick="askIPO('${encName}');closeModal()">Ask Advisor about ${ipo.name} →</button>
+        <button class="ob-btn" style="margin-top:0;margin-bottom:9px;" onclick="generateIPOReport('${encName}')">📊 Generate Pre-IPO Risk Report</button>
+        <button class="pf-action-btn" style="width:100%;" onclick="askIPO('${encName}');closeModal()">Ask Advisor about ${ipo.name} →</button>
       </div>
     </div>`;
 }
 function askIPO(encName){const name=decodeURIComponent(encName);goTab('chat');const ta=document.getElementById('cin');if(ta)ta.value=`Tell me about the upcoming ${name} IPO — should I be interested when it goes public?`;setTimeout(()=>sendMsg(),300);}
+ 
+// Risk report for a not-yet-public IPO company
+async function generateIPOReport(encName){
+  const name=decodeURIComponent(encName);
+  const ipo=IPOS.find(i=>i.name===name);if(!ipo)return;
+  document.getElementById('modals').innerHTML=`<div class="modal-bg" style="align-items:center;"><div style="text-align:center;color:var(--text2);"><div class="spinner"></div><div class="mono" style="font-size:11px;letter-spacing:1px;margin-top:14px;">ANALYZING ${name.toUpperCase()}…</div></div></div>`;
+  try{
+    const prompt=`Generate a pre-IPO risk analysis for ${name}, a private company in the ${ipo.sector} sector expected to IPO (${ipo.date}). Use your knowledge. Respond ONLY with valid JSON (no markdown):
+{"ticker":"${name.toUpperCase()}","name":"${name}","price":"Private","riskScore":<0-100 integer, higher=riskier>,"rating":"<WATCH|PROMISING|CAUTION>","kpis":[{"label":"Last Val","value":"$65B"},{"label":"Funding","value":"$2B"},{"label":"Founded","value":"2010"},{"label":"Sector","value":"${ipo.sector}"}],"priceChart":[<12 numbers showing private valuation trend>],"chartMarkers":[{"i":3,"label":"Series F"},{"i":8,"label":"IPO filing"}],"valuation":[{"metric":"Last Round","value":"$65B","status":"amber","note":"short"},{"metric":"Rev Multiple","value":"25x","status":"red","note":"short"},{"metric":"Burn Rate","value":"High","status":"amber","note":"short"}],"financialHealth":[{"metric":"Cash Position","value":"Strong","status":"green","note":"short"},{"metric":"Profitability","value":"No","status":"red","note":"short"},{"metric":"Runway","value":"3yr+","status":"green","note":"short"}],"growth":[{"metric":"Rev Growth","value":"40%","status":"green","note":"short"},{"metric":"User Growth","value":"High","status":"green","note":"short"},{"metric":"Market Size","value":"Large","status":"green","note":"short"}],"scoreBreakdown":{"valuation":18,"health":24,"growth":27},"quarterly":[{"q":"FY22","rev":"—","eps":"—","change":"—"},{"q":"FY23","rev":"est","eps":"—","change":"+50%"},{"q":"FY24","rev":"est","eps":"—","change":"+40%"}],"earningsUpdate":"2-sentence summary of latest known financials/IPO status.","catalysts":["catalyst 1","catalyst 2","catalyst 3"],"risks":["risk 1","risk 2","risk 3"],"bottomLine":"2-sentence verdict on the IPO prospect."}
+scoreBreakdown: valuation/35, health/35, growth/30. Make data realistic for ${name}.`;
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a JSON-only equity research API. Output only valid JSON.',messages:[{role:'user',content:prompt}]})});
+    const d=await res.json();
+    const r=extractJSON(d.content?.find(b=>b.type==='text')?.text||'');
+    if(!r)throw new Error('parse');
+    renderRiskReport(r);
+  }catch(e){
+    document.getElementById('modals').innerHTML=`<div class="modal-bg" onclick="closeModal(event)"><div class="modal-box" onclick="event.stopPropagation()"><div class="modal-handle"></div><div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">Couldn't generate the report. Please try again.</div></div></div>`;
+  }
+}
  
 /* ── UNIVERSAL SEARCH ── */
 async function doSearch(){
@@ -1133,9 +1175,10 @@ launch=function(){
       let saved=null;try{saved=JSON.parse(localStorage.getItem('lf_profile_'+sess)||'null');}catch(e){}
       if(saved&&saved.amount){S.P=saved;document.getElementById('auth').style.display='none';launch();}
     }
-  }
+}
 })();
 if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));if(window.caches)caches.keys().then(ks=>ks.forEach(k=>caches.delete(k)));}
 </script>
 </body>
 </html>
+
