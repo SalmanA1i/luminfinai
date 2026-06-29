@@ -293,7 +293,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
       <div class="chat-shell" style="height:100%">
         <div class="chat-top">
           <div class="chat-av">LF</div>
-          <div><div class="chat-name">LuminFin Advisor</div><div class="chat-status"><span class="chat-sdot"></span>ONLINE</div></div>
+          <div><div class="chat-name">LuminFin Advisor</div><div class="chat-status"><span class="chat-sdot"></span>ONLINE · POWERED BY AI</div></div>
         </div>
         <div class="msgs" id="msgs"></div>
         <div class="sugs" id="sugs"></div>
@@ -720,6 +720,10 @@ function buildHome(){
     <div class="index-bar" style="margin-top:12px;">
       ${indexBarHTML()}
     </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 16px 0;">
+      <div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:.5px;display:flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--success);display:inline-block;"></span>${lastUpdatedText()}</div>
+      <div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:.5px;">⚡ POWERED BY AI</div>
+    </div>
     <div class="sec-hdr"><span class="sh">Today's Market Sentiment</span></div>
     <div id="sentiment-container">${sentimentHTML()}</div>
     <div class="sec-hdr"><span class="sh">⚡ AI Confidence Watchlist</span></div>
@@ -734,7 +738,28 @@ function buildHome(){
     <div id="impact-container">${impactHTML()}</div>
     <div class="sec-hdr"><span class="sh">Suggestions</span></div>
     <div id="sugg-container">${suggHTML()}</div>
+    ${disclaimerHTML()}
   `;
+}
+
+function lastUpdatedText(){
+  const tz={PK:'PKT',US:'EST',EU:'CET',HK:'HKT',SG:'SGT',GLOBAL:'UTC'};
+  const first=(S.P.markets&&S.P.markets[0])||'PK';
+  const d=new Date();
+  const hh=d.getHours().toString().padStart(2,'0');
+  const mm=d.getMinutes().toString().padStart(2,'0');
+  return `UPDATED ${hh}:${mm} · ${tz[first]||'PKT'}`;
+}
+
+function disclaimerHTML(){
+  return `<div style="margin:8px 16px 16px;padding:14px;background:var(--bg3);border:0.5px solid var(--border);border-radius:12px;">
+    <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
+      <span style="font-size:13px;">⚠️</span>
+      <span class="mono" style="font-size:9px;letter-spacing:1px;color:var(--gold);">NOT FINANCIAL ADVICE</span>
+    </div>
+    <div style="font-size:10px;color:var(--muted);line-height:1.6;">LuminFin provides AI-generated information and educational insights only — not personalised financial advice. Market figures are AI estimates and may not reflect real-time prices. Always do your own research or consult a licensed advisor before investing. Investments carry risk, including loss of capital.</div>
+    <div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:.5px;margin-top:10px;padding-top:10px;border-top:0.5px solid var(--border);">DATA: AI-GENERATED ESTIMATES · POWERED BY LUMINFIN AI</div>
+  </div>`;
 }
 
 function indexBarHTML(){
@@ -1224,8 +1249,13 @@ function buildMarkets(){
       </div>
     </div>
     <div class="index-bar" style="margin-top:12px;">${indexBarHTML()}</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 16px 0;">
+      <div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:.5px;display:flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--success);display:inline-block;"></span>${lastUpdatedText()}</div>
+      <div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:.5px;">⚡ POWERED BY AI</div>
+    </div>
     <div class="board-tabs">${ordered.map((t,i)=>`<div class="board-tab ${i===0?'active':''}" onclick="filterBoard(this,'${t.label}')">${t.label}</div>`).join('')}</div>
-    <div class="mkt-list" id="board-list">${firstList.map(s=>mktRow(s)).join('')}</div>`;
+    <div class="mkt-list" id="board-list">${firstList.map(s=>mktRow(s)).join('')}</div>
+    ${disclaimerHTML()}`;
 }
 
 function boardList(f){
