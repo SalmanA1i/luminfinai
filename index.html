@@ -531,6 +531,7 @@ function launch(){
   document.getElementById('av-btn').textContent=ini(S.P.name);
   buildHome();buildMarkets();buildNews();buildProfile();initChat();
   generatePortfolio();
+  startSessionWatch();
 }
 
 /* ── TABS ── */
@@ -1345,14 +1346,34 @@ function buildProfile(){
       <div class="prof-chips">${p.sectors.map(id=>{const s=SECTORS.find(s=>s.id===id);return s?`<div class="pchip">${s.emoji} ${s.name}</div>`:''}).join('')}</div>
     </div>
     <div style="padding:0 16px 24px;display:flex;flex-direction:column;gap:9px;">
+      <div style="display:flex;gap:9px;margin-bottom:2px;">
+        <a href="/privacy.html" target="_blank" style="flex:1;text-align:center;background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:12px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--text2);text-decoration:none;">Privacy Policy</a>
+        <a href="/terms.html" target="_blank" style="flex:1;text-align:center;background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:12px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--text2);text-decoration:none;">Terms & Conditions</a>
+      </div>
       <button onclick="signOut()" style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:13px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;">Sign Out</button>
       <button onclick="confirmDelete()" style="width:100%;background:transparent;border:0.5px solid var(--danger);border-radius:10px;padding:13px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--danger);cursor:pointer;">Delete Account</button>
+      <div class="mono" style="font-size:8px;color:var(--muted);text-align:center;margin-top:6px;letter-spacing:.5px;">LUMINFIN · v1.0 · NOT FINANCIAL ADVICE</div>
     </div>`;
 }
 
 function signOut(){
   try{localStorage.removeItem('lf_session');}catch(e){}
   location.reload();
+}
+
+/* ── SESSION TIMEOUT (auto-logout after 30 min inactivity) ── */
+let _sessionTimer=null;
+const SESSION_TIMEOUT_MS=30*60*1000; // 30 minutes
+function resetSessionTimer(){
+  if(_sessionTimer)clearTimeout(_sessionTimer);
+  _sessionTimer=setTimeout(()=>{
+    try{localStorage.removeItem('lf_session');}catch(e){}
+    document.getElementById('modals').innerHTML=`<div class="modal-bg"><div class="modal-box"><div class="modal-handle"></div><div style="text-align:center;padding:8px 0;"><div style="font-size:28px;margin-bottom:10px;">🔒</div><div style="font-size:17px;font-weight:600;margin-bottom:8px;">Session expired</div><div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:18px;">For your security, you've been logged out after 30 minutes of inactivity.</div><button class="ob-btn" style="margin-top:0;" onclick="location.reload()">Log in again</button></div></div>`;
+  },SESSION_TIMEOUT_MS);
+}
+function startSessionWatch(){
+  ['click','keydown','touchstart','scroll'].forEach(ev=>document.addEventListener(ev,resetSessionTimer,{passive:true}));
+  resetSessionTimer();
 }
 
 function confirmDelete(){
@@ -1446,6 +1467,7 @@ function renderAuth(){
       </div>
       <div id="au-err" style="color:var(--danger);font-size:12px;display:none;"></div>
       <button class="ob-btn" onclick="doSignup()">Sign up with Email →</button>
+      <div style="font-size:10px;color:var(--muted);text-align:center;line-height:1.5;margin-top:2px;">By signing up you agree to our <a href="/terms.html" target="_blank" style="color:var(--gold);">Terms</a> & <a href="/privacy.html" target="_blank" style="color:var(--gold);">Privacy Policy</a></div>
       <div style="text-align:center;font-size:12px;color:var(--muted);margin-top:6px;">Already have an account? <span style="color:var(--gold);cursor:pointer;" onclick="authMode='login';renderAuth()">Log in</span></div>`;
   }else{
     c.innerHTML=`
