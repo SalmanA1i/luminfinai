@@ -825,6 +825,7 @@ function pfHTML(){
       </div>
       <div class="pie-legend">${legend}</div>
     </div>
+    ${perfStripHTML(pf)}
     <div class="holdings-table">${holdings}</div>
     ${pf.whyExplanation?`<div style="background:var(--gold-dim);border:0.5px solid var(--border2);border-radius:12px;padding:13px;margin-top:14px;"><div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;"><span style="font-size:13px;">💡</span><span class="mono" style="font-size:9px;letter-spacing:1px;color:var(--gold);">WHY THIS PORTFOLIO</span></div><div style="font-size:12px;color:var(--text);line-height:1.65;">${pf.whyExplanation}</div></div>`:''}
     <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5;">⚠ ${pf.riskNote||'All investments carry risk.'}</div>
@@ -833,6 +834,36 @@ function pfHTML(){
       <button class="pf-action-btn primary" onclick="customizePortfolio()">✎ Customize</button>
     </div>
   </div>`;
+}
+
+// Deterministic performance figures seeded from the portfolio holdings
+function perfStripHTML(pf){
+  // Seed from tickers so numbers are stable for a given portfolio
+  let seed=0;pf.holdings.forEach(h=>{for(const c of h.ticker)seed+=c.charCodeAt(0);});
+  const rnd=(min,max,salt)=>{const x=Math.sin(seed*9301+salt*49297)*233280;const f=x-Math.floor(x);return min+f*(max-min);};
+  const risk=S.P.risk||50;
+  // Higher risk → wider swings
+  const vol=0.6+risk/100*1.4;
+  const sinceInception=(rnd(-4,18,1)*vol).toFixed(1);     // %
+  const today=(rnd(-1.2,1.8,2)*vol).toFixed(2);            // %
+  const annualised=(rnd(6,16,3)).toFixed(1);               // %
+  const ck=curKey();const cur=CURRENCIES[ck]||CURRENCIES.PK;
+  const idx=cur.amounts.indexOf(S.P.amount);const base=idx>-1?cur.bases[idx]:cur.bases[1];
+  const totalReturnVal=Math.round(base*parseFloat(sinceInception)/100);
+  const fmtMoney=v=>{const a=Math.abs(v);const s=v<0?'-':'+';if(a>=1000000)return s+cur.sym+' '+(a/1000000).toFixed(2)+'M';if(a>=1000)return s+cur.sym+' '+(a/1000).toFixed(1)+'K';return s+cur.sym+' '+a;};
+  const cls=v=>parseFloat(v)>=0?'up':'dn';
+  const arr=v=>parseFloat(v)>=0?'▲':'▼';
+  const cell=(label,val,suffix,isMoney)=>`<div style="flex:1;min-width:0;text-align:center;padding:2px;"><div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:.5px;margin-bottom:4px;">${label}</div><div class="mono ${cls(val)}" style="font-size:13px;font-weight:700;">${isMoney?fmtMoney(parseFloat(val)<0?-totalReturnVal:totalReturnVal):arr(val)+' '+(parseFloat(val)>=0?'+':'')+val+suffix}</div></div>`;
+  return`<div style="background:var(--bg3);border:0.5px solid var(--border);border-radius:12px;padding:12px 6px;margin:14px 0 2px;display:flex;align-items:stretch;">
+    ${cell('TOTAL RETURN',sinceInception,'%',true)}
+    <div style="width:0.5px;background:var(--border);"></div>
+    ${cell("TODAY",today,'%',false)}
+    <div style="width:0.5px;background:var(--border);"></div>
+    ${cell('SINCE START',sinceInception,'%',false)}
+    <div style="width:0.5px;background:var(--border);"></div>
+    ${cell('ANNUALISED',annualised,'%',false)}
+  </div>
+  <div class="mono" style="font-size:8px;color:var(--muted);text-align:center;margin-bottom:4px;letter-spacing:.5px;">SIMULATED PERFORMANCE · ILLUSTRATIVE ONLY</div>`;
 }
 
 function calcAmount(alloc){
