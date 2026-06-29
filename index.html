@@ -556,7 +556,7 @@ Suggested tickers by market: ${tickerGuide}
 ${extra?'IMPORTANT custom request from user: '+extra:''}
 
 Pick 4-6 real holdings only from the allowed markets, matching the risk level and interested sectors. Respond ONLY with valid JSON, no markdown:
-{"strategy":"one short sentence","holdings":[{"ticker":"SAP","name":"SAP SE","alloc":25,"reason":"short reason"}],"expectedReturn":"12-15% annually","riskNote":"one short sentence"}
+{"strategy":"one short sentence","holdings":[{"ticker":"SAP","name":"SAP SE","alloc":25,"reason":"short reason"}],"expectedReturn":"12-15% annually","riskNote":"one short sentence","whyExplanation":"A warm, conversational 2-3 sentence explanation, speaking directly to ${S.P.name.split(' ')[0]}, of WHY this allocation suits their ${RL(S.P.risk)} risk profile. Start with 'Based on your...'. Explain the reasoning behind the weighting (e.g. why more in dividend stocks for conservative, or growth stocks for aggressive). Make them feel understood."}
 Allocations must sum to 100.`;
     const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a precise JSON-only portfolio API. You strictly respect the investor\u2019s chosen markets and never suggest stocks from other markets. Output only valid JSON.',messages:[{role:'user',content:prompt}]})});
     const d=await res.json();
@@ -627,11 +627,15 @@ function fallbackPortfolio(){
   // Normalize allocations to sum 100
   const sum=holdings.reduce((a,h)=>a+h.alloc,0);
   if(sum!==100&&holdings.length)holdings[0].alloc+=100-sum;
+  const fname=(S.P.name||'there').split(' ')[0];
   return{
     strategy:aggressive?'Growth-focused allocation across your selected markets.':'Balanced allocation across your selected markets.',
     holdings,
     expectedReturn:aggressive?'15-22% annually':'9-13% annually',
-    riskNote:aggressive?'Higher volatility — for aggressive investors.':'Moderate risk with a balanced focus.'
+    riskNote:aggressive?'Higher volatility — for aggressive investors.':'Moderate risk with a balanced focus.',
+    whyExplanation:aggressive
+      ?`Based on your higher risk tolerance, ${fname}, I've weighted this portfolio toward growth-oriented names with greater upside potential. You're comfortable riding out short-term swings, so the allocation favors companies positioned to appreciate faster, while keeping enough spread to avoid over-concentration in any single stock.`
+      :`Based on your more conservative profile, ${fname}, I've leaned toward established, dividend-paying companies that have historically shown steadier performance and lower volatility. The larger weightings sit in your most stable holdings, which helps protect your capital while still giving you room to grow.`
   };
 }
 
@@ -822,6 +826,7 @@ function pfHTML(){
       <div class="pie-legend">${legend}</div>
     </div>
     <div class="holdings-table">${holdings}</div>
+    ${pf.whyExplanation?`<div style="background:var(--gold-dim);border:0.5px solid var(--border2);border-radius:12px;padding:13px;margin-top:14px;"><div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;"><span style="font-size:13px;">💡</span><span class="mono" style="font-size:9px;letter-spacing:1px;color:var(--gold);">WHY THIS PORTFOLIO</span></div><div style="font-size:12px;color:var(--text);line-height:1.65;">${pf.whyExplanation}</div></div>`:''}
     <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5;">⚠ ${pf.riskNote||'All investments carry risk.'}</div>
     <div class="pf-actions">
       <button class="pf-action-btn" onclick="generatePortfolio()">↻ Suggest Another</button>
