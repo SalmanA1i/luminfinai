@@ -735,35 +735,64 @@ scoreBreakdown: valuation/35, health/35, growth/30. Make data realistic for ${na
 async function doSearch(){
   const q=document.getElementById('home-search')?.value.trim();
   if(!q)return;
-  // Check fixed list first
+  document.getElementById('modals').innerHTML=`<div class="modal-bg" style="align-items:center;"><div style="text-align:center;color:var(--text2);"><div class="spinner"></div><div class="mono" style="font-size:11px;letter-spacing:1px;margin-top:14px;">ANALYZING "${q.toUpperCase()}"…</div></div></div>`;
+  // Known stock for instant base data
   const match=ALL_STOCKS.find(s=>s.ticker.toLowerCase()===q.toLowerCase()||s.name.toLowerCase().includes(q.toLowerCase()));
-  if(match){showHolding(match.ticker);return;}
-  // AI fallback
-  document.getElementById('modals').innerHTML=`<div class="modal-bg" style="align-items:center;"><div style="text-align:center;color:var(--text2);"><div class="spinner"></div><div class="mono" style="font-size:11px;letter-spacing:1px;margin-top:14px;">SEARCHING "${q.toUpperCase()}"…</div></div></div>`;
   try{
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a JSON-only stock data API. Output only valid JSON, no markdown.',messages:[{role:'user',content:`Provide data for "${q}". If it is a private company not yet public (like SpaceX), set "public":false. Respond ONLY with JSON: {"ticker":"TSLA","name":"Tesla Inc.","price":"$248.50","exchange":"NASDAQ","public":true,"about":"2-sentence description","sector":"Automotive"}`}]})});
+    const prompt=`Provide a full investor profile for "${q}"${match?` (ticker ${match.ticker}, current price ${match.price})`:''}. If it's a private company not yet public (like a pre-IPO startup), set "public":false. Respond ONLY with valid JSON (no markdown):
+{"ticker":"ENGRO","name":"Engro Corporation","exchange":"PSX","public":true,"price":"${match?match.price:'PKR 342'}","change":"+1.15%","up":true,"pe":"8.4","divYield":"9.2%","marketCap":"PKR 197B","week52":"285 – 358","sector":"Conglomerate","about":"2-sentence company overview.","priceHistory":[<12 monthly numbers showing the trend>],"recommendation":"BUY","recReason":"1-sentence reason for the recommendation tailored to a ${RL(S.P.risk)} investor."}
+recommendation must be BUY, HOLD, or SELL. Use realistic figures.`;
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a JSON-only equity research API. Output only valid JSON, no markdown.',messages:[{role:'user',content:prompt}]})});
     const d=await res.json();
     const r=extractJSON(d.content?.find(b=>b.type==='text')?.text||'');
     if(!r)throw new Error('parse');
+    if(match){r.price=r.price||match.price;r.up=match.up;}
     showSearchResult(r,q);
   }catch(e){
     document.getElementById('modals').innerHTML=`<div class="modal-bg" onclick="closeModal(event)"><div class="modal-box" onclick="event.stopPropagation()"><div class="modal-handle"></div><div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">Couldn't find "${q}". Try another name or ticker.</div></div></div>`;
   }
 }
 
+function searchChartSVG(history,up){
+  if(!history||!history.length)return'';
+  const w=300,h=70,pad=4;
+  const mx=Math.max(...history),mn=Math.min(...history);
+  const range=mx-mn||1;
+  const pts=history.map((v,i)=>{const x=pad+i*((w-2*pad)/(history.length-1));const y=h-pad-((v-mn)/range)*(h-2*pad);return[x,y];});
+  const line=pts.map((p,i)=>(i===0?'M':'L')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const area=line+` L${pts[pts.length-1][0].toFixed(1)} ${h} L${pts[0][0].toFixed(1)} ${h} Z`;
+  const col=up?'#3db87a':'#e05252';
+  const gid='g'+Math.random().toString(36).slice(2,7);
+  return`<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:70px;" preserveAspectRatio="none"><defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${col}" stop-opacity="0.25"/><stop offset="100%" stop-color="${col}" stop-opacity="0"/></linearGradient></defs><path d="${area}" fill="url(#${gid})"/><path d="${line}" fill="none" stroke="${col}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
 function showSearchResult(r,q){
   const isPublic=r.public!==false;
+  const recColor=r.recommendation==='BUY'?'var(--success)':r.recommendation==='SELL'?'var(--danger)':'var(--gold)';
+  const recBg=r.recommendation==='BUY'?'var(--green-dim)':r.recommendation==='SELL'?'rgba(224,82,82,0.1)':'var(--gold-dim)';
+  const kpi=(label,val)=>`<div style="flex:1;min-width:0;"><div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">${label}</div><div class="mono" style="font-size:13px;font-weight:700;">${val||'—'}</div></div>`;
   document.getElementById('modals').innerHTML=`
     <div class="modal-bg" onclick="closeModal(event)">
       <div class="modal-box" onclick="event.stopPropagation()">
         <div class="modal-handle"></div>
         <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px;">
           <div style="width:44px;height:44px;border-radius:10px;background:var(--bg3);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-weight:700;color:var(--gold);">${(r.ticker||r.name||'?').slice(0,3)}</div>
-          <div><div style="font-size:16px;font-weight:600;">${r.name||q}</div><div class="mono" style="font-size:10px;color:var(--gold);margin-top:2px;">${r.ticker||'PRIVATE'} ${r.exchange?'· '+r.exchange:''}</div></div>
+          <div style="flex:1;"><div style="font-size:16px;font-weight:600;">${r.name||q}</div><div class="mono" style="font-size:10px;color:var(--gold);margin-top:2px;">${r.ticker||'PRIVATE'} ${r.exchange?'· '+r.exchange:''}</div></div>
         </div>
-        ${isPublic?`<div style="display:flex;gap:18px;margin-bottom:14px;"><div><div class="mono" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">PRICE</div><div class="mono" style="font-size:18px;font-weight:700;">${r.price||'—'}</div></div><div><div class="mono" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">SECTOR</div><div style="font-size:13px;font-weight:600;margin-top:3px;">${r.sector||'—'}</div></div></div>`:`<div style="background:var(--gold-dim);border:0.5px solid var(--border2);border-radius:10px;padding:11px;margin-bottom:14px;"><div class="mono" style="font-size:9px;color:var(--gold);letter-spacing:1px;margin-bottom:4px;">⚠ NOT YET PUBLIC</div><div style="font-size:12px;color:var(--text2);">This company is privately held and not currently traded on public markets.</div></div>`}
+        ${isPublic?`
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px;">
+          <div class="mono" style="font-size:24px;font-weight:700;">${r.price||'—'}</div>
+          ${r.change?`<div class="mono ${r.up?'up':'dn'}" style="font-size:13px;font-weight:700;">${r.up?'▲':'▼'} ${r.change}</div>`:''}
+        </div>
+        ${r.priceHistory?`<div style="margin-bottom:6px;">${searchChartSVG(r.priceHistory,r.up)}</div><div class="mono" style="font-size:8px;color:var(--muted);text-align:right;margin-bottom:14px;">12-MONTH TREND</div>`:''}
+        <div style="display:flex;gap:10px;margin-bottom:8px;">${kpi('P/E RATIO',r.pe)}${kpi('DIV YIELD',r.divYield)}</div>
+        <div style="display:flex;gap:10px;margin-bottom:14px;">${kpi('MARKET CAP',r.marketCap)}${kpi('52-WK RANGE',r.week52)}</div>
+        ${r.recommendation?`<div style="background:${recBg};border:0.5px solid ${recColor};border-radius:10px;padding:12px;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span class="mono" style="font-size:9px;color:var(--muted);letter-spacing:1px;">AI RECOMMENDATION</span><span class="mono" style="font-size:12px;font-weight:700;color:${recColor};">${r.recommendation}</span></div><div style="font-size:11px;color:var(--text2);line-height:1.5;">${r.recReason||''}</div></div>`:''}
+        `:`<div style="background:var(--gold-dim);border:0.5px solid var(--border2);border-radius:10px;padding:11px;margin-bottom:14px;"><div class="mono" style="font-size:9px;color:var(--gold);letter-spacing:1px;margin-bottom:4px;">⚠ NOT YET PUBLIC</div><div style="font-size:12px;color:var(--text2);">This company is privately held and not currently traded on public markets.</div></div>`}
+        <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;" class="mono">OVERVIEW</div>
         <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:14px;">${r.about||''}</div>
         <button class="ob-btn" style="margin-top:0;" onclick="askSearchStock('${encodeURIComponent(r.name||q)}');closeModal()">Ask Advisor →</button>
+        <div style="font-size:9px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.4;">AI-generated estimates · Not financial advice</div>
       </div>
     </div>`;
 }
