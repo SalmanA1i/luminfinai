@@ -32,6 +32,13 @@ body{font-family:'Inter',sans-serif;color:var(--text)}
 .ob-logo{font-family:'Space Mono',monospace;font-size:13px;letter-spacing:2px;color:var(--text2);display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .ob-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);animation:glow 2s infinite}
 @keyframes glow{0%,100%{box-shadow:0 0 6px var(--gold)}50%{box-shadow:0 0 16px var(--gold),0 0 28px rgba(232,160,32,.3)}}
+/* ── LOGO MARK ── */
+.lf-mark{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;border-radius:7px;background:linear-gradient(145deg,#f5c05a,#e8a020);position:relative;box-shadow:0 2px 8px rgba(232,160,32,.35)}
+.lf-mark svg{width:62%;height:62%}
+.lf-mark.sm{width:22px;height:22px;border-radius:6px}
+.lf-mark.md{width:30px;height:30px}
+.lf-mark.lg{width:52px;height:52px;border-radius:13px}
+.lf-mark.xl{width:72px;height:72px;border-radius:18px;box-shadow:0 4px 24px rgba(232,160,32,.45)}
 .ob-tag{font-size:13px;color:var(--muted);text-align:center;margin-bottom:24px;line-height:1.6}
 .ob-pbar{width:100%;margin-bottom:22px}
 .ob-pbar-bg{height:2px;background:var(--bg4);border-radius:2px;position:relative;overflow:hidden}
@@ -245,7 +252,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 <!-- ═══ WELCOME SPLASH ═══ -->
 <div id="welcome" style="position:fixed;inset:0;background:var(--bg);z-index:130;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 32px calc(var(--safe-bottom)+32px);max-width:430px;margin:0 auto;left:50%;transform:translateX(-50%);width:100%;">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-    <div style="width:18px;height:18px;border-radius:50%;background:var(--gold);box-shadow:0 0 24px var(--gold),0 0 48px rgba(232,160,32,.4);animation:glow 2s infinite;margin-bottom:28px;"></div>
+    <div style="margin-bottom:28px;"><span class="lf-mark xl"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="13" width="3.2" height="7" rx="1" fill="#0a0c12"/><rect x="10.4" y="9" width="3.2" height="11" rx="1" fill="#0a0c12"/><rect x="17.3" y="5" width="3.2" height="15" rx="1" fill="#0a0c12"/><path d="M3 8.5L9 6L14 8L21 3" stroke="#0a0c12" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg></span></div>
     <div style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:4px;color:var(--text2);margin-bottom:18px;">LUMINFIN</div>
     <div style="font-size:32px;font-weight:600;line-height:1.25;margin-bottom:14px;">Welcome to<br>LuminFin AI</div>
     <div style="font-size:15px;color:var(--muted);line-height:1.6;max-width:280px;">Your personal finance advisor — building intelligent portfolios across global markets.</div>
@@ -256,14 +263,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 
 <!-- ═══ AUTH (LOGIN / SIGNUP) ═══ -->
 <div id="auth" style="position:fixed;inset:0;background:var(--bg);z-index:120;display:flex;flex-direction:column;align-items:center;padding:calc(var(--safe-top)+60px) 24px calc(var(--safe-bottom)+24px);max-width:430px;margin:0 auto;left:50%;transform:translateX(-50%);width:100%;">
-  <div class="ob-logo" style="font-size:16px;"><span class="ob-dot"></span>LUMINFIN</div>
+  <div class="ob-logo" style="font-size:16px;"><span class="lf-mark sm"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="13" width="3.2" height="7" rx="1" fill="#0a0c12"/><rect x="10.4" y="9" width="3.2" height="11" rx="1" fill="#0a0c12"/><rect x="17.3" y="5" width="3.2" height="15" rx="1" fill="#0a0c12"/><path d="M3 8.5L9 6L14 8L21 3" stroke="#0a0c12" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg></span>LUMINFIN</div>
   <div class="ob-tag" style="margin-bottom:36px;">AI-powered investing for global markets.</div>
   <div class="ob-card" id="auth-card" style="flex:none;max-height:none;"></div>
 </div>
 
 <!-- ═══ ONBOARDING ═══ -->
 <div id="ob" style="display:none;">
-  <div class="ob-logo"><span class="ob-dot"></span>LUMINFIN</div>
+  <div class="ob-logo"><span class="lf-mark sm"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="13" width="3.2" height="7" rx="1" fill="#0a0c12"/><rect x="10.4" y="9" width="3.2" height="11" rx="1" fill="#0a0c12"/><rect x="17.3" y="5" width="3.2" height="15" rx="1" fill="#0a0c12"/><path d="M3 8.5L9 6L14 8L21 3" stroke="#0a0c12" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg></span>LUMINFIN</div>
   <div class="ob-tag">AI-powered investing, built for you.</div>
   <div class="ob-pbar"><div class="ob-pbar-bg"><div class="ob-pbar-fill" id="ob-fill" style="width:16%"></div></div></div>
   <div class="ob-card" id="ob-card"></div>
@@ -272,7 +279,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 <!-- ═══ APP ═══ -->
 <div id="app">
   <div class="appbar">
-    <div class="appbar-logo"><span class="appbar-dot"></span>LUMINFIN</div>
+    <div class="appbar-logo"><span class="lf-mark sm"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="13" width="3.2" height="7" rx="1" fill="#0a0c12"/><rect x="10.4" y="9" width="3.2" height="11" rx="1" fill="#0a0c12"/><rect x="17.3" y="5" width="3.2" height="15" rx="1" fill="#0a0c12"/><path d="M3 8.5L9 6L14 8L21 3" stroke="#0a0c12" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg></span>LUMINFIN</div>
     <div class="appbar-right">
       <div class="kse-pill"><span style="color:var(--muted)">KSE-100</span><span class="up">▲ 0.81%</span></div>
       <div class="av-btn" id="av-btn" onclick="goTab('profile')"></div>
@@ -435,6 +442,10 @@ const NEWS=[
 
 const RL=v=>v<20?'Capital Preservation':v<40?'Conservative':v<60?'Balanced':v<80?'Growth':'Aggressive';
 const ini=n=>n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()||'U';
+// LuminFin logo mark — ascending bars + rising arrow on a gold badge
+function lfMark(size){
+  return `<span class="lf-mark ${size||'md'}"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="13" width="3.2" height="7" rx="1" fill="#0a0c12"/><rect x="10.4" y="9" width="3.2" height="11" rx="1" fill="#0a0c12"/><rect x="17.3" y="5" width="3.2" height="15" rx="1" fill="#0a0c12"/><path d="M3 8.5L9 6L14 8L21 3" stroke="#0a0c12" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg></span>`;
+}
 const fmt=t=>t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/^[•\-] /gm,'&bull; ').replace(/\n/g,'<br>');
 
 /* ── ONBOARDING ── */
