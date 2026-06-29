@@ -329,7 +329,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 <div id="modals"></div>
 
 <script>
-const S={step:0,P:{name:'',age:'',occupation:'',risk:50,knowledge:'',amount:'',sectors:[],domain:'',markets:[],currency:'',email:''},msgs:[],loading:false,tab:'home',portfolio:null,pfBuilding:false};
+const S={step:0,P:{name:'',age:'',occupation:'',risk:50,knowledge:'',amount:'',sectors:[],domain:'',markets:[],currency:'',email:'',goal:'',horizon:'',monthly:''},msgs:[],loading:false,tab:'home',portfolio:null,pfBuilding:false};
+const GOALS=[{id:'wealth',emoji:'📈',name:'Grow wealth'},{id:'retire',emoji:'🏖️',name:'Retirement'},{id:'income',emoji:'💵',name:'Passive income'},{id:'preserve',emoji:'🛡️',name:'Preserve capital'},{id:'house',emoji:'🏠',name:'Buy a home'},{id:'learn',emoji:'🎓',name:'Learn & grow'}];
+const HORIZONS=[{id:'short',name:'< 1 year'},{id:'medium',name:'1 – 5 years'},{id:'long',name:'5 – 10 years'},{id:'verylong',name:'10+ years'}];
 const MARKETS_LIST=[
   {id:'PK',emoji:'🇵🇰',name:'Pakistan (PSX)'},
   {id:'US',emoji:'🇺🇸',name:'United States'},
@@ -449,12 +451,12 @@ function lfMark(size){
 const fmt=t=>t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/^[•\-] /gm,'&bull; ').replace(/\n/g,'<br>');
 
 /* ── ONBOARDING ── */
-const STEPS=['Your details','Your occupation','Which markets to invest in?','Risk appetite','Finance knowledge','Investment amount','Your interests'];
-const TOTAL=7;
+const STEPS=['Your details','Your occupation','Which markets to invest in?','Risk appetite','Finance knowledge','Investment amount','Your goals','Your interests'];
+const TOTAL=8;
 
 function renderOB(){
   document.getElementById('ob-fill').style.width=((S.step+1)/TOTAL*100)+'%';
-  document.getElementById('ob-card').innerHTML=`<div class="ob-step">STEP ${S.step+1} OF ${TOTAL}</div><div class="ob-title">${STEPS[S.step]}</div>${[s0,s1,sMarket,s2,s3,s4,s5][S.step]()}`;
+  document.getElementById('ob-card').innerHTML=`<div class="ob-step">STEP ${S.step+1} OF ${TOTAL}</div><div class="ob-title">${STEPS[S.step]}</div>${[s0,s1,sMarket,s2,s3,s4,sGoals,s5][S.step]()}`;
   if(S.step===3){const r=document.getElementById('fr');if(r)r.addEventListener('input',function(){const v=parseInt(this.value);S.P.risk=v;this.style.setProperty('--pct',v+'%');const d=document.getElementById('rv'),l=document.getElementById('rl');if(d)d.textContent=v;if(l)l.textContent=RL(v);});}
 }
 function s0(){return`<div style="font-size:13px;color:var(--text2);margin-bottom:4px;">Welcome, ${S.P.name.split(' ')[0]}! Just a few quick questions.</div><div class="field"><div class="flbl">Your age</div><input class="finput" id="fa" type="number" placeholder="e.g. 25" min="13" max="100" value="${S.P.age}"/></div><button class="ob-btn" onclick="obNext()">Continue →</button>`;}
@@ -470,6 +472,30 @@ function s4(){
   }
   return`<div>${curSel}<div class="flbl" style="margin-bottom:10px;">How much do you want to invest?</div><div class="amt-chips" id="amt-chips">${cur.amounts.map(a=>`<div class="amt-chip ${S.P.amount===a?'sel':''}" onclick="selAmt('${a}')">${a}</div>`).join('')}</div></div><button class="ob-btn" id="abtn" onclick="obNext()" ${!S.P.amount?'disabled':''}>Continue →</button>`;
 }
+function sGoals(){
+  const ck=curKey();const cur=CURRENCIES[ck]||CURRENCIES.PK;
+  const monthlyChips=['Skip','100','500','1,000','5,000'];
+  return`<div style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:16px;">
+    <div>
+      <div class="flbl" style="margin-bottom:8px;">Investment goal</div>
+      <div class="sec-grid" id="goal-grid">${GOALS.map(g=>`<div class="sec-card ${S.P.goal===g.id?'sel':''}" data-id="${g.id}" onclick="selGoal('${g.id}')"><div class="sec-emo" style="pointer-events:none;">${g.emoji}</div><div class="sec-name" style="pointer-events:none;">${g.name}</div></div>`).join('')}</div>
+    </div>
+    <div>
+      <div class="flbl" style="margin-bottom:8px;">Time horizon</div>
+      <div class="amt-chips" id="horizon-chips">${HORIZONS.map(h=>`<div class="amt-chip ${S.P.horizon===h.id?'sel':''}" data-id="${h.id}" onclick="selHorizon('${h.id}')">${h.name}</div>`).join('')}</div>
+    </div>
+    <div>
+      <div class="flbl" style="margin-bottom:8px;">Monthly contribution (${cur.sym}, optional)</div>
+      <div class="amt-chips" id="monthly-chips">${monthlyChips.map(mc=>`<div class="amt-chip ${S.P.monthly===mc?'sel':''}" data-id="${mc}" onclick="selMonthly('${mc}')">${mc==='Skip'?'Skip':cur.sym+' '+mc}</div>`).join('')}</div>
+    </div>
+  </div>
+  <button class="ob-btn" id="gbtn" onclick="obNext()" ${(!S.P.goal||!S.P.horizon)?'disabled':''}>Continue →</button>`;
+}
+function selGoal(id){S.P.goal=id;document.querySelectorAll('#goal-grid .sec-card').forEach(el=>el.classList.toggle('sel',el.getAttribute('data-id')===id));goalsBtn();}
+function selHorizon(id){S.P.horizon=id;document.querySelectorAll('#horizon-chips .amt-chip').forEach(el=>el.classList.toggle('sel',el.getAttribute('data-id')===id));goalsBtn();}
+function selMonthly(v){S.P.monthly=v;document.querySelectorAll('#monthly-chips .amt-chip').forEach(el=>el.classList.toggle('sel',el.getAttribute('data-id')===v));}
+function goalsBtn(){const b=document.getElementById('gbtn');if(b)b.disabled=(!S.P.goal||!S.P.horizon);}
+
 function s5(){return`<div class="sec-grid" id="sector-grid" style="overflow-y:auto;flex:1;">${SECTORS.map(s=>`<div class="sec-card ${S.P.sectors.includes(s.id)?'sel':''}" data-id="${s.id}" onclick="toggleSec('${s.id}')"><div class="sec-emo" style="pointer-events:none;">${s.emoji}</div><div class="sec-name" style="pointer-events:none;">${s.name}</div><div class="sec-desc" style="pointer-events:none;">${s.desc}</div></div>`).join('')}</div><button class="ob-btn" id="lbtn" onclick="launch()" ${S.P.sectors.length===0?'disabled':''}>Build My Portfolio →</button>`;}
 
 function obNext(){
@@ -479,6 +505,7 @@ function obNext(){
   else if(S.step===3){S.P.risk=parseInt(document.getElementById('fr')?.value||50);}
   else if(S.step===4){if(!S.P.knowledge)return;}
   else if(S.step===5){if(!S.P.amount)return;}
+  else if(S.step===6){if(!S.P.goal||!S.P.horizon)return;}
   S.step++;renderOB();
 }
 function toggleMarket(id){
@@ -549,7 +576,7 @@ async function generatePortfolio(extra){
   }[m]||'')).filter(Boolean).join(' | ');
   try{
     const prompt=`You are an elite global portfolio manager. Build an investment portfolio for this investor.
-Investor: ${S.P.name}, age ${S.P.age}, ${S.P.occupation}, risk ${S.P.risk}/100 (${RL(S.P.risk)}), knowledge ${S.P.knowledge}, investing ${S.P.amount}, interested sectors: ${S.P.sectors.join(', ')}.
+Investor: ${S.P.name}, age ${S.P.age}, ${S.P.occupation}, risk ${S.P.risk}/100 (${RL(S.P.risk)}), knowledge ${S.P.knowledge}, investing ${S.P.amount}, goal: ${(GOALS.find(g=>g.id===S.P.goal)||{}).name||'grow wealth'}, time horizon: ${(HORIZONS.find(h=>h.id===S.P.horizon)||{}).name||'long-term'}, interested sectors: ${S.P.sectors.join(', ')}.
 
 CRITICAL CONSTRAINT: The investor ONLY wants to invest in these markets: ${marketNames}. Every single holding MUST be a real, currently-listed stock from those markets. Do NOT include stocks from any other market. ${(S.P.markets||[]).includes('PK')?'':'Do NOT include any Pakistani/PSX stocks.'}
 Suggested tickers by market: ${tickerGuide}
@@ -1275,6 +1302,9 @@ function buildProfile(){
     </div>
     <div class="prof-rows">
       <div class="prow"><div><div class="prow-lbl">Occupation</div><div class="prow-val">${p.occupation}</div></div></div>
+      <div class="prow"><div><div class="prow-lbl">Investment Goal</div><div class="prow-val">${(GOALS.find(g=>g.id===p.goal)||{}).name||'—'}</div></div></div>
+      <div class="prow"><div><div class="prow-lbl">Time Horizon</div><div class="prow-val">${(HORIZONS.find(h=>h.id===p.horizon)||{}).name||'—'}</div></div></div>
+      <div class="prow"><div><div class="prow-lbl">Monthly Contribution</div><div class="prow-val">${p.monthly&&p.monthly!=='Skip'?(CURRENCIES[curKey()]||CURRENCIES.PK).sym+' '+p.monthly:'—'}</div></div></div>
       <div class="prow"><div><div class="prow-lbl">Markets</div><div class="prow-val">${(p.markets||[]).map(m=>MARKETS_LIST.find(x=>x.id===m)?.name||m).join(', ')||'—'}</div></div></div>
       <div class="prow"><div><div class="prow-lbl">Investment Amount</div><div class="prow-val">${p.amount}</div></div></div>
       <div class="prow"><div><div class="prow-lbl">Risk Tolerance</div><div class="prow-val">${p.risk}/100 · ${RL(p.risk)}</div></div></div>
