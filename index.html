@@ -25,6 +25,20 @@ html,body{height:100%;overflow:hidden;background:var(--bg)}
 body{font-family:'Inter',sans-serif;color:var(--text)}
 #root{height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto;background:var(--bg);position:relative}
 .mono{font-family:'Space Mono',monospace}
+@media (min-width:780px){
+  body{background:radial-gradient(ellipse at top,#13161d 0%,#070809 70%)}
+  #root{max-width:420px;height:92vh;max-height:900px;margin:4vh auto;border:0.5px solid var(--border);border-radius:28px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.03)}
+  #welcome,#auth,#ob{max-width:420px;height:92vh;max-height:900px;top:4vh;bottom:auto;border:0.5px solid var(--border);border-radius:28px;box-shadow:0 30px 80px rgba(0,0,0,0.6)}
+  .modal-bg{align-items:center !important}
+  .modal-box{max-width:400px;border-radius:20px !important;max-height:80vh}
+  .desktop-brand{display:none;position:fixed;left:calc(50% - 530px);top:50%;transform:translateY(-50%);width:300px;flex-direction:column;gap:16px;z-index:1}
+}
+@media (min-width:1120px){.desktop-brand{display:flex !important}}
+.db-logo{display:flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:18px;letter-spacing:2px;color:var(--gold)}
+.db-head{font-size:30px;font-weight:600;line-height:1.25;color:var(--text)}
+.db-sub{font-size:14px;color:var(--muted);line-height:1.6}
+.db-feat{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)}
+.db-feat span{color:var(--gold);font-size:15px}
 .up{color:var(--success)}.dn{color:var(--danger)}
 
 /* ── ONBOARDING ── */
@@ -247,6 +261,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 </style>
 </head>
 <body>
+<div class="desktop-brand">
+  <div class="db-logo"><span class="lf-mark md"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="13" width="3.2" height="7" rx="1" fill="#0a0c12"/><rect x="10.4" y="9" width="3.2" height="11" rx="1" fill="#0a0c12"/><rect x="17.3" y="5" width="3.2" height="15" rx="1" fill="#0a0c12"/><path d="M3 8.5L9 6L14 8L21 3" stroke="#0a0c12" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg></span>LUMINFIN</div>
+  <div class="db-head">AI-powered investing,<br>built for everyone.</div>
+  <div class="db-sub">Intelligent portfolios, real-time market insights, and a personal AI advisor — across Pakistan, US, Europe, and Asia.</div>
+  <div style="display:flex;flex-direction:column;gap:11px;margin-top:6px;">
+    <div class="db-feat"><span>◆</span> AI portfolio builder tailored to you</div>
+    <div class="db-feat"><span>◆</span> Live market sentiment & confidence scores</div>
+    <div class="db-feat"><span>◆</span> Deep-dive risk reports on any stock</div>
+    <div class="db-feat"><span>◆</span> Conversational AI finance advisor</div>
+  </div>
+</div>
 <div id="root">
 
 <!-- ═══ WELCOME SPLASH ═══ -->
@@ -432,6 +457,84 @@ const IPOS=[
 ];
 const ALL_STOCKS=[...PSX,...GLOBAL];
 
+/* ══════════════════════════════════════════════════════════
+   LIVE MARKET DATA (Twelve Data via /api/market proxy)
+   - Maps app tickers to Twelve Data symbols + exchange hints
+   - refreshLiveQuotes() updates the PSX/GLOBAL arrays in place
+   - Gracefully no-ops if the API key isn't configured yet
+   ══════════════════════════════════════════════════════════ */
+// Exchange hints so Twelve Data resolves the right listing.
+const TD_EXCHANGE={PK:'PSX',US:'',EU:'',HK:'',SG:''};
+// Some tickers need a Twelve Data-specific symbol (e.g. HK/SG suffixes already match).
+function tdSymbol(s){
+  // PSX tickers map 1:1 (OGDC, ENGRO…). HK/SG already carry .HK/.SI. Crypto uses BTC/USD form.
+  if(s.country==='GLOBAL'){
+    const map={BTC:'BTC/USD',ETH:'ETH/USD',GOLD:'XAU/USD',SILVER:'XAG/USD'};
+    return map[s.ticker]||s.ticker;
+  }
+  return s.ticker;
+}
+function tdExchangeFor(s){
+  const c=s.country||'PK';
+  return TD_EXCHANGE[c]||'';
+}
+let LIVE_ENABLED=true;     // flips false if proxy reports no key
+let LIVE_LAST=0;           // timestamp of last refresh
+
+async function tdQuote(s){
+  const sym=encodeURIComponent(tdSymbol(s));
+  const ex=tdExchangeFor(s);
+  let u=`/api/market?type=quote&symbol=${sym}`;
+  if(ex)u+=`&exchange=${encodeURIComponent(ex)}`;
+  const r=await fetch(u);
+  return r.json();
+}
+
+// Update a stock object in place from a Twelve Data /quote response
+function applyQuote(stock,q){
+  if(!q||q.error||q.status==='error')return false;
+  const close=parseFloat(q.close);
+  const pct=parseFloat(q.percent_change);
+  const chg=parseFloat(q.change);
+  if(isNaN(close))return false;
+  // Currency symbol by market
+  const cur={PK:'PKR ',US:'$',EU:'€',HK:'HK$',SG:'S$',GLOBAL:'$'}[stock.country||'PK'];
+  stock.price=(stock.country==='US'||stock.country==='GLOBAL')?cur+close.toFixed(2):cur+close.toFixed(2);
+  stock.up=!isNaN(pct)?pct>=0:true;
+  stock.pct=(!isNaN(pct)?(pct>=0?'+':'')+pct.toFixed(2):'0.00')+'%';
+  stock.chg=(!isNaN(chg)?(chg>=0?'+':'')+chg.toFixed(2):'0.00');
+  if(q.fifty_two_week&&q.fifty_two_week.range)stock._week52=q.fifty_two_week.range;
+  stock._live=true;
+  return true;
+}
+
+// Refresh quotes for the markets the user actually chose (keeps API usage low).
+async function refreshLiveQuotes(force){
+  if(!LIVE_ENABLED)return;
+  if(!force && Date.now()-LIVE_LAST<60_000)return; // throttle to once/min
+  const markets=(S.P.markets&&S.P.markets.length)?S.P.markets:['PK'];
+  // Build the working set: only stocks in chosen markets, capped to respect rate limits.
+  let set=[];
+  markets.forEach(m=>{
+    if(m==='PK')set=set.concat(PSX.slice(0,8));
+    else set=set.concat(GLOBAL.filter(s=>s.country===m).slice(0,8));
+  });
+  // Fetch sequentially-ish but in parallel batches of 8 (Grow plan = 55+ calls/min)
+  try{
+    const results=await Promise.all(set.map(s=>tdQuote(s).then(q=>({s,q})).catch(()=>({s,q:null}))));
+    let anyKeyError=false;
+    results.forEach(({s,q})=>{
+      if(q&&q.error==='no_key')anyKeyError=true;
+      applyQuote(s,q);
+    });
+    if(anyKeyError){LIVE_ENABLED=false;return;} // key not set yet → stay on demo data silently
+    LIVE_LAST=Date.now();
+    // Re-render the visible screen with fresh numbers
+    if(S.tab==='home')buildHome();
+    else if(S.tab==='markets')buildMarkets();
+  }catch(e){/* network issue → keep last known values */}
+}
+
 const NEWS=[
   {source:'BR',title:'KSE-100 hits record 170,330 as foreign buying accelerates',sectors:['banks'],emoji:'📈',time:'1h ago',summary:'The KSE-100 index closed at an all-time high of 170,330 points, up 0.81%, driven by strong foreign institutional inflows and improving macroeconomic indicators including a declining current account deficit.'},
   {source:'DAWN',title:'SBP holds policy rate at 21% citing inflation caution',sectors:['banks'],emoji:'🏦',time:'3h ago',summary:'The State Bank of Pakistan kept its benchmark interest rate unchanged at 21%, citing the need for continued monetary tightening despite recent improvements in headline inflation figures.'},
@@ -532,6 +635,8 @@ function launch(){
   buildHome();buildMarkets();buildNews();buildProfile();initChat();
   generatePortfolio();
   startSessionWatch();
+  refreshLiveQuotes(true);              // pull real prices on entry
+  setInterval(()=>refreshLiveQuotes(false), 60_000); // keep them fresh every minute
 }
 
 /* ── TABS ── */
@@ -670,24 +775,46 @@ function fallbackPortfolio(){
 /* ── HOME (3 sections: Portfolio, Market, Impact+Suggestions) ── */
 /* ── MARKET SENTIMENT + AI WATCHLIST (home cards) ── */
 function sentimentHTML(){
-  // Sentiment driven by the user's primary market index direction (stable per session)
   const first=(S.P.markets&&S.P.markets[0])||'PK';
-  const upMarket=first!=='HK'; // HK index shown as down in demo data
-  // Score 0-100 (50=neutral). Derive a stable-ish value.
-  const score=upMarket?68:38;
-  const mood=score>=66?'Bullish':score>=55?'Mildly Bullish':score>=45?'Neutral':score>=34?'Mildly Bearish':'Bearish';
-  const moodColor=score>=55?'var(--success)':score<=45?'var(--danger)':'var(--gold)';
-  const angle=(score/100)*180-90; // -90 to +90 deg for needle
+  // Derive a DISTINCT score per market from its actual stock movements + the index direction.
+  // Pull the stocks for this market and measure how many are up vs down and by how much.
+  const marketStocks=(()=>{
+    if(first==='PK')return PSX;
+    return GLOBAL.filter(s=>s.country===first);
+  })();
+  let score;
+  if(marketStocks.length){
+    // Base on % of stocks up, weighted by average move, then nudge by index direction
+    const ups=marketStocks.filter(s=>s.up).length;
+    const upRatio=ups/marketStocks.length; // 0..1
+    const avgMove=marketStocks.reduce((a,s)=>a+parseFloat(s.pct),0)/marketStocks.length; // can be +/-
+    // Map: 50 neutral + ratio influence + momentum influence
+    score=Math.round(40+upRatio*35+Math.max(-12,Math.min(12,avgMove*8)));
+  }else{
+    score=50;
+  }
+  // Index-level adjustment so each market lands on its own number
+  const idxAdj={PK:6,US:4,EU:1,HK:-9,SG:0,GLOBAL:11};
+  score+=(idxAdj[first]||0);
+  score=Math.max(8,Math.min(95,score)); // clamp to a believable range
+  const mood=score>=70?'Bullish':score>=56?'Mildly Bullish':score>=45?'Neutral':score>=32?'Mildly Bearish':'Bearish';
+  const moodColor=score>=56?'var(--success)':score<=44?'var(--danger)':'var(--gold)';
+  const mname={PK:'PSX',US:'US markets',EU:'European markets',HK:'Hong Kong markets',SG:'Singapore markets',GLOBAL:'Crypto markets'}[first]||'Markets';
+  const desc=score>=56
+    ?`${mname} are leaning positive today, with more gainers than decliners and steady buying interest. Sentiment favors a risk-on stance.`
+    :score<=44
+    ?`${mname} are under pressure today, with decliners outweighing gainers. Sentiment is defensive — a time for selectivity and caution.`
+    :`${mname} are mixed today, with gains and losses fairly balanced. Sentiment is neutral — no strong directional signal.`;
   return`<div class="impact-card" style="display:block;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <div><div class="mono" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">MARKET MOOD</div><div style="font-size:18px;font-weight:700;color:${moodColor};">${mood}</div></div>
+      <div><div class="mono" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">${mname.toUpperCase()} MOOD</div><div style="font-size:18px;font-weight:700;color:${moodColor};">${mood}</div></div>
       <div style="text-align:right;"><div class="mono" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">FEAR / GREED</div><div class="mono" style="font-size:18px;font-weight:700;">${score}<span style="font-size:11px;color:var(--muted);">/100</span></div></div>
     </div>
     <div style="position:relative;height:8px;border-radius:4px;background:linear-gradient(to right,var(--danger),var(--gold),var(--success));margin-bottom:6px;">
       <div style="position:absolute;top:-3px;left:${score}%;transform:translateX(-50%);width:3px;height:14px;background:var(--text);border-radius:2px;box-shadow:0 0 4px rgba(0,0,0,.5);"></div>
     </div>
     <div style="display:flex;justify-content:space-between;"><span class="mono" style="font-size:8px;color:var(--danger);">FEAR</span><span class="mono" style="font-size:8px;color:var(--success);">GREED</span></div>
-    <div style="font-size:11px;color:var(--text2);line-height:1.5;margin-top:10px;">${upMarket?'Markets are leaning positive today on strong volumes and buying interest. Sentiment favors risk-on positioning.':'Caution is elevated today with some profit-taking. Sentiment is leaning defensive — a time for selectivity.'}</div>
+    <div style="font-size:11px;color:var(--text2);line-height:1.5;margin-top:10px;">${desc}</div>
   </div>`;
 }
 
@@ -749,7 +876,8 @@ function lastUpdatedText(){
   const d=new Date();
   const hh=d.getHours().toString().padStart(2,'0');
   const mm=d.getMinutes().toString().padStart(2,'0');
-  return `UPDATED ${hh}:${mm} · ${tz[first]||'PKT'}`;
+  const liveTag=(LIVE_ENABLED&&LIVE_LAST>0)?'LIVE · ':'';
+  return `${liveTag}UPDATED ${hh}:${mm} · ${tz[first]||'PKT'}`;
 }
 
 function disclaimerHTML(){
@@ -823,10 +951,14 @@ async function generateIPOReport(encName){
     const prompt=`Generate a pre-IPO risk analysis for ${name}, a private company in the ${ipo.sector} sector expected to IPO (${ipo.date}). Use your knowledge. Respond ONLY with valid JSON (no markdown):
 {"ticker":"${name.toUpperCase()}","name":"${name}","price":"Private","riskScore":<0-100 integer, higher=riskier>,"rating":"<WATCH|PROMISING|CAUTION>","kpis":[{"label":"Last Val","value":"$65B"},{"label":"Funding","value":"$2B"},{"label":"Founded","value":"2010"},{"label":"Sector","value":"${ipo.sector}"}],"priceChart":[<12 numbers showing private valuation trend>],"chartMarkers":[{"i":3,"label":"Series F"},{"i":8,"label":"IPO filing"}],"valuation":[{"metric":"Last Round","value":"$65B","status":"amber","note":"short"},{"metric":"Rev Multiple","value":"25x","status":"red","note":"short"},{"metric":"Burn Rate","value":"High","status":"amber","note":"short"}],"financialHealth":[{"metric":"Cash Position","value":"Strong","status":"green","note":"short"},{"metric":"Profitability","value":"No","status":"red","note":"short"},{"metric":"Runway","value":"3yr+","status":"green","note":"short"}],"growth":[{"metric":"Rev Growth","value":"40%","status":"green","note":"short"},{"metric":"User Growth","value":"High","status":"green","note":"short"},{"metric":"Market Size","value":"Large","status":"green","note":"short"}],"scoreBreakdown":{"valuation":18,"health":24,"growth":27},"quarterly":[{"q":"FY22","rev":"—","eps":"—","change":"—"},{"q":"FY23","rev":"est","eps":"—","change":"+50%"},{"q":"FY24","rev":"est","eps":"—","change":"+40%"}],"earningsUpdate":"2-sentence summary of latest known financials/IPO status.","catalysts":["catalyst 1","catalyst 2","catalyst 3"],"risks":["risk 1","risk 2","risk 3"],"bottomLine":"2-sentence verdict on the IPO prospect."}
 scoreBreakdown: valuation/35, health/35, growth/30. Make data realistic for ${name}.`;
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a JSON-only equity research API. Output only valid JSON.',messages:[{role:'user',content:prompt}]})});
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a JSON-only equity research API. Output only valid JSON. Analyze EACH company on its own specific fundamentals — two different companies must have clearly different scores.',messages:[{role:'user',content:prompt}]})});
     const d=await res.json();
     const r=extractJSON(d.content?.find(b=>b.type==='text')?.text||'');
     if(!r)throw new Error('parse');
+    if(r.scoreBreakdown){
+      const sum=(Number(r.scoreBreakdown.valuation)||0)+(Number(r.scoreBreakdown.health)||0)+(Number(r.scoreBreakdown.growth)||0);
+      if(sum>0)r.riskScore=Math.max(5,Math.min(99,Math.round(sum)));
+    }
     renderRiskReport(r);
   }catch(e){
     document.getElementById('modals').innerHTML=`<div class="modal-bg" onclick="closeModal(event)"><div class="modal-box" onclick="event.stopPropagation()"><div class="modal-handle"></div><div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">Couldn't generate the report. Please try again.</div></div></div>`;
@@ -840,15 +972,33 @@ async function doSearch(){
   document.getElementById('modals').innerHTML=`<div class="modal-bg" style="align-items:center;"><div style="text-align:center;color:var(--text2);"><div class="spinner"></div><div class="mono" style="font-size:11px;letter-spacing:1px;margin-top:14px;">ANALYZING "${q.toUpperCase()}"…</div></div></div>`;
   // Known stock for instant base data
   const match=ALL_STOCKS.find(s=>s.ticker.toLowerCase()===q.toLowerCase()||s.name.toLowerCase().includes(q.toLowerCase()));
+  // Try to pull a REAL live quote first (price, change, 52-wk range)
+  let live=null;
+  if(LIVE_ENABLED){
+    try{
+      const lq=await tdQuote(match||{ticker:q,country:(S.P.markets&&S.P.markets[0])||'PK'});
+      if(lq&&lq.error==='no_key')LIVE_ENABLED=false;
+      else if(lq&&!lq.error&&lq.status!=='error'&&!isNaN(parseFloat(lq.close)))live=lq;
+    }catch(e){}
+  }
   try{
-    const prompt=`Provide a full investor profile for "${q}"${match?` (ticker ${match.ticker}, current price ${match.price})`:''}. If it's a private company not yet public (like a pre-IPO startup), set "public":false. Respond ONLY with valid JSON (no markdown):
-{"ticker":"ENGRO","name":"Engro Corporation","exchange":"PSX","public":true,"price":"${match?match.price:'PKR 342'}","change":"+1.15%","up":true,"pe":"8.4","divYield":"9.2%","marketCap":"PKR 197B","week52":"285 – 358","sector":"Conglomerate","about":"2-sentence company overview.","priceHistory":[<12 monthly numbers showing the trend>],"recommendation":"BUY","recReason":"1-sentence reason for the recommendation tailored to a ${RL(S.P.risk)} investor."}
-recommendation must be BUY, HOLD, or SELL. Use realistic figures.`;
+    const realLine=live?` REAL DATA — price ${parseFloat(live.close).toFixed(2)}, change ${live.percent_change}%, 52-week range ${live.fifty_two_week?live.fifty_two_week.range:'n/a'}. Use these exact figures for price/change/week52; do not invent them.`:'';
+    const prompt=`Provide a full investor profile for "${q}"${match?` (ticker ${match.ticker})`:''}.${realLine} If it's a private company not yet public (like a pre-IPO startup), set "public":false. Respond ONLY with valid JSON (no markdown):
+{"ticker":"ENGRO","name":"Engro Corporation","exchange":"PSX","public":true,"price":"${live?parseFloat(live.close).toFixed(2):(match?match.price:'PKR 342')}","change":"+1.15%","up":true,"pe":"8.4","divYield":"9.2%","marketCap":"PKR 197B","week52":"285 – 358","sector":"Conglomerate","about":"2-sentence company overview.","priceHistory":[<12 monthly numbers showing the trend>],"recommendation":"BUY","recReason":"1-sentence reason for the recommendation tailored to a ${RL(S.P.risk)} investor."}
+recommendation must be BUY, HOLD, or SELL. ${live?'Price, change and week52 are REAL — keep them.':'Use realistic figures.'}`;
     const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a JSON-only equity research API. Output only valid JSON, no markdown.',messages:[{role:'user',content:prompt}]})});
     const d=await res.json();
     const r=extractJSON(d.content?.find(b=>b.type==='text')?.text||'');
     if(!r)throw new Error('parse');
-    if(match){r.price=r.price||match.price;r.up=match.up;}
+    // Overwrite AI guesses with real numbers where we have them
+    if(live){
+      const cur={PK:'PKR ',US:'$',EU:'€',HK:'HK$',SG:'S$',GLOBAL:'$'}[(match&&match.country)||'PK'];
+      r.price=cur+parseFloat(live.close).toFixed(2);
+      const p=parseFloat(live.percent_change);
+      r.up=p>=0;r.change=(p>=0?'+':'')+p.toFixed(2)+'%';
+      if(live.fifty_two_week&&live.fifty_two_week.range)r.week52=live.fifty_two_week.range;
+      r._live=true;
+    }else if(match){r.price=r.price||match.price;r.up=match.up;}
     showSearchResult(r,q);
   }catch(e){
     document.getElementById('modals').innerHTML=`<div class="modal-bg" onclick="closeModal(event)"><div class="modal-box" onclick="event.stopPropagation()"><div class="modal-handle"></div><div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">Couldn't find "${q}". Try another name or ticker.</div></div></div>`;
@@ -1067,12 +1217,21 @@ Use your knowledge to produce realistic figures. Respond ONLY with valid JSON (n
 "risks":["Currency volatility","Regulatory changes","Commodity price swings"],
 "bottomLine":"A fundamentally sound stock with attractive valuation and steady growth, suitable for balanced portfolios."
 }
-scoreBreakdown values: valuation out of 35, health out of 35, growth out of 30. riskScore 0-100 (higher=better/safer). rating one of STRONG BUY/BUY/HOLD/SELL. Make all data realistic for this specific company.`;
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a JSON-only equity research API. Output only valid JSON.',messages:[{role:'user',content:prompt}]})});
+scoreBreakdown values: valuation out of 35, health out of 35, growth out of 30 — base each on ${ticker}'s OWN specific fundamentals (a cheap, healthy, fast-growing company scores high; an expensive, indebted, shrinking one scores low). These three sub-scores determine the overall score, so make them genuinely reflect THIS company. rating one of STRONG BUY/BUY/HOLD/SELL. Make all data realistic and specific to ${ticker} — do not reuse generic numbers.`;
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a JSON-only equity research API. Output only valid JSON. Analyze EACH company on its own specific fundamentals — never reuse a generic score. Two different companies must have clearly different scores.',messages:[{role:'user',content:prompt}]})});
     const d=await res.json();
     let txt=d.content?.find(b=>b.type==='text')?.text||'';
     const r=extractJSON(txt);
     if(!r)throw new Error('parse');
+    // DERIVE the headline riskScore from the sub-scores so it actually reflects the analysis,
+    // rather than trusting the model to pick a meaningful number (it tends to echo the example).
+    if(r.scoreBreakdown){
+      const v=Number(r.scoreBreakdown.valuation)||0;
+      const h=Number(r.scoreBreakdown.health)||0;
+      const g=Number(r.scoreBreakdown.growth)||0;
+      const sum=v+h+g; // out of 100 (35+35+30)
+      if(sum>0)r.riskScore=Math.max(5,Math.min(99,Math.round(sum)));
+    }
     renderRiskReport(r);
   }catch(e){
     document.getElementById('modals').innerHTML=`<div class="modal-bg" onclick="closeModal(event)"><div class="modal-box" onclick="event.stopPropagation()"><div class="modal-handle"></div><div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">Couldn't generate the report. Please try again.</div></div></div>`;
