@@ -437,11 +437,23 @@ const GLOBAL=[
   {ticker:'9988.HK',name:'Alibaba Group',price:'HK$78.65',chg:'-1.10',pct:'-1.38%',up:false,vol:'42M',sector:'intl',country:'HK'},
   {ticker:'3690.HK',name:'Meituan',price:'HK$118.40',chg:'+2.60',pct:'+2.24%',up:true,vol:'15M',sector:'intl',country:'HK'},
   {ticker:'1810.HK',name:'Xiaomi Corp',price:'HK$18.92',chg:'+0.34',pct:'+1.83%',up:true,vol:'88M',sector:'intl',country:'HK'},
+  {ticker:'0941.HK',name:'China Mobile',price:'HK$72.15',chg:'+0.55',pct:'+0.77%',up:true,vol:'12M',sector:'intl',country:'HK'},
+  {ticker:'1299.HK',name:'AIA Group',price:'HK$58.30',chg:'-0.40',pct:'-0.68%',up:false,vol:'20M',sector:'intl',country:'HK'},
+  {ticker:'0388.HK',name:'HK Exchanges',price:'HK$284.60',chg:'+3.20',pct:'+1.14%',up:true,vol:'3.1M',sector:'intl',country:'HK'},
+  {ticker:'9618.HK',name:'JD.com',price:'HK$132.80',chg:'+1.90',pct:'+1.45%',up:true,vol:'9.4M',sector:'intl',country:'HK'},
+  {ticker:'2318.HK',name:'Ping An Insurance',price:'HK$44.75',chg:'-0.25',pct:'-0.56%',up:false,vol:'26M',sector:'intl',country:'HK'},
+  {ticker:'9888.HK',name:'Baidu',price:'HK$88.20',chg:'+1.15',pct:'+1.32%',up:true,vol:'7.8M',sector:'intl',country:'HK'},
   // Singapore
   {ticker:'D05.SI',name:'DBS Group',price:'S$36.80',chg:'+0.42',pct:'+1.15%',up:true,vol:'4.2M',sector:'intl',country:'SG'},
   {ticker:'O39.SI',name:'OCBC Bank',price:'S$14.62',chg:'+0.18',pct:'+1.25%',up:true,vol:'8.1M',sector:'intl',country:'SG'},
   {ticker:'Z74.SI',name:'Singtel',price:'S$3.18',chg:'-0.02',pct:'-0.62%',up:false,vol:'22M',sector:'intl',country:'SG'},
   {ticker:'U11.SI',name:'UOB',price:'S$32.10',chg:'+0.28',pct:'+0.88%',up:true,vol:'3.4M',sector:'intl',country:'SG'},
+  {ticker:'C6L.SI',name:'Singapore Airlines',price:'S$6.44',chg:'+0.05',pct:'+0.78%',up:true,vol:'6.8M',sector:'intl',country:'SG'},
+  {ticker:'C38U.SI',name:'CapitaLand Mall Trust',price:'S$2.01',chg:'-0.01',pct:'-0.49%',up:false,vol:'11M',sector:'intl',country:'SG'},
+  {ticker:'S68.SI',name:'Singapore Exchange',price:'S$11.28',chg:'+0.14',pct:'+1.26%',up:true,vol:'2.1M',sector:'intl',country:'SG'},
+  {ticker:'Y92.SI',name:'Thai Beverage',price:'S$0.52',chg:'+0.01',pct:'+1.96%',up:true,vol:'18M',sector:'intl',country:'SG'},
+  {ticker:'BN4.SI',name:'Keppel Corporation',price:'S$6.72',chg:'-0.06',pct:'-0.88%',up:false,vol:'5.2M',sector:'intl',country:'SG'},
+  {ticker:'BS6.SI',name:'Yangzijiang Shipbuilding',price:'S$2.34',chg:'+0.08',pct:'+3.54%',up:true,vol:'14M',sector:'intl',country:'SG'},
   // Global / Crypto / Commodities
   {ticker:'BTC',name:'Bitcoin',price:'$67,420',chg:'+2,210',pct:'+3.39%',up:true,vol:'—',sector:'crypto',country:'GLOBAL'},
   {ticker:'ETH',name:'Ethereum',price:'$3,842',chg:'+95',pct:'+2.54%',up:true,vol:'—',sector:'crypto',country:'GLOBAL'},
@@ -533,6 +545,128 @@ async function refreshLiveQuotes(force){
     if(S.tab==='home')buildHome();
     else if(S.tab==='markets')buildMarkets();
   }catch(e){/* network issue → keep last known values */}
+}
+
+/* ══════════════════════════════════════════════════════════
+   DYNAMIC STOCK UNIVERSE (real lists from Twelve Data /stocks)
+   - UNIVERSE[market] = full list of {ticker,name,country} for that exchange
+   - Cached in localStorage for 24h so we don't re-fetch the list constantly
+   - TOP_MOVERS[market] = top performers (by % change) with live quotes
+   - Everything falls back to the hardcoded PSX/GLOBAL arrays if the API fails
+   ══════════════════════════════════════════════════════════ */
+// Twelve Data query params per market: PSX by exchange, others by country
+const MARKET_QUERY={
+  PK:{exchange:'PSX'},
+  US:{exchange:'NASDAQ'},   // major US exchange — clean large-cap coverage (AAPL, NVDA, MSFT…)
+  EU:{exchange:'XETRA'},    // Frankfurt/Xetra — Germany's main exchange, deep European coverage
+  HK:{exchange:'HKEX'},     // Hong Kong Stock Exchange
+  SG:{exchange:'SGX'},      // Singapore Exchange
+  GLOBAL:{crypto:true}
+};
+const CUR_SYM={PK:'PKR ',US:'$',EU:'€',HK:'HK$',SG:'S$',GLOBAL:'$'};
+let UNIVERSE={};     // market -> [{ticker,name,country}]
+let TOP_MOVERS={};   // market -> [{ticker,name,price,pct,up,chg,country}]
+
+// Hardcoded fallback universe (what we already have) keyed by market
+function fallbackUniverse(m){
+  if(m==='PK')return PSX.map(s=>({ticker:s.ticker,name:s.name,country:'PK'}));
+  return GLOBAL.filter(s=>s.country===m).map(s=>({ticker:s.ticker,name:s.name,country:m}));
+}
+
+// Load the real stock list for a market (cached 24h in localStorage)
+async function loadUniverse(m){
+  if(UNIVERSE[m])return UNIVERSE[m];
+  // Try cache
+  try{
+    const raw=localStorage.getItem('lf_universe_'+m);
+    if(raw){const o=JSON.parse(raw);if(o.exp>Date.now()&&o.list&&o.list.length){UNIVERSE[m]=o.list;return o.list;}}
+  }catch(e){}
+  // Crypto: use a fixed set (Twelve Data /stocks doesn't list crypto)
+  if(m==='GLOBAL'){
+    const list=[{ticker:'BTC/USD',name:'Bitcoin',country:'GLOBAL'},{ticker:'ETH/USD',name:'Ethereum',country:'GLOBAL'},{ticker:'BNB/USD',name:'BNB',country:'GLOBAL'},{ticker:'SOL/USD',name:'Solana',country:'GLOBAL'},{ticker:'XRP/USD',name:'XRP',country:'GLOBAL'},{ticker:'ADA/USD',name:'Cardano',country:'GLOBAL'},{ticker:'DOGE/USD',name:'Dogecoin',country:'GLOBAL'},{ticker:'XAU/USD',name:'Gold',country:'GLOBAL'}];
+    UNIVERSE[m]=list;return list;
+  }
+  if(!LIVE_ENABLED)return fallbackUniverse(m);
+  try{
+    const q=MARKET_QUERY[m]||{};
+    let u=`/api/market?type=stocks`;
+    if(q.exchange)u+=`&exchange=${encodeURIComponent(q.exchange)}`;
+    if(q.country)u+=`&country=${encodeURIComponent(q.country)}`;
+    const r=await fetch(u);const d=await r.json();
+    if(d&&d.error==='no_key'){LIVE_ENABLED=false;return fallbackUniverse(m);}
+    if(d&&Array.isArray(d.data)&&d.data.length){
+      // Keep common stock only, cap to a workable size
+      const list=d.data.filter(x=>!x.type||/stock/i.test(x.type)).slice(0,120).map(x=>({ticker:x.symbol,name:x.name,country:m}));
+      if(list.length){
+        UNIVERSE[m]=list;
+        try{localStorage.setItem('lf_universe_'+m,JSON.stringify({exp:Date.now()+86_400_000,list}));}catch(e){}
+        return list;
+      }
+    }
+  }catch(e){}
+  return fallbackUniverse(m);
+}
+
+// Batch quote helper — Twelve Data accepts comma-separated symbols (up to 120)
+async function tdBatchQuote(symbols,exchange){
+  const sym=encodeURIComponent(symbols.join(','));
+  let u=`/api/market?type=quote&symbol=${sym}`;
+  if(exchange)u+=`&exchange=${encodeURIComponent(exchange)}`;
+  const r=await fetch(u);return r.json();
+}
+
+// Fetch quotes for a market's universe and rank by % change → top movers
+async function loadTopMovers(m,limit){
+  limit=limit||8;
+  const uni=await loadUniverse(m);
+  if(!uni||!uni.length)return [];
+  if(!LIVE_ENABLED){
+    // No live data — return fallback array slice with existing demo numbers
+    const src=(m==='PK')?PSX:GLOBAL.filter(s=>s.country===m);
+    return src.slice(0,limit);
+  }
+  // To stay within credits, quote up to 30 symbols from the universe, then rank.
+  const sample=uni.slice(0,30);
+  const q=MARKET_QUERY[m]||{};
+  const exchange=q.exchange||'';
+  try{
+    const syms=sample.map(s=>s.ticker);
+    const data=await tdBatchQuote(syms,exchange);
+    if(data&&data.error==='no_key'){LIVE_ENABLED=false;return (m==='PK'?PSX:GLOBAL.filter(s=>s.country===m)).slice(0,limit);}
+    // Batch response is an object keyed by symbol (or a single object if one symbol)
+    const rows=[];
+    const pushRow=(sym,qq)=>{
+      if(!qq||qq.status==='error')return;
+      const close=parseFloat(qq.close);const pct=parseFloat(qq.percent_change);const chg=parseFloat(qq.change);
+      if(isNaN(close))return;
+      const meta=sample.find(s=>s.ticker===sym)||{name:sym};
+      rows.push({ticker:sym,name:qq.name||meta.name||sym,country:m,
+        price:CUR_SYM[m]+close.toFixed(2),
+        up:!isNaN(pct)?pct>=0:true,
+        pct:(!isNaN(pct)?(pct>=0?'+':'')+pct.toFixed(2):'0.00')+'%',
+        chg:(!isNaN(chg)?(chg>=0?'+':'')+chg.toFixed(2):'0.00'),
+        _pctNum:!isNaN(pct)?pct:0,
+        _week52:qq.fifty_two_week&&qq.fifty_two_week.range?qq.fifty_two_week.range:null,
+        _live:true});
+    };
+    if(data&&data.close!==undefined){pushRow(sample[0].ticker,data);} // single-symbol shape
+    else if(data&&typeof data==='object'){Object.keys(data).forEach(k=>{if(data[k]&&typeof data[k]==='object')pushRow(k,data[k]);});}
+    if(!rows.length)return (m==='PK'?PSX:GLOBAL.filter(s=>s.country===m)).slice(0,limit);
+    rows.sort((a,b)=>b._pctNum-a._pctNum); // best performers first
+    TOP_MOVERS[m]=rows;
+    return rows.slice(0,limit);
+  }catch(e){
+    return (m==='PK'?PSX:GLOBAL.filter(s=>s.country===m)).slice(0,limit);
+  }
+}
+
+// Build the home "top performers" set across the user's chosen markets
+async function loadHomeTopMovers(){
+  const markets=(S.P.markets&&S.P.markets.length)?S.P.markets:['PK'];
+  const perMarket=markets.length>1?Math.max(2,Math.floor(6/markets.length)):6;
+  const lists=await Promise.all(markets.map(m=>loadTopMovers(m,perMarket)));
+  let out=[];lists.forEach(l=>out=out.concat(l));
+  return out.slice(0,6);
 }
 
 const NEWS=[
@@ -858,8 +992,8 @@ function buildHome(){
     <div id="watchlist-container">${watchlistHTML()}</div>
     <div class="sec-hdr"><span class="sh">Your AI Portfolio</span></div>
     <div id="pf-container">${pfHTML()}</div>
-    <div class="sec-hdr"><span class="sh">Markets</span><span class="sec-more" onclick="goTab('markets')">See all →</span></div>
-    <div class="mkt-list">${homeMarketStocks().map(s=>mktRow(s)).join('')}</div>
+    <div class="sec-hdr"><span class="sh">⭐ Top Performers</span><span class="sec-more" onclick="goTab('markets')">Explore all →</span></div>
+    <div class="mkt-list" id="home-movers">${homeMarketStocks().map(s=>mktRow(s)).join('')}</div>
     <div class="sec-hdr"><span class="sh">🚀 Upcoming IPOs</span></div>
     <div id="ipo-container">${ipoHTML()}</div>
     <div class="sec-hdr"><span class="sh">How Your Portfolio Is Affected</span></div>
@@ -868,6 +1002,24 @@ function buildHome(){
     <div id="sugg-container">${suggHTML()}</div>
     ${disclaimerHTML()}
   `;
+  // Fill in real top performers asynchronously (won't block first paint)
+  fillHomeTopMovers();
+  fillRealIPOs();
+}
+
+// Replace the home "Top Performers" list with real, ranked live data
+async function fillHomeTopMovers(){
+  if(!LIVE_ENABLED)return;
+  try{
+    const movers=await loadHomeTopMovers();
+    const el=document.getElementById('home-movers');
+    if(el && movers && movers.length){
+      el.innerHTML=movers.map(s=>mktRow(s)).join('');
+      LIVE_LAST=Date.now();
+      // refresh the timestamp badge if present
+      if(S.tab==='home'){/* timestamp updates on next full render */}
+    }
+  }catch(e){}
 }
 
 function lastUpdatedText(){
@@ -923,6 +1075,64 @@ function ipoHTML(){
   return IPOS.map(ipo=>`<div class="impact-card" style="cursor:pointer;" onclick="showIPO('${encodeURIComponent(ipo.name)}')"><div class="impact-icon" style="background:var(--gold-dim);border:0.5px solid var(--border2);">${ipo.emoji}</div><div class="impact-body"><div style="display:flex;justify-content:space-between;align-items:center;"><div class="impact-title">${ipo.name}</div><div class="mono" style="font-size:9px;color:var(--gold);">${ipo.date}</div></div><div class="impact-text">${ipo.sector} · ${ipo.note}</div></div></div>`).join('');
 }
 
+// Pull the REAL upcoming IPO calendar from Twelve Data and render into #ipo-container
+let REAL_IPOS=null;
+async function fillRealIPOs(){
+  if(!LIVE_ENABLED)return;
+  try{
+    const r=await fetch('/api/market?type=ipo');const d=await r.json();
+    if(d&&d.error==='no_key'){LIVE_ENABLED=false;return;}
+    // Response shape: { "2025-07-16": [ {symbol,name,exchange,...} ], ... }
+    let rows=[];
+    if(d&&typeof d==='object'){
+      Object.keys(d).forEach(date=>{
+        if(Array.isArray(d[date])){
+          d[date].forEach(x=>{
+            if(x&&x.name)rows.push({name:x.name,symbol:x.symbol,exchange:x.exchange,date,
+              priceLow:x.price_range_low,priceHigh:x.price_range_high,currency:x.currency});
+          });
+        }
+      });
+    }
+    if(!rows.length)return; // keep the curated fallback list
+    // Sort by date ascending, keep the soonest 8 upcoming
+    const today=new Date().toISOString().slice(0,10);
+    rows=rows.filter(r=>r.date>=today).sort((a,b)=>a.date<b.date?-1:1).slice(0,8);
+    if(!rows.length)return;
+    REAL_IPOS=rows;
+    const el=document.getElementById('ipo-container');
+    if(el){
+      el.innerHTML=rows.map(ipo=>{
+        const pr=(ipo.priceLow&&ipo.priceHigh)?`${ipo.currency||''} ${ipo.priceLow}–${ipo.priceHigh}`:'Price TBA';
+        return `<div class="impact-card" style="cursor:pointer;" onclick="showRealIPO('${encodeURIComponent(ipo.name)}','${encodeURIComponent(ipo.symbol||'')}')"><div class="impact-icon" style="background:var(--gold-dim);border:0.5px solid var(--border2);">🚀</div><div class="impact-body"><div style="display:flex;justify-content:space-between;align-items:center;"><div class="impact-title">${ipo.name}</div><div class="mono" style="font-size:9px;color:var(--gold);">${ipo.date}</div></div><div class="impact-text">${ipo.exchange||''} · ${pr}</div></div></div>`;
+      }).join('');
+    }
+  }catch(e){}
+}
+
+function showRealIPO(encName,encSym){
+  const name=decodeURIComponent(encName);
+  const ipo=(REAL_IPOS||[]).find(i=>i.name===name);
+  const pr=ipo&&ipo.priceLow&&ipo.priceHigh?`${ipo.currency||''} ${ipo.priceLow}–${ipo.priceHigh}`:'Price to be announced';
+  document.getElementById('modals').innerHTML=`
+    <div class="modal-bg" onclick="closeModal(event)">
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px;">
+          <div style="width:44px;height:44px;border-radius:10px;background:var(--bg3);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;">🚀</div>
+          <div><div style="font-size:16px;font-weight:600;">${name}</div><div class="mono" style="font-size:10px;color:var(--gold);margin-top:2px;">${ipo?ipo.exchange||'':''} ${ipo?'· '+ipo.date:''}</div></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:14px;">
+          <div style="flex:1;"><div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">EXPECTED PRICE</div><div class="mono" style="font-size:13px;font-weight:700;">${pr}</div></div>
+          <div style="flex:1;"><div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">TICKER</div><div class="mono" style="font-size:13px;font-weight:700;">${ipo&&ipo.symbol?ipo.symbol:'TBA'}</div></div>
+        </div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:14px;">This is a real upcoming IPO from the market calendar. Once it lists, you'll be able to search and analyse it like any other stock.</div>
+        <button class="pf-action-btn" style="width:100%;" onclick="askIPO('${encName}');closeModal()">Ask Advisor about ${name} →</button>
+        <div style="font-size:9px;color:var(--muted);text-align:center;margin-top:10px;">IPO calendar data · Not financial advice</div>
+      </div>
+    </div>`;
+}
+
 function showIPO(encName){
   const name=decodeURIComponent(encName);
   const ipo=IPOS.find(i=>i.name===name);if(!ipo)return;
@@ -942,16 +1152,29 @@ function showIPO(encName){
 }
 function askIPO(encName){const name=decodeURIComponent(encName);goTab('chat');const ta=document.getElementById('cin');if(ta)ta.value=`Tell me about the upcoming ${name} IPO — should I be interested when it goes public?`;setTimeout(()=>sendMsg(),300);}
 
+// Known facts to anchor each pre-IPO company so reports differ meaningfully
+const IPO_FACTS={
+  'Stripe':'Payments infrastructure. Last valuation ~$65B (down from $95B peak). Profitable/near-profitable, huge processing volume, faces competition from Adyen/PayPal. Founded 2010.',
+  'Databricks':'Data + AI lakehouse platform. Last valuation ~$62B (2024 round). Rapid revenue growth (~$2.4B ARR), not yet profitable, competes with Snowflake. Founded 2013.',
+  'Shein':'Fast-fashion e-commerce. Valuation ~$66B (down from $100B). Profitable, huge revenue, but faces regulatory/ESG scrutiny and forced-labour concerns. Founded 2012.',
+  'Revolut':'Neobank/fintech super-app. Valuation ~$45B (2024 secondary). Profitable in 2023, 45M+ users, awaiting UK banking licence. Founded 2015.',
+  'Klarna':'Buy-now-pay-later fintech. Valuation recovered to ~$14-15B (from $46B peak, crashed to $6.7B). Returned to profitability, filed for US IPO. Founded 2005.',
+  'Discord':'Communications platform, 200M+ MAU. Last valuation ~$15B. Not yet profitable, monetises via Nitro subscriptions, exploring IPO. Founded 2015.'
+};
+
 // Risk report for a not-yet-public IPO company
 async function generateIPOReport(encName){
   const name=decodeURIComponent(encName);
   const ipo=IPOS.find(i=>i.name===name);if(!ipo)return;
   document.getElementById('modals').innerHTML=`<div class="modal-bg" style="align-items:center;"><div style="text-align:center;color:var(--text2);"><div class="spinner"></div><div class="mono" style="font-size:11px;letter-spacing:1px;margin-top:14px;">ANALYZING ${name.toUpperCase()}…</div></div></div>`;
   try{
-    const prompt=`Generate a pre-IPO risk analysis for ${name}, a private company in the ${ipo.sector} sector expected to IPO (${ipo.date}). Use your knowledge. Respond ONLY with valid JSON (no markdown):
-{"ticker":"${name.toUpperCase()}","name":"${name}","price":"Private","riskScore":<0-100 integer, higher=riskier>,"rating":"<WATCH|PROMISING|CAUTION>","kpis":[{"label":"Last Val","value":"$65B"},{"label":"Funding","value":"$2B"},{"label":"Founded","value":"2010"},{"label":"Sector","value":"${ipo.sector}"}],"priceChart":[<12 numbers showing private valuation trend>],"chartMarkers":[{"i":3,"label":"Series F"},{"i":8,"label":"IPO filing"}],"valuation":[{"metric":"Last Round","value":"$65B","status":"amber","note":"short"},{"metric":"Rev Multiple","value":"25x","status":"red","note":"short"},{"metric":"Burn Rate","value":"High","status":"amber","note":"short"}],"financialHealth":[{"metric":"Cash Position","value":"Strong","status":"green","note":"short"},{"metric":"Profitability","value":"No","status":"red","note":"short"},{"metric":"Runway","value":"3yr+","status":"green","note":"short"}],"growth":[{"metric":"Rev Growth","value":"40%","status":"green","note":"short"},{"metric":"User Growth","value":"High","status":"green","note":"short"},{"metric":"Market Size","value":"Large","status":"green","note":"short"}],"scoreBreakdown":{"valuation":18,"health":24,"growth":27},"quarterly":[{"q":"FY22","rev":"—","eps":"—","change":"—"},{"q":"FY23","rev":"est","eps":"—","change":"+50%"},{"q":"FY24","rev":"est","eps":"—","change":"+40%"}],"earningsUpdate":"2-sentence summary of latest known financials/IPO status.","catalysts":["catalyst 1","catalyst 2","catalyst 3"],"risks":["risk 1","risk 2","risk 3"],"bottomLine":"2-sentence verdict on the IPO prospect."}
-scoreBreakdown: valuation/35, health/35, growth/30. Make data realistic for ${name}.`;
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a JSON-only equity research API. Output only valid JSON. Analyze EACH company on its own specific fundamentals — two different companies must have clearly different scores.',messages:[{role:'user',content:prompt}]})});
+    const facts=IPO_FACTS[name]||`${ipo.sector} company expected to IPO ${ipo.date}.`;
+    const prompt=`Generate a pre-IPO risk analysis for ${name}. KNOWN FACTS about this specific company: ${facts}
+Base EVERY field on ${name}'s OWN real situation above — do NOT output generic numbers. A profitable company with a strong balance sheet should score very differently from an unprofitable, richly-valued one.
+Respond ONLY with valid JSON (no markdown). Replace every ALL-CAPS placeholder with a real value specific to ${name}:
+{"ticker":"${name.toUpperCase()}","name":"${name}","price":"Private","riskScore":0,"rating":"WATCH_OR_PROMISING_OR_CAUTION","kpis":[{"label":"Last Val","value":"REAL_VALUATION"},{"label":"Funding","value":"REAL_TOTAL_RAISED"},{"label":"Founded","value":"REAL_YEAR"},{"label":"Sector","value":"${ipo.sector}"}],"priceChart":[TWELVE_NUMBERS_SHOWING_THIS_COMPANYS_VALUATION_TREND],"chartMarkers":[{"i":3,"label":"REAL_MILESTONE"},{"i":8,"label":"REAL_MILESTONE"}],"valuation":[{"metric":"Last Round","value":"REAL","status":"green_amber_or_red","note":"short specific to ${name}"},{"metric":"Rev Multiple","value":"REAL","status":"...","note":"..."},{"metric":"Burn Rate","value":"REAL","status":"...","note":"..."}],"financialHealth":[{"metric":"Profitability","value":"REAL_yes_or_no","status":"...","note":"..."},{"metric":"Cash Position","value":"REAL","status":"...","note":"..."},{"metric":"Runway","value":"REAL","status":"...","note":"..."}],"growth":[{"metric":"Rev Growth","value":"REAL","status":"...","note":"..."},{"metric":"User/Customer Growth","value":"REAL","status":"...","note":"..."},{"metric":"Market Size","value":"REAL","status":"...","note":"..."}],"scoreBreakdown":{"valuation":0,"health":0,"growth":0},"quarterly":[{"q":"FY22","rev":"REAL_OR_EST","eps":"—","change":"REAL"},{"q":"FY23","rev":"REAL_OR_EST","eps":"—","change":"REAL"},{"q":"FY24","rev":"REAL_OR_EST","eps":"—","change":"REAL"}],"earningsUpdate":"2 sentences on ${name}'s latest known financials and IPO status.","catalysts":["3 catalysts specific to ${name}"],"risks":["3 risks specific to ${name}"],"bottomLine":"2-sentence verdict on ${name}'s IPO prospect."}
+scoreBreakdown: valuation out of 35, health out of 35, growth out of 30 — reflect ${name}'s actual strength (profitable + reasonably valued = high; unprofitable + richly valued = low). These three sum to the overall score.`;
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a JSON-only equity research API. Output only valid JSON. Use the specific known facts given about each company — never output generic template numbers.',messages:[{role:'user',content:prompt}]})});
     const d=await res.json();
     const r=extractJSON(d.content?.find(b=>b.type==='text')?.text||'');
     if(!r)throw new Error('parse');
@@ -1416,6 +1639,8 @@ function buildMarkets(){
     <div class="board-tabs">${ordered.map((t,i)=>`<div class="board-tab ${i===0?'active':''}" onclick="filterBoard(this,'${t.label}')">${t.label}</div>`).join('')}</div>
     <div class="mkt-list" id="board-list">${firstList.map(s=>mktRow(s)).join('')}</div>
     ${disclaimerHTML()}`;
+  // Load the real full universe for the first (chosen) market
+  loadBoardReal(ordered[0].label, document.getElementById('board-list'));
 }
 
 function boardList(f){
@@ -1432,13 +1657,45 @@ function boardList(f){
 function searchFrom(q){if(!q)return;doSearchWith(q);}
 async function doSearchWith(q){const tmp=document.createElement('input');tmp.id='home-search';tmp.value=q;tmp.style.display='none';document.body.appendChild(tmp);await doSearch();tmp.remove();}
 
-function mktRow(s){return`<div class="mkt-row" onclick="showHolding('${s.ticker}')"><div class="mkt-left"><div class="mkt-icon">${s.ticker.slice(0,3)}</div><div><div class="mkt-ticker">${s.ticker}</div><div class="mkt-name">${s.name}</div></div></div><div class="mkt-right"><div class="mkt-price">${s.price}</div><div class="mkt-chg ${s.up?'up':'dn'}">${s.up?'▲':'▼'} ${s.pct}</div><div class="mkt-vol">VOL ${s.vol}</div></div></div>`;}
+function mktRow(s){return`<div class="mkt-row" onclick="showHolding('${s.ticker}')"><div class="mkt-left"><div class="mkt-icon">${(s.ticker||'?').slice(0,3)}</div><div><div class="mkt-ticker">${s.ticker}</div><div class="mkt-name">${s.name||''}</div></div></div><div class="mkt-right"><div class="mkt-price">${s.price||'—'}</div><div class="mkt-chg ${s.up?'up':'dn'}">${s.up?'▲':'▼'} ${s.pct||'0.00%'}</div>${s.vol?`<div class="mkt-vol">VOL ${s.vol}</div>`:''}</div></div>`;}
 
 function filterBoard(el,f){
   document.querySelectorAll('.board-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
-  const list=boardList(f);
   const c=document.getElementById('board-list');
+  // Show demo immediately, then swap in the real full list
+  const list=boardList(f);
   if(c)c.innerHTML=list.length>0?list.map(s=>mktRow(s)).join(''):`<div style="padding:28px;text-align:center;color:var(--muted);font-size:11px;" class="mono">NO STOCKS IN THIS BOARD.</div>`;
+  loadBoardReal(f,c);
+}
+
+// Map a board label to a market id
+function boardMarket(f){
+  if(f.includes('PSX'))return 'PK';
+  if(f.includes('US'))return 'US';
+  if(f.includes('Europe'))return 'EU';
+  if(f.includes('HK'))return 'HK';
+  if(f.includes('Singapore'))return 'SG';
+  if(f.includes('Crypto'))return 'GLOBAL';
+  return null; // Gainers has no single market
+}
+
+// Load the real, full ranked market list into the board
+async function loadBoardReal(f,c){
+  if(!LIVE_ENABLED||!c)return;
+  const m=boardMarket(f);
+  if(m){
+    const rows=await loadTopMovers(m,30); // full ranked list for this market
+    if(rows&&rows.length&&c){
+      c.innerHTML=rows.map(s=>mktRow(s)).join('');
+    }
+  }else if(f.includes('Gainers')){
+    // Combine chosen markets' movers, keep only gainers, sort by % change
+    const markets=(S.P.markets&&S.P.markets.length)?S.P.markets:['PK'];
+    const lists=await Promise.all(markets.map(mk=>loadTopMovers(mk,20)));
+    let all=[];lists.forEach(l=>all=all.concat(l));
+    const gainers=all.filter(s=>s.up).sort((a,b)=>(b._pctNum||0)-(a._pctNum||0));
+    if(gainers.length&&c)c.innerHTML=gainers.map(s=>mktRow(s)).join('');
+  }
 }
 
 function filterBoardOLD(el,f){
@@ -1459,17 +1716,59 @@ function filterBoardOLD(el,f){
 function buildNews(){
   const rel=NEWS.filter(n=>n.sectors.some(sec=>S.P.sectors.includes(sec)));
   S.news=rel.length>2?rel:NEWS;
+  const markets=(S.P.markets&&S.P.markets.length)?S.P.markets:['PK'];
+  const mnames={PK:'PSX',US:'US',EU:'EUROPE',HK:'HONG KONG',SG:'SINGAPORE',GLOBAL:'CRYPTO'};
+  const label=markets.map(m=>mnames[m]||m).join(' · ');
   document.getElementById('sc-news').innerHTML=`
     <div style="padding:14px 16px 10px;border-bottom:0.5px solid var(--border);">
       <div style="font-size:18px;font-weight:600;">Market News</div>
-      <div class="mono" style="font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:.5px;">PSX & GLOBAL · TAILORED TO YOU</div>
+      <div class="mono" style="font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:.5px;">${label} · TAILORED TO YOU</div>
     </div>
-    <div class="news-list">${S.news.map(n=>nCard(n)).join('')}</div>`;
+    <div class="news-list" id="news-list">${S.news.map(n=>nCard(n)).join('')}</div>`;
+  // Pull REAL company news for the top stocks in the user's chosen markets
+  fillRealNews();
+}
+
+// Fetch real press releases for the top holdings in the user's markets
+async function fillRealNews(){
+  if(!LIVE_ENABLED)return;
+  try{
+    const markets=(S.P.markets&&S.P.markets.length)?S.P.markets:['PK'];
+    // Get a few top stocks per market to source news from
+    const perMkt=markets.length>1?2:5;
+    const listsRaw=await Promise.all(markets.map(m=>loadTopMovers(m,perMkt)));
+    let stocks=[];listsRaw.forEach(l=>stocks=stocks.concat(l));
+    stocks=stocks.slice(0,6);
+    if(!stocks.length)return;
+    const q=MARKET_QUERY; // for exchange hints
+    const newsRows=[];
+    await Promise.all(stocks.map(async s=>{
+      try{
+        const ex=(q[s.country]&&q[s.country].exchange)?`&exchange=${encodeURIComponent(q[s.country].exchange)}`:'';
+        const r=await fetch(`/api/market?type=news&symbol=${encodeURIComponent(s.ticker)}${ex}`);
+        const d=await r.json();
+        if(d&&d.error==='no_key'){LIVE_ENABLED=false;return;}
+        if(d&&Array.isArray(d.press_releases)){
+          d.press_releases.slice(0,2).forEach(pr=>{
+            // strip HTML tags from body for a clean summary
+            const body=(pr.body||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,240);
+            newsRows.push({source:s.ticker,title:pr.title||'Company update',summary:body,
+              sectors:[],time:pr.datetime?new Date(pr.datetime).toLocaleDateString():'',emoji:'📰',country:s.country});
+          });
+        }
+      }catch(e){}
+    }));
+    if(!newsRows.length)return; // keep curated fallback
+    S.news=newsRows.slice(0,10);
+    const el=document.getElementById('news-list');
+    if(el)el.innerHTML=S.news.map(n=>nCard(n)).join('');
+  }catch(e){}
 }
 
 function nCard(n){
   const t=encodeURIComponent(n.title),su=encodeURIComponent(n.summary||'');
-  return`<div class="ncard" onclick="openNews('${t}','${su}','${n.source}')"><div class="nbody"><div class="nsource">${n.source}</div><div class="ntitle">${n.title}</div><div class="nmeta">${n.sectors.map(s=>`<span class="ntag">${s.toUpperCase()}</span>`).join('')}${n.time}</div></div><div class="nthumb">${n.emoji}</div></div>`;
+  const tags=(n.sectors&&n.sectors.length)?n.sectors.map(s=>`<span class="ntag">${s.toUpperCase()}</span>`).join(''):'';
+  return`<div class="ncard" onclick="openNews('${t}','${su}','${n.source}')"><div class="nbody"><div class="nsource">${n.source}</div><div class="ntitle">${n.title}</div><div class="nmeta">${tags}${n.time||''}</div></div><div class="nthumb">${n.emoji||'📰'}</div></div>`;
 }
 
 function openNews(t,su,source){
