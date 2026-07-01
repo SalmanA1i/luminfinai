@@ -1099,14 +1099,44 @@ async function fillRealIPOs(){
       });
     }
     if(!rows.length)return; // keep the curated fallback list
-    // Sort by date ascending, keep the soonest 8 upcoming
     const today=new Date().toISOString().slice(0,10);
-    rows=rows.filter(r=>r.date>=today).sort((a,b)=>a.date<b.date?-1:1).slice(0,8);
+    rows=rows.filter(r=>r.date>=today).sort((a,b)=>a.date<b.date?-1:1);
     if(!rows.length)return;
-    REAL_IPOS=rows;
+
+    // Map user's chosen markets → the exchange codes that appear in IPO data
+    const marketExch={
+      PK:['PSX','KAR'],
+      US:['NASDAQ','NYSE','NYSE MKT','NYSE AMERICAN','BATS','OTC','AMEX','NYSEARCA'],
+      EU:['XETR','FSX','FRA','LSE','EPA','AMS','SWX','BME','MIL','STO','XETRA','EURONEXT','LON'],
+      HK:['XHKG','HKEX','HKG'],
+      SG:['XSES','SGX','SES'],
+      GLOBAL:[]
+    };
+    const markets=(S.P.markets&&S.P.markets.length)?S.P.markets:['PK'];
+    // Build the set of exchange codes the user cares about
+    let wanted=[];markets.forEach(m=>{wanted=wanted.concat(marketExch[m]||[]);});
+    const matchMarket=(ex)=>{
+      if(!ex)return false;
+      const up=ex.toUpperCase();
+      return wanted.some(w=>up.includes(w.toUpperCase()));
+    };
+
+    // Prefer IPOs from the user's markets
+    let localRows=rows.filter(r=>matchMarket(r.exchange)).slice(0,8);
+    let isGlobal=false;
+    let displayRows=localRows;
+    if(!displayRows.length){
+      // No IPOs in the user's markets → show global upcoming IPOs, clearly labeled
+      displayRows=rows.slice(0,8);
+      isGlobal=true;
+    }
+    REAL_IPOS=displayRows;
     const el=document.getElementById('ipo-container');
     if(el){
-      el.innerHTML=rows.map(ipo=>{
+      const banner=isGlobal
+        ? `<div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:.5px;padding:0 2px 8px;">🌍 GLOBAL IPOs · NONE SCHEDULED IN YOUR MARKETS RIGHT NOW</div>`
+        : `<div class="mono" style="font-size:8px;color:var(--gold);letter-spacing:.5px;padding:0 2px 8px;">📍 UPCOMING IN YOUR MARKETS</div>`;
+      el.innerHTML=banner+displayRows.map(ipo=>{
         const pr=(ipo.priceLow&&ipo.priceHigh)?`${ipo.currency||''} ${ipo.priceLow}–${ipo.priceHigh}`:'Price TBA';
         return `<div class="impact-card" style="cursor:pointer;" onclick="showRealIPO('${encodeURIComponent(ipo.name)}','${encodeURIComponent(ipo.symbol||'')}')"><div class="impact-icon" style="background:var(--gold-dim);border:0.5px solid var(--border2);">🚀</div><div class="impact-body"><div style="display:flex;justify-content:space-between;align-items:center;"><div class="impact-title">${ipo.name}</div><div class="mono" style="font-size:9px;color:var(--gold);">${ipo.date}</div></div><div class="impact-text">${ipo.exchange||''} · ${pr}</div></div></div>`;
       }).join('');
@@ -1131,10 +1161,36 @@ function showRealIPO(encName,encSym){
           <div style="flex:1;"><div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">TICKER</div><div class="mono" style="font-size:13px;font-weight:700;">${ipo&&ipo.symbol?ipo.symbol:'TBA'}</div></div>
         </div>
         <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:14px;">This is a real upcoming IPO from the market calendar. Once it lists, you'll be able to search and analyse it like any other stock.</div>
+        <button class="ob-btn" style="margin-top:0;margin-bottom:9px;" onclick="generateRealIPOReport('${encName}')">📊 Generate Pre-IPO Risk Report</button>
         <button class="pf-action-btn" style="width:100%;" onclick="askIPO('${encName}');closeModal()">Ask Advisor about ${name} →</button>
         <div style="font-size:9px;color:var(--muted);text-align:center;margin-top:10px;">IPO calendar data · Not financial advice</div>
       </div>
     </div>`;
+}
+
+// Risk report for a REAL upcoming IPO (from the calendar) — AI analyses by name
+async function generateRealIPOReport(encName){
+  const name=decodeURIComponent(encName);
+  const ipo=(REAL_IPOS||[]).find(i=>i.name===name);
+  document.getElementById('modals').innerHTML=`<div class="modal-bg" style="align-items:center;"><div style="text-align:center;color:var(--text2);"><div class="spinner"></div><div class="mono" style="font-size:11px;letter-spacing:1px;margin-top:14px;">ANALYZING ${name.toUpperCase()}…</div></div></div>`;
+  try{
+    const ctx=ipo?`Exchange: ${ipo.exchange||'n/a'}, expected date: ${ipo.date||'n/a'}, price range: ${ipo.priceLow&&ipo.priceHigh?(ipo.currency||'')+' '+ipo.priceLow+'–'+ipo.priceHigh:'TBA'}, ticker: ${ipo.symbol||'TBA'}.`:'';
+    const prompt=`Generate a pre-IPO risk analysis for ${name}, a company with a confirmed upcoming IPO. ${ctx} Use your knowledge of this specific company. Base every field on ${name}'s OWN real situation — do not output generic numbers.
+Respond ONLY with valid JSON (no markdown). Replace ALL-CAPS placeholders with real values specific to ${name}:
+{"ticker":"${ipo&&ipo.symbol?ipo.symbol:name.toUpperCase()}","name":"${name}","price":"${ipo&&ipo.priceLow?(ipo.currency||'')+' '+ipo.priceLow+'–'+ipo.priceHigh:'IPO pending'}","riskScore":0,"rating":"WATCH_OR_PROMISING_OR_CAUTION","kpis":[{"label":"Exchange","value":"${ipo&&ipo.exchange?ipo.exchange:'TBA'}"},{"label":"IPO Date","value":"${ipo&&ipo.date?ipo.date:'TBA'}"},{"label":"Sector","value":"REAL_SECTOR"},{"label":"HQ","value":"REAL_COUNTRY"}],"priceChart":[TWELVE_NUMBERS_ROUGH_VALUATION_TREND],"chartMarkers":[{"i":3,"label":"REAL_MILESTONE"},{"i":8,"label":"IPO"}],"valuation":[{"metric":"IPO Valuation","value":"REAL","status":"green_amber_or_red","note":"short"},{"metric":"Rev Multiple","value":"REAL","status":"...","note":"..."},{"metric":"Pricing","value":"REAL","status":"...","note":"..."}],"financialHealth":[{"metric":"Profitability","value":"REAL","status":"...","note":"..."},{"metric":"Debt","value":"REAL","status":"...","note":"..."},{"metric":"Cash","value":"REAL","status":"...","note":"..."}],"growth":[{"metric":"Rev Growth","value":"REAL","status":"...","note":"..."},{"metric":"Market","value":"REAL","status":"...","note":"..."},{"metric":"Outlook","value":"REAL","status":"...","note":"..."}],"scoreBreakdown":{"valuation":0,"health":0,"growth":0},"quarterly":[{"q":"FY22","rev":"REAL_OR_EST","eps":"—","change":"REAL"},{"q":"FY23","rev":"REAL_OR_EST","eps":"—","change":"REAL"},{"q":"FY24","rev":"REAL_OR_EST","eps":"—","change":"REAL"}],"earningsUpdate":"2 sentences on ${name}'s financials and IPO.","catalysts":["3 specific to ${name}"],"risks":["3 specific to ${name}"],"bottomLine":"2-sentence verdict on ${name}'s IPO."}
+scoreBreakdown: valuation/35, health/35, growth/30, reflecting ${name}'s real strength. These sum to the overall score.`;
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a JSON-only equity research API. Output only valid JSON. Use real facts about the specific company; never output generic template numbers.',messages:[{role:'user',content:prompt}]})});
+    const d=await res.json();
+    const r=extractJSON(d.content?.find(b=>b.type==='text')?.text||'');
+    if(!r)throw new Error('parse');
+    if(r.scoreBreakdown){
+      const sum=(Number(r.scoreBreakdown.valuation)||0)+(Number(r.scoreBreakdown.health)||0)+(Number(r.scoreBreakdown.growth)||0);
+      if(sum>0)r.riskScore=Math.max(5,Math.min(99,Math.round(sum)));
+    }
+    renderRiskReport(r);
+  }catch(e){
+    document.getElementById('modals').innerHTML=`<div class="modal-bg" onclick="closeModal(event)"><div class="modal-box" onclick="event.stopPropagation()"><div class="modal-handle"></div><div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">Couldn't generate the report. Please try again.</div></div></div>`;
+  }
 }
 
 function showIPO(encName){
@@ -1718,8 +1774,6 @@ function filterBoardOLD(el,f){
 
 /* ── NEWS ── */
 function buildNews(){
-  const rel=NEWS.filter(n=>n.sectors.some(sec=>S.P.sectors.includes(sec)));
-  S.news=rel.length>2?rel:NEWS;
   const markets=(S.P.markets&&S.P.markets.length)?S.P.markets:['PK'];
   const mnames={PK:'PSX',US:'US',EU:'EUROPE',HK:'HONG KONG',SG:'SINGAPORE',GLOBAL:'CRYPTO'};
   const label=markets.map(m=>mnames[m]||m).join(' · ');
@@ -1728,16 +1782,16 @@ function buildNews(){
       <div style="font-size:18px;font-weight:600;">Market News</div>
       <div class="mono" style="font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:.5px;">${label} · TAILORED TO YOU</div>
     </div>
-    <div class="news-list" id="news-list">${S.news.map(n=>nCard(n)).join('')}</div>`;
+    <div class="news-list" id="news-list"><div style="padding:34px 24px;text-align:center;color:var(--muted);"><div class="spinner" style="margin:0 auto 12px;"></div><div class="mono" style="font-size:9px;letter-spacing:.5px;">LOADING ${label} NEWS…</div></div></div>`;
   // Pull REAL company news for the top stocks in the user's chosen markets
   fillRealNews();
 }
 
 // Fetch real press releases for the top holdings in the user's markets
 async function fillRealNews(){
-  if(!LIVE_ENABLED)return;
+  const markets=(S.P.markets&&S.P.markets.length)?S.P.markets:['PK'];
+  if(!LIVE_ENABLED){await fillAINews(markets);return;}
   try{
-    const markets=(S.P.markets&&S.P.markets.length)?S.P.markets:['PK'];
     // Get a few top stocks per market to source news from
     const perMkt=markets.length>1?2:5;
     const listsRaw=await Promise.all(markets.map(m=>loadTopMovers(m,perMkt)));
@@ -1766,18 +1820,42 @@ async function fillRealNews(){
       S.news=newsRows.slice(0,10);
       if(el)el.innerHTML=S.news.map(n=>nCard(n)).join('');
     }else{
-      // No real news available for the chosen market(s). Be honest rather than
-      // showing hardcoded headlines that don't belong to this market.
-      const mnames={PK:'Pakistani (PSX)',US:'US',EU:'European',HK:'Hong Kong',SG:'Singapore',GLOBAL:'crypto'};
-      const label=markets.map(m=>mnames[m]||m).join(', ');
-      if(el)el.innerHTML=`<div style="padding:40px 24px;text-align:center;color:var(--muted);">
-        <div style="font-size:26px;margin-bottom:12px;">📰</div>
-        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:6px;">Live company news for ${label} markets isn't available from our data provider right now.</div>
-        <div class="mono" style="font-size:9px;letter-spacing:.5px;">CHECK BACK SOON · OR ASK THE ADVISOR FOR MARKET UPDATES</div>
-        <button class="ob-btn" style="margin-top:16px;max-width:220px;" onclick="goTab('chat')">Ask the Advisor →</button>
-      </div>`;
+      // No press-release coverage for these markets → generate an AI market briefing
+      // (real, current-context analysis, clearly labeled as AI), instead of a dead tab.
+      await fillAINews(markets);
     }
   }catch(e){}
+}
+
+// AI-generated market briefing for markets where the data provider has no press releases
+async function fillAINews(markets){
+  const el=document.getElementById('news-list');
+  if(!el)return;
+  const mnames={PK:'Pakistan (PSX)',US:'US',EU:'European',HK:'Hong Kong',SG:'Singapore',GLOBAL:'crypto'};
+  const label=markets.map(m=>mnames[m]||m).join(', ');
+  // Loading state
+  el.innerHTML=`<div style="padding:34px 24px;text-align:center;color:var(--muted);"><div class="spinner" style="margin:0 auto 12px;"></div><div class="mono" style="font-size:9px;letter-spacing:.5px;">GENERATING ${label.toUpperCase()} MARKET BRIEFING…</div></div>`;
+  try{
+    const sectors=(S.P.sectors||[]).join(', ')||'general';
+    const prompt=`Generate 5 concise market news briefing items for the ${label} stock market(s), relevant to an investor interested in ${sectors}. Write them as a financial news editor would — specific, current, and insightful. Respond ONLY with valid JSON (no markdown):
+{"items":[{"source":"MARKET BRIEF","title":"A specific, punchy headline about a real trend, sector move, or macro theme in ${label} markets","summary":"2-3 sentences of specific, useful context an investor would value."}]}
+Make each item distinct and genuinely relevant to ${label}. Do not fabricate specific stock prices or fake breaking events — focus on real, plausible themes, sector trends, and macro context.`;
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a financial markets news editor. Output only valid JSON.',messages:[{role:'user',content:prompt}]})});
+    const d=await res.json();
+    const r=extractJSON(d.content?.find(b=>b.type==='text')?.text||'');
+    if(r&&Array.isArray(r.items)&&r.items.length){
+      S.news=r.items.slice(0,6).map(it=>({source:it.source||'MARKET BRIEF',title:it.title,summary:it.summary,sectors:[],time:'AI BRIEFING',emoji:'🧠'}));
+      el.innerHTML=`<div style="padding:10px 16px 4px;"><div class="mono" style="font-size:8px;color:var(--gold);letter-spacing:1px;">🧠 AI MARKET BRIEFING · ${label.toUpperCase()}</div></div>`+S.news.map(n=>nCard(n)).join('')+`<div class="mono" style="font-size:8px;color:var(--muted);text-align:center;padding:12px;letter-spacing:.5px;">AI-GENERATED BRIEFING · NOT FINANCIAL ADVICE</div>`;
+    }else{
+      throw new Error('no items');
+    }
+  }catch(e){
+    el.innerHTML=`<div style="padding:40px 24px;text-align:center;color:var(--muted);">
+      <div style="font-size:26px;margin-bottom:12px;">📰</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:6px;">News briefing for ${label} markets is unavailable right now.</div>
+      <button class="ob-btn" style="margin-top:16px;max-width:220px;" onclick="goTab('chat')">Ask the Advisor →</button>
+    </div>`;
+  }
 }
 
 function nCard(n){
