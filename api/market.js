@@ -1,4 +1,4 @@
-// Vercel Edge Function — secure proxy to Twelve Data
+// Vercel Edge Function (v2) — secure proxy to Twelve Data
 // Holds the API key server-side and caches responses to respect rate limits.
 //
 // Supported types (via ?type=):
