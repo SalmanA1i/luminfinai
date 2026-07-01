@@ -50,6 +50,20 @@ export default async function handler(req){
   };
   if(req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
 
+  // DIAGNOSTIC: /api/market?debug=1 tells us what Vercel sees, without exposing the key
+  try{
+    const dbg = new URL(req.url).searchParams.get('debug');
+    if(dbg === '1'){
+      const allKeys = Object.keys(process.env).filter(k=>/TWELVE|GROQ|API/i.test(k));
+      return new Response(JSON.stringify({
+        twelvedata_key_present: !!process.env.TWELVEDATA_API_KEY,
+        twelvedata_key_length: (process.env.TWELVEDATA_API_KEY||'').length,
+        groq_key_present: !!process.env.GROQ_API_KEY,
+        matching_env_var_names: allKeys
+      }), { status: 200, headers: cors });
+    }
+  }catch(e){}
+
   if(!KEY){
     return new Response(JSON.stringify({ error: 'no_key', message: 'TWELVEDATA_API_KEY is not set in environment variables.' }), { status: 200, headers: cors });
   }
