@@ -1,16 +1,34 @@
 // Vercel Edge Function — secure proxy to Twelve Data
 // Holds the API key server-side and caches responses to respect rate limits.
-// Endpoints proxied: /quote, /price, /time_series, /profile, /dividends
-// Usage from the app:  /api/market?type=quote&symbol=AAPL
-//                      /api/market?type=quote&symbol=ENGRO&exchange=PSX
-//                      /api/market?type=time_series&symbol=AAPL&interval=1day&outputsize=30
-//                      /api/market?type=profile&symbol=AAPL
+//
+// Supported types (via ?type=):
+//   quote        1 credit   — single or comma-separated symbols (batched)
+//   price        1 credit
+//   time_series  1 credit   — needs interval, outputsize
+//   profile      10 credits — cached 24h
+//   dividends    20 credits — cached 24h
+//   stocks       1 credit   — full symbol list for an exchange, cached 24h
+//   ipo          40 credits — upcoming IPO calendar, cached 12h
+//
+// Examples:
+//   /api/market?type=quote&symbol=AAPL,MSFT,NVDA
+//   /api/market?type=stocks&exchange=PSX
+//   /api/market?type=stocks&country=Singapore
+//   /api/market?type=ipo
 
 export const config = { runtime: 'edge' };
 
-// Simple in-memory cache (per edge instance). Quotes cached 60s, profiles 24h.
 const CACHE = new Map();
-const TTL = { quote: 60_000, price: 60_000, time_series: 300_000, profile: 86_400_000, dividends: 86_400_000 };
+const TTL = {
+  quote: 60_000,          // 1 min
+  price: 60_000,
+  time_series: 300_000,   // 5 min
+  profile: 86_400_000,    // 24 h
+  dividends: 86_400_000,  // 24 h
+  stocks: 86_400_000,     // 24 h — the list of what exists barely changes
+  ipo: 43_200_000,        // 12 h
+  news: 1_800_000         // 30 min — company press releases
+};
 
 function cacheGet(key){
   const hit = CACHE.get(key);
@@ -19,7 +37,7 @@ function cacheGet(key){
   return null;
 }
 function cacheSet(key, val, ttl){
-  CACHE.set(key, { val, exp: Date.now() + (ttl||60_000) });
+  CACHE.set(key, { val, exp: Date.now() + (ttl || 60_000) });
 }
 
 export default async function handler(req){
@@ -39,37 +57,43 @@ export default async function handler(req){
   try{
     const url = new URL(req.url);
     const type = (url.searchParams.get('type') || 'quote').toLowerCase();
-    const symbol = url.searchParams.get('symbol');
-    if(!symbol) return new Response(JSON.stringify({ error: 'no_symbol' }), { status: 200, headers: cors });
-
-    const allowed = ['quote','price','time_series','profile','dividends'];
-    if(!allowed.includes(type)) return new Response(JSON.stringify({ error: 'bad_type' }), { status: 200, headers: cors });
-
-    // Build cache key from all relevant params
+    const symbol = url.searchParams.get('symbol') || '';
     const exchange = url.searchParams.get('exchange') || '';
+    const country = url.searchParams.get('country') || '';
     const interval = url.searchParams.get('interval') || '1day';
     const outputsize = url.searchParams.get('outputsize') || '30';
-    const country = url.searchParams.get('country') || '';
-    const cacheKey = `${type}:${symbol}:${exchange}:${interval}:${outputsize}:${country}`;
 
+    const allowed = ['quote','price','time_series','profile','dividends','stocks','ipo','news'];
+    if(!allowed.includes(type)) return new Response(JSON.stringify({ error: 'bad_type' }), { status: 200, headers: cors });
+
+    // Symbol required for everything except stocks/ipo
+    if(!symbol && !['stocks','ipo'].includes(type)){
+      return new Response(JSON.stringify({ error: 'no_symbol' }), { status: 200, headers: cors });
+    }
+
+    const cacheKey = `${type}:${symbol}:${exchange}:${interval}:${outputsize}:${country}`;
     const cached = cacheGet(cacheKey);
     if(cached) return new Response(JSON.stringify({ ...cached, cached: true }), { status: 200, headers: cors });
 
-    // Build the Twelve Data request
-    const td = new URL(`https://api.twelvedata.com/${type}`);
-    td.searchParams.set('symbol', symbol);
+    // Map our type → Twelve Data path
+    const pathMap = { ipo: 'ipo_calendar', news: 'press_releases' };
+    const tdPath = pathMap[type] || type;
+
+    const td = new URL(`https://api.twelvedata.com/${tdPath}`);
     td.searchParams.set('apikey', KEY);
+    if(symbol) td.searchParams.set('symbol', symbol);
     if(exchange) td.searchParams.set('exchange', exchange);
     if(country) td.searchParams.set('country', country);
     if(type === 'time_series'){ td.searchParams.set('interval', interval); td.searchParams.set('outputsize', outputsize); }
     if(type === 'dividends'){ td.searchParams.set('range', '1y'); }
+    if(type === 'stocks'){ td.searchParams.set('format', 'JSON'); }
+    if(type === 'news'){ td.searchParams.set('outputsize', '3'); }
 
     const r = await fetch(td.toString(), { headers: { 'Accept': 'application/json' } });
     const data = await r.json();
 
-    // Twelve Data signals errors with status:"error" and a code
+    // Twelve Data error object
     if(data && data.status === 'error'){
-      // Don't cache errors. Surface a clean message.
       return new Response(JSON.stringify({ error: 'td_error', code: data.code, message: data.message }), { status: 200, headers: cors });
     }
 
