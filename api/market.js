@@ -86,7 +86,7 @@ export default async function handler(req){
     if(country) td.searchParams.set('country', country);
     if(type === 'time_series'){ td.searchParams.set('interval', interval); td.searchParams.set('outputsize', outputsize); }
     if(type === 'dividends'){ td.searchParams.set('range', '1y'); }
-    if(type === 'stocks'){ td.searchParams.set('format', 'JSON'); }
+    if(type === 'stocks'){ td.searchParams.set('format', 'JSON'); td.searchParams.set('outputsize', '150'); }
     if(type === 'news'){ td.searchParams.set('outputsize', '3'); }
 
     const r = await fetch(td.toString(), { headers: { 'Accept': 'application/json' } });
