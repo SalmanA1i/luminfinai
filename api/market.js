@@ -1,4 +1,4 @@
-// Vercel Edge Function (v2) — secure proxy to Twelve Data
+// Vercel Edge Function — secure proxy to Twelve Data
 // Holds the API key server-side and caches responses to respect rate limits.
 //
 // Supported types (via ?type=):
@@ -41,7 +41,7 @@ function cacheSet(key, val, ttl){
 }
 
 export default async function handler(req){
-  const KEY = process.env.TWELVEDATA_API_KEY;
+  const KEY = process.env.TDKEY;
   const cors = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -54,10 +54,11 @@ export default async function handler(req){
   try{
     const dbg = new URL(req.url).searchParams.get('debug');
     if(dbg === '1'){
-      const allKeys = Object.keys(process.env).filter(k=>/TWELVE|GROQ|API/i.test(k));
+      const allKeys = Object.keys(process.env).filter(k=>/TWELVE|GROQ|API|TD/i.test(k));
       return new Response(JSON.stringify({
-        twelvedata_key_present: !!process.env.TWELVEDATA_API_KEY,
-        twelvedata_key_length: (process.env.TWELVEDATA_API_KEY||'').length,
+        TDKEY_present: !!process.env.TDKEY,
+        TDKEY_length: (process.env.TDKEY||'').length,
+        old_twelvedata_present: !!process.env.TWELVEDATA_API_KEY,
         groq_key_present: !!process.env.GROQ_API_KEY,
         matching_env_var_names: allKeys
       }), { status: 200, headers: cors });
@@ -65,7 +66,7 @@ export default async function handler(req){
   }catch(e){}
 
   if(!KEY){
-    return new Response(JSON.stringify({ error: 'no_key', message: 'TWELVEDATA_API_KEY is not set in environment variables.' }), { status: 200, headers: cors });
+    return new Response(JSON.stringify({ error: 'no_key', message: 'TDKEY is not set in environment variables.' }), { status: 200, headers: cors });
   }
 
   try{
