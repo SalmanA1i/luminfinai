@@ -50,21 +50,6 @@ export default async function handler(req){
   };
   if(req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
 
-  // DIAGNOSTIC: /api/market?debug=1 tells us what Vercel sees, without exposing the key
-  try{
-    const dbg = new URL(req.url).searchParams.get('debug');
-    if(dbg === '1'){
-      const allKeys = Object.keys(process.env).filter(k=>/TWELVE|GROQ|API|TD/i.test(k));
-      return new Response(JSON.stringify({
-        TDKEY_present: !!process.env.TDKEY,
-        TDKEY_length: (process.env.TDKEY||'').length,
-        old_twelvedata_present: !!process.env.TWELVEDATA_API_KEY,
-        groq_key_present: !!process.env.GROQ_API_KEY,
-        matching_env_var_names: allKeys
-      }), { status: 200, headers: cors });
-    }
-  }catch(e){}
-
   if(!KEY){
     return new Response(JSON.stringify({ error: 'no_key', message: 'TDKEY is not set in environment variables.' }), { status: 200, headers: cors });
   }
@@ -105,11 +90,17 @@ export default async function handler(req){
     if(type === 'news'){ td.searchParams.set('outputsize', '3'); }
 
     const r = await fetch(td.toString(), { headers: { 'Accept': 'application/json' } });
-    const data = await r.json();
+    let data = await r.json();
 
     // Twelve Data error object
     if(data && data.status === 'error'){
       return new Response(JSON.stringify({ error: 'td_error', code: data.code, message: data.message }), { status: 200, headers: cors });
+    }
+
+    // Large exchanges (e.g. Hong Kong ~2600 stocks) return huge payloads that can
+    // time out the function. Trim the /stocks list to a workable size server-side.
+    if(type === 'stocks' && data && Array.isArray(data.data) && data.data.length > 150){
+      data = { ...data, data: data.data.slice(0, 150), count: 150, _trimmed: true };
     }
 
     cacheSet(cacheKey, data, TTL[type]);
