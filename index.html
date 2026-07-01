@@ -557,10 +557,10 @@ async function refreshLiveQuotes(force){
 // Twelve Data query params per market: PSX by exchange, others by country
 const MARKET_QUERY={
   PK:{exchange:'PSX'},
-  US:{exchange:'NASDAQ'},   // major US exchange — clean large-cap coverage (AAPL, NVDA, MSFT…)
-  EU:{exchange:'XETRA'},    // Frankfurt/Xetra — Germany's main exchange, deep European coverage
-  HK:{exchange:'HKEX'},     // Hong Kong Stock Exchange
-  SG:{exchange:'SGX'},      // Singapore Exchange
+  US:{exchange:'NASDAQ'},   // NASDAQ is accepted by name
+  EU:{exchange:'XETR'},     // Xetra (Frankfurt) MIC code
+  HK:{exchange:'XHKG'},     // Hong Kong Exchange MIC code
+  SG:{exchange:'XSES'},     // Singapore Exchange MIC code
   GLOBAL:{crypto:true}
 };
 const CUR_SYM={PK:'PKR ',US:'$',EU:'€',HK:'HK$',SG:'S$',GLOBAL:'$'};
@@ -781,6 +781,10 @@ function goTab(tab){
   document.getElementById(`sc-${tab}`).classList.add('active');
   const idx=['home','markets','news','chat'].indexOf(tab);
   if(idx>-1)document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+  // Rebuild the screen so it reflects current markets + pulls fresh live data
+  if(tab==='markets')buildMarkets();
+  else if(tab==='news')buildNews();
+  else if(tab==='home')buildHome();
 }
 
 /* ── PORTFOLIO GENERATION ── */
@@ -1738,7 +1742,7 @@ async function fillRealNews(){
     const perMkt=markets.length>1?2:5;
     const listsRaw=await Promise.all(markets.map(m=>loadTopMovers(m,perMkt)));
     let stocks=[];listsRaw.forEach(l=>stocks=stocks.concat(l));
-    stocks=stocks.slice(0,6);
+    stocks=stocks.slice(0,8);
     if(!stocks.length)return;
     const q=MARKET_QUERY; // for exchange hints
     const newsRows=[];
@@ -1750,7 +1754,6 @@ async function fillRealNews(){
         if(d&&d.error==='no_key'){LIVE_ENABLED=false;return;}
         if(d&&Array.isArray(d.press_releases)){
           d.press_releases.slice(0,2).forEach(pr=>{
-            // strip HTML tags from body for a clean summary
             const body=(pr.body||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,240);
             newsRows.push({source:s.ticker,title:pr.title||'Company update',summary:body,
               sectors:[],time:pr.datetime?new Date(pr.datetime).toLocaleDateString():'',emoji:'📰',country:s.country});
@@ -1758,10 +1761,22 @@ async function fillRealNews(){
         }
       }catch(e){}
     }));
-    if(!newsRows.length)return; // keep curated fallback
-    S.news=newsRows.slice(0,10);
     const el=document.getElementById('news-list');
-    if(el)el.innerHTML=S.news.map(n=>nCard(n)).join('');
+    if(newsRows.length){
+      S.news=newsRows.slice(0,10);
+      if(el)el.innerHTML=S.news.map(n=>nCard(n)).join('');
+    }else{
+      // No real news available for the chosen market(s). Be honest rather than
+      // showing hardcoded headlines that don't belong to this market.
+      const mnames={PK:'Pakistani (PSX)',US:'US',EU:'European',HK:'Hong Kong',SG:'Singapore',GLOBAL:'crypto'};
+      const label=markets.map(m=>mnames[m]||m).join(', ');
+      if(el)el.innerHTML=`<div style="padding:40px 24px;text-align:center;color:var(--muted);">
+        <div style="font-size:26px;margin-bottom:12px;">📰</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:6px;">Live company news for ${label} markets isn't available from our data provider right now.</div>
+        <div class="mono" style="font-size:9px;letter-spacing:.5px;">CHECK BACK SOON · OR ASK THE ADVISOR FOR MARKET UPDATES</div>
+        <button class="ob-btn" style="margin-top:16px;max-width:220px;" onclick="goTab('chat')">Ask the Advisor →</button>
+      </div>`;
+    }
   }catch(e){}
 }
 
