@@ -109,6 +109,41 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 /* SHARED */
 .sh{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase}
 .sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:26px 16px 12px}
+/* ── PHONE-ONLY DECLUTTER (desktop untouched) ── */
+@media (max-width:480px){
+  .sec-hdr{padding:34px 16px 14px}
+  .sec-hdr .sh{font-size:16px}
+  .impact-card{margin-bottom:12px}
+  .mkt-row{padding:15px 16px}
+  .index-bar{padding:16px}
+  .ncard{padding:16px}
+}
+/* Collapsible home sections */
+.col-sec{margin:10px 16px 0;border:0.5px solid var(--border);border-radius:14px;background:var(--bg2);overflow:hidden}
+/* ── PORTFOLIO COMPACT MODE (phones) ── */
+.pf-detail{display:none}
+.pf-card.pf-open .pf-detail{display:block}
+.pf-detail-toggle{width:100%;background:transparent;border:0.5px solid var(--border);border-radius:10px;padding:10px;margin-top:12px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--gold);cursor:pointer}
+@media (min-width:780px){
+  .pf-detail{display:block !important}
+  .pf-detail-toggle{display:none}
+}
+/* ── PHONE DENSITY PASS ── */
+@media (max-width:779px){
+  .sec-hdr{padding:20px 16px 9px}
+  .pf-card{padding:14px}
+  .impact-card{padding:12px}
+  .mkt-row{padding:11px 14px}
+  .mkt-vol{display:none}
+  .col-hd{padding:12px 14px}
+  #home-movers .mkt-row:nth-child(n+5){display:none} /* show top 4 on phones */
+}
+.col-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 15px;cursor:pointer;user-select:none}
+.col-hd .ct{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.col-hd .chev{color:var(--muted);font-size:12px;transition:transform .2s}
+.col-sec.open .chev{transform:rotate(180deg)}
+.col-body{display:none;border-top:0.5px solid var(--border)}
+.col-sec.open .col-body{display:block}
 .sec-more{font-size:11px;color:var(--muted);cursor:pointer}
 .shimmer{background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%);background-size:200% 100%;animation:shim 1.5s infinite;border-radius:6px}
 @keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
@@ -365,16 +400,7 @@ const MARKETS_LIST=[
   {id:'SG',emoji:'🇸🇬',name:'Singapore'},
   {id:'GLOBAL',emoji:'🌍',name:'Crypto & Global'}
 ];
-const DOMAINS=[
-  {id:'tech',emoji:'💻',name:'Tech / IT'},
-  {id:'finance',emoji:'🏦',name:'Finance / Banking'},
-  {id:'medical',emoji:'⚕️',name:'Medical / Health'},
-  {id:'engineering',emoji:'⚙️',name:'Engineering'},
-  {id:'business',emoji:'📊',name:'Business / Trade'},
-  {id:'student',emoji:'🎓',name:'Student'},
-  {id:'energy',emoji:'⚡',name:'Energy / Oil'},
-  {id:'other',emoji:'🌐',name:'Other'}
-];
+
 
 const SECTORS=[
   {id:'banks',emoji:'🏦',name:'Banks & Finance',desc:'Banks, insurance, fintech'},
@@ -528,8 +554,8 @@ async function refreshLiveQuotes(force){
   // Build the working set: only stocks in chosen markets, capped to respect rate limits.
   let set=[];
   markets.forEach(m=>{
-    if(m==='PK')set=set.concat(PSX.slice(0,8));
-    else set=set.concat(GLOBAL.filter(s=>s.country===m).slice(0,8));
+    if(m==='PK')set=set.concat(PSX.slice(0,5));
+    else set=set.concat(GLOBAL.filter(s=>s.country===m).slice(0,5));
   });
   // Fetch sequentially-ish but in parallel batches of 8 (Grow plan = 55+ calls/min)
   try{
@@ -626,7 +652,7 @@ async function loadTopMovers(m,limit){
     return src.slice(0,limit);
   }
   // To stay within credits, quote up to 30 symbols from the universe, then rank.
-  const sample=uni.slice(0,30);
+  const sample=uni.slice(0,12);
   const q=MARKET_QUERY[m]||{};
   const exchange=q.exchange||'';
   try{
@@ -663,10 +689,11 @@ async function loadTopMovers(m,limit){
 // Build the home "top performers" set across the user's chosen markets
 async function loadHomeTopMovers(){
   const markets=(S.P.markets&&S.P.markets.length)?S.P.markets:['PK'];
-  const perMarket=markets.length>1?Math.max(2,Math.floor(6/markets.length)):6;
+  const cap=isPhone()?4:6;
+  const perMarket=markets.length>1?Math.max(2,Math.floor(cap/markets.length)):cap;
   const lists=await Promise.all(markets.map(m=>loadTopMovers(m,perMarket)));
   let out=[];lists.forEach(l=>out=out.concat(l));
-  return out.slice(0,6);
+  return out.slice(0,isPhone()?4:6);
 }
 
 const NEWS=[
@@ -681,6 +708,7 @@ const NEWS=[
 
 const RL=v=>v<20?'Capital Preservation':v<40?'Conservative':v<60?'Balanced':v<80?'Growth':'Aggressive';
 const ini=n=>n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()||'U';
+const isPhone=()=>window.matchMedia&&window.matchMedia('(max-width:480px)').matches;
 // LuminFin logo mark — ascending bars + rising arrow on a gold badge
 function lfMark(size){
   return `<span class="lf-mark ${size||'md'}"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="13" width="3.2" height="7" rx="1" fill="#0a0c12"/><rect x="10.4" y="9" width="3.2" height="11" rx="1" fill="#0a0c12"/><rect x="17.3" y="5" width="3.2" height="15" rx="1" fill="#0a0c12"/><path d="M3 8.5L9 6L14 8L21 3" stroke="#0a0c12" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg></span>`;
@@ -770,7 +798,7 @@ function launch(){
   generatePortfolio();
   startSessionWatch();
   refreshLiveQuotes(true);              // pull real prices on entry
-  setInterval(()=>refreshLiveQuotes(false), 60_000); // keep them fresh every minute
+  setInterval(()=>refreshLiveQuotes(false), 180_000); // refresh every 3 min (rate-limit safe)
 }
 
 /* ── TABS ── */
@@ -961,7 +989,7 @@ function watchlistHTML(){
   const pool=homeMarketStocks();
   if(!pool.length)return'';
   // Stable confidence from ticker
-  const scored=pool.map(s=>{let seed=0;for(const c of s.ticker)seed+=c.charCodeAt(0);const conf=72+(seed%26);return{...s,conf:Math.min(conf,98)};}).sort((a,b)=>b.conf-a.conf).slice(0,4);
+  const scored=pool.map(s=>{let seed=0;for(const c of s.ticker)seed+=c.charCodeAt(0);const conf=72+(seed%26);return{...s,conf:Math.min(conf,98)};}).sort((a,b)=>b.conf-a.conf).slice(0,isPhone()?3:4);
   return scored.map(s=>{
     const cc=s.conf>=90?'var(--success)':s.conf>=80?'var(--gold)':'var(--text2)';
     return`<div class="mkt-row" onclick="showHolding('${s.ticker}')" style="border-radius:0;">
@@ -997,17 +1025,27 @@ function buildHome(){
     <div class="sec-hdr"><span class="sh">⭐ Top Performers</span><span class="sec-more" onclick="goTab('markets')">Explore all →</span></div>
     <div class="mkt-list" id="home-movers">${homeMarketStocks().map(s=>mktRow(s)).join('')}</div>
 
-    <div class="sec-hdr"><span class="sh">Market Sentiment</span></div>
-    <div id="sentiment-container">${sentimentHTML()}</div>
+    <div style="height:14px;"></div>
 
-    <div class="sec-hdr"><span class="sh">⚡ AI Confidence Watchlist</span></div>
-    <div id="watchlist-container">${watchlistHTML()}</div>
+    <div class="col-sec" id="cs-sent">
+      <div class="col-hd" onclick="toggleSec2('cs-sent')"><span class="ct">📊 Market Sentiment</span><span class="chev">▼</span></div>
+      <div class="col-body"><div id="sentiment-container">${sentimentHTML()}</div></div>
+    </div>
 
-    <div class="sec-hdr"><span class="sh">🚀 Upcoming IPOs</span></div>
-    <div id="ipo-container">${ipoHTML()}</div>
+    <div class="col-sec" id="cs-watch">
+      <div class="col-hd" onclick="toggleSec2('cs-watch')"><span class="ct">⚡ AI Confidence Watchlist</span><span class="chev">▼</span></div>
+      <div class="col-body"><div id="watchlist-container">${watchlistHTML()}</div></div>
+    </div>
 
-    <div class="sec-hdr"><span class="sh">Suggestions</span></div>
-    <div id="sugg-container">${suggHTML()}</div>
+    <div class="col-sec" id="cs-ipo">
+      <div class="col-hd" onclick="toggleSec2('cs-ipo')"><span class="ct">🚀 Upcoming IPOs</span><span class="chev">▼</span></div>
+      <div class="col-body"><div id="ipo-container" style="padding:12px;">${ipoHTML()}</div></div>
+    </div>
+
+    <div class="col-sec" id="cs-sugg" style="margin-bottom:6px;">
+      <div class="col-hd" onclick="toggleSec2('cs-sugg')"><span class="ct">💡 Suggestions</span><span class="chev">▼</span></div>
+      <div class="col-body"><div id="sugg-container">${suggHTML()}</div></div>
+    </div>
 
     <div id="impact-container" style="display:none;">${impactHTML()}</div>
     ${disclaimerHTML()}
@@ -1015,6 +1053,11 @@ function buildHome(){
   // Fill in real top performers asynchronously (won't block first paint)
   fillHomeTopMovers();
   fillRealIPOs();
+}
+
+function toggleSec2(id){
+  const el=document.getElementById(id);
+  if(el)el.classList.toggle('open');
 }
 
 // Replace the home "Top Performers" list with real, ranked live data
@@ -1073,9 +1116,10 @@ function homeMarketStocks(){
   if(groups.length===0)groups.push(PSX);
   // Interleave round-robin
   const out=[];let i=0;
-  while(out.length<6){
+  const hmCap=isPhone()?4:6;
+  while(out.length<hmCap){
     let added=false;
-    for(const g of groups){if(g[i]){out.push(g[i]);added=true;if(out.length>=6)break;}}
+    for(const g of groups){if(g[i]){out.push(g[i]);added=true;if(out.length>=hmCap)break;}}
     if(!added)break;i++;
   }
   return out;
@@ -1128,12 +1172,13 @@ async function fillRealIPOs(){
     };
 
     // Prefer IPOs from the user's markets
-    let localRows=rows.filter(r=>matchMarket(r.exchange)).slice(0,8);
+    const ipoCap=isPhone()?4:8;
+    let localRows=rows.filter(r=>matchMarket(r.exchange)).slice(0,ipoCap);
     let isGlobal=false;
     let displayRows=localRows;
     if(!displayRows.length){
       // No IPOs in the user's markets → show global upcoming IPOs, clearly labeled
-      displayRows=rows.slice(0,8);
+      displayRows=rows.slice(0,ipoCap);
       isGlobal=true;
     }
     REAL_IPOS=displayRows;
@@ -1350,7 +1395,7 @@ function pfHTML(){
     const amt=calcAmount(h.alloc);
     return`<div class="holding-row" onclick="showHolding('${h.ticker}')"><div class="holding-left"><div class="holding-icon">${h.ticker.slice(0,3)}</div><div><div class="holding-ticker">${h.ticker}</div><div class="holding-name">${h.name}</div></div></div><div class="holding-right"><div class="holding-alloc">${h.alloc}%</div><div class="holding-amt">${amt}</div></div></div>`;
   }).join('');
-  return`<div class="pf-card">
+  return`<div class="pf-card ${S.pfOpen?'pf-open':''}" id="pf-card">
     <div class="pf-top">
       <div><div class="pf-label">TOTAL ALLOCATION</div><div class="pf-value">${S.P.amount}</div><div class="pf-change up">Expected: ${pf.expectedReturn||'—'}</div></div>
       <div class="pf-badge">${RL(S.P.risk).toUpperCase()}</div>
@@ -1363,14 +1408,27 @@ function pfHTML(){
       <div class="pie-legend">${legend}</div>
     </div>
     ${perfStripHTML(pf)}
-    <div class="holdings-table">${holdings}</div>
-    ${pf.whyExplanation?`<div style="background:var(--gold-dim);border:0.5px solid var(--border2);border-radius:12px;padding:13px;margin-top:14px;"><div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;"><span style="font-size:13px;">💡</span><span class="mono" style="font-size:9px;letter-spacing:1px;color:var(--gold);">WHY THIS PORTFOLIO</span></div><div style="font-size:12px;color:var(--text);line-height:1.65;">${pf.whyExplanation}</div></div>`:''}
-    <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5;">⚠ ${pf.riskNote||'All investments carry risk.'}</div>
+    <div class="pf-detail">
+      <div class="holdings-table">${holdings}</div>
+      ${pf.whyExplanation?`<div style="background:var(--gold-dim);border:0.5px solid var(--border2);border-radius:12px;padding:13px;margin-top:14px;"><div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;"><span style="font-size:13px;">💡</span><span class="mono" style="font-size:9px;letter-spacing:1px;color:var(--gold);">WHY THIS PORTFOLIO</span></div><div style="font-size:12px;color:var(--text);line-height:1.65;">${pf.whyExplanation}</div></div>`:''}
+      <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5;">⚠ ${pf.riskNote||'All investments carry risk.'}</div>
+    </div>
+    <button class="pf-detail-toggle" onclick="togglePfDetail()">${S.pfOpen?'Hide breakdown ▲':'View breakdown ▼'}</button>
     <div class="pf-actions">
       <button class="pf-action-btn" onclick="generatePortfolio()">↻ Suggest Another</button>
       <button class="pf-action-btn primary" onclick="customizePortfolio()">✎ Customize</button>
     </div>
   </div>`;
+}
+
+function togglePfDetail(){
+  S.pfOpen=!S.pfOpen;
+  const card=document.getElementById('pf-card');
+  if(card){
+    card.classList.toggle('pf-open',S.pfOpen);
+    const btn=card.querySelector('.pf-detail-toggle');
+    if(btn)btn.textContent=S.pfOpen?'Hide breakdown ▲':'View breakdown ▼';
+  }
 }
 
 // Deterministic performance figures seeded from the portfolio holdings
@@ -1453,19 +1511,22 @@ function applyCustomize(){
 }
 
 function showHolding(ticker){
-  const s=ALL_STOCKS.find(x=>x.ticker===ticker)||{ticker,name:ticker,price:'—',chg:'',pct:'',up:true};
+  const s=ALL_STOCKS.find(x=>x.ticker===ticker);
   const h=S.portfolio?.holdings.find(x=>x.ticker===ticker);
+  // Live-universe stock (not in the built-in list): open the rich live detail instead of an empty card
+  if(!s&&!h){doSearchWith(ticker);return;}
+  const stock=s||{ticker,name:ticker,price:'—',chg:'',pct:'',up:true};
   document.getElementById('modals').innerHTML=`
     <div class="modal-bg" onclick="closeModal(event)">
       <div class="modal-box" onclick="event.stopPropagation()">
         <div class="modal-handle"></div>
         <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px;">
           <div style="width:44px;height:44px;border-radius:10px;background:var(--bg3);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-weight:700;color:var(--gold);">${ticker.slice(0,3)}</div>
-          <div><div style="font-size:16px;font-weight:600;">${s.name}</div><div class="mono" style="font-size:10px;color:var(--gold);margin-top:2px;">${ticker}</div></div>
+          <div><div style="font-size:16px;font-weight:600;">${stock.name}</div><div class="mono" style="font-size:10px;color:var(--gold);margin-top:2px;">${ticker}</div></div>
         </div>
         <div style="display:flex;gap:18px;margin-bottom:14px;">
-          <div><div class="mono" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">PRICE</div><div class="mono" style="font-size:18px;font-weight:700;">${s.price}</div></div>
-          ${s.pct?`<div><div class="mono" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">CHANGE</div><div class="mono ${s.up?'up':'dn'}" style="font-size:18px;font-weight:700;">${s.up?'+':''}${s.chg}</div></div>`:''}
+          <div><div class="mono" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">PRICE</div><div class="mono" style="font-size:18px;font-weight:700;">${stock.price}</div></div>
+          ${stock.pct?`<div><div class="mono" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">CHANGE</div><div class="mono ${stock.up?'up':'dn'}" style="font-size:18px;font-weight:700;">${stock.up?'+':''}${stock.chg}</div></div>`:''}
         </div>
         ${h?`<div style="background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;"><div class="mono" style="font-size:9px;color:var(--gold);letter-spacing:1px;margin-bottom:6px;">IN YOUR PORTFOLIO</div><div style="font-size:13px;">${h.alloc}% · ${calcAmount(h.alloc)}</div><div style="font-size:11px;color:var(--text2);margin-top:6px;line-height:1.5;">${h.reason||''}</div></div>`:''}
         <button class="ob-btn" style="margin-top:0;margin-bottom:9px;" onclick="generateRiskReport('${ticker}')">📊 Generate Risk Report</button>
@@ -1764,19 +1825,7 @@ async function loadBoardReal(f,c){
   }
 }
 
-function filterBoardOLD(el,f){
-  document.querySelectorAll('.board-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
-  let list=PSX;
-  if(f.includes('PSX'))list=PSX;
-  else if(f.includes('US'))list=GLOBAL.filter(s=>s.country==='US');
-  else if(f.includes('Europe'))list=GLOBAL.filter(s=>s.country==='EU');
-  else if(f.includes('HK'))list=GLOBAL.filter(s=>s.country==='HK');
-  else if(f.includes('Singapore'))list=GLOBAL.filter(s=>s.country==='SG');
-  else if(f==='Gainers')list=[...PSX,...GLOBAL].filter(s=>s.up).sort((a,b)=>parseFloat(b.pct)-parseFloat(a.pct));
-  else if(f==='Crypto')list=GLOBAL.filter(s=>s.sector==='crypto'||s.sector==='commodities');
-  const c=document.getElementById('board-list');
-  if(c)c.innerHTML=list.length>0?list.map(s=>mktRow(s)).join(''):`<div style="padding:28px;text-align:center;color:var(--muted);font-size:11px;" class="mono">NO STOCKS IN THIS BOARD.</div>`;
-}
+
 
 /* ── NEWS ── */
 function buildNews(){
@@ -1803,7 +1852,7 @@ async function fillRealNews(){
     const listsRaw=await Promise.all(markets.map(m=>loadTopMovers(m,perMkt)));
     let stocks=[];listsRaw.forEach(l=>stocks=stocks.concat(l));
     stocks=stocks.slice(0,8);
-    if(!stocks.length)return;
+    if(!stocks.length){await fillAINews(markets);return;}
     const q=MARKET_QUERY; // for exchange hints
     const newsRows=[];
     await Promise.all(stocks.map(async s=>{
