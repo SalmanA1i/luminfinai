@@ -108,7 +108,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 
 /* SHARED */
 .sh{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase}
-.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 10px}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:26px 16px 12px}
 .sec-more{font-size:11px;color:var(--muted);cursor:pointer}
 .shimmer{background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%);background-size:200% 100%;animation:shim 1.5s infinite;border-radius:6px}
 @keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
@@ -979,31 +979,37 @@ function buildHome(){
   el.innerHTML=`
     <div style="padding:12px 16px 0;">
       <div style="position:relative;">
-        <input id="home-search" class="finput" style="padding-left:38px;font-size:14px;" placeholder="Search any stock — e.g. Tesla, SpaceX, OGDC" onkeydown="if(event.key==='Enter')doSearch()"/>
+        <input id="home-search" class="finput" style="padding-left:38px;font-size:14px;" placeholder="Search any stock — e.g. Tesla, OGDC" onkeydown="if(event.key==='Enter')doSearch()"/>
         <svg style="position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </div>
     </div>
     <div class="index-bar" style="margin-top:12px;">
       ${indexBarHTML()}
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 16px 0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 16px 0;">
       <div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:.5px;display:flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--success);display:inline-block;"></span>${lastUpdatedText()}</div>
       <div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:.5px;">⚡ POWERED BY AI</div>
     </div>
-    <div class="sec-hdr"><span class="sh">Today's Market Sentiment</span></div>
-    <div id="sentiment-container">${sentimentHTML()}</div>
-    <div class="sec-hdr"><span class="sh">⚡ AI Confidence Watchlist</span></div>
-    <div id="watchlist-container">${watchlistHTML()}</div>
+
     <div class="sec-hdr"><span class="sh">Your AI Portfolio</span></div>
     <div id="pf-container">${pfHTML()}</div>
+
     <div class="sec-hdr"><span class="sh">⭐ Top Performers</span><span class="sec-more" onclick="goTab('markets')">Explore all →</span></div>
     <div class="mkt-list" id="home-movers">${homeMarketStocks().map(s=>mktRow(s)).join('')}</div>
+
+    <div class="sec-hdr"><span class="sh">Market Sentiment</span></div>
+    <div id="sentiment-container">${sentimentHTML()}</div>
+
+    <div class="sec-hdr"><span class="sh">⚡ AI Confidence Watchlist</span></div>
+    <div id="watchlist-container">${watchlistHTML()}</div>
+
     <div class="sec-hdr"><span class="sh">🚀 Upcoming IPOs</span></div>
     <div id="ipo-container">${ipoHTML()}</div>
-    <div class="sec-hdr"><span class="sh">How Your Portfolio Is Affected</span></div>
-    <div id="impact-container">${impactHTML()}</div>
+
     <div class="sec-hdr"><span class="sh">Suggestions</span></div>
     <div id="sugg-container">${suggHTML()}</div>
+
+    <div id="impact-container" style="display:none;">${impactHTML()}</div>
     ${disclaimerHTML()}
   `;
   // Fill in real top performers asynchronously (won't block first paint)
