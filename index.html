@@ -1223,6 +1223,9 @@ function showRealIPO(encName,encSym){
 async function generateRealIPOReport(encName){
   const name=decodeURIComponent(encName);
   const ipo=(REAL_IPOS||[]).find(i=>i.name===name);
+  const _day=new Date().toISOString().slice(0,10);
+  const _ck='lf_iporep_'+name.replace(/\W+/g,'')+'_'+_day;
+  try{const cached=JSON.parse(localStorage.getItem(_ck)||'null');if(cached){renderRiskReport(cached);return;}}catch(e){}
   document.getElementById('modals').innerHTML=`<div class="modal-bg" style="align-items:center;"><div style="text-align:center;color:var(--text2);"><div class="spinner"></div><div class="mono" style="font-size:11px;letter-spacing:1px;margin-top:14px;">ANALYZING ${name.toUpperCase()}…</div></div></div>`;
   try{
     const ctx=ipo?`Exchange: ${ipo.exchange||'n/a'}, expected date: ${ipo.date||'n/a'}, price range: ${ipo.priceLow&&ipo.priceHigh?(ipo.currency||'')+' '+ipo.priceLow+'–'+ipo.priceHigh:'TBA'}, ticker: ${ipo.symbol||'TBA'}.`:'';
@@ -1230,14 +1233,15 @@ async function generateRealIPOReport(encName){
 Respond ONLY with valid JSON (no markdown). Replace ALL-CAPS placeholders with real values specific to ${name}:
 {"ticker":"${ipo&&ipo.symbol?ipo.symbol:name.toUpperCase()}","name":"${name}","price":"${ipo&&ipo.priceLow?(ipo.currency||'')+' '+ipo.priceLow+'–'+ipo.priceHigh:'IPO pending'}","riskScore":0,"rating":"WATCH_OR_PROMISING_OR_CAUTION","kpis":[{"label":"Exchange","value":"${ipo&&ipo.exchange?ipo.exchange:'TBA'}"},{"label":"IPO Date","value":"${ipo&&ipo.date?ipo.date:'TBA'}"},{"label":"Sector","value":"REAL_SECTOR"},{"label":"HQ","value":"REAL_COUNTRY"}],"priceChart":[TWELVE_NUMBERS_ROUGH_VALUATION_TREND],"chartMarkers":[{"i":3,"label":"REAL_MILESTONE"},{"i":8,"label":"IPO"}],"valuation":[{"metric":"IPO Valuation","value":"REAL","status":"green_amber_or_red","note":"short"},{"metric":"Rev Multiple","value":"REAL","status":"...","note":"..."},{"metric":"Pricing","value":"REAL","status":"...","note":"..."}],"financialHealth":[{"metric":"Profitability","value":"REAL","status":"...","note":"..."},{"metric":"Debt","value":"REAL","status":"...","note":"..."},{"metric":"Cash","value":"REAL","status":"...","note":"..."}],"growth":[{"metric":"Rev Growth","value":"REAL","status":"...","note":"..."},{"metric":"Market","value":"REAL","status":"...","note":"..."},{"metric":"Outlook","value":"REAL","status":"...","note":"..."}],"scoreBreakdown":{"valuation":0,"health":0,"growth":0},"quarterly":[{"q":"FY22","rev":"REAL_OR_EST","eps":"—","change":"REAL"},{"q":"FY23","rev":"REAL_OR_EST","eps":"—","change":"REAL"},{"q":"FY24","rev":"REAL_OR_EST","eps":"—","change":"REAL"}],"earningsUpdate":"2 sentences on ${name}'s financials and IPO.","catalysts":["3 specific to ${name}"],"risks":["3 specific to ${name}"],"bottomLine":"2-sentence verdict on ${name}'s IPO."}
 scoreBreakdown: valuation/35, health/35, growth/30, reflecting ${name}'s real strength. These sum to the overall score.`;
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a JSON-only equity research API. Output only valid JSON. Use real facts about the specific company; never output generic template numbers.',messages:[{role:'user',content:prompt}]})});
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({temperature:0.2,system:'You are a JSON-only equity research API. Output only valid JSON. Use real facts about the specific company; never output generic template numbers.',messages:[{role:'user',content:prompt}]})});
     const d=await res.json();
     const r=extractJSON(d.content?.find(b=>b.type==='text')?.text||'');
     if(!r)throw new Error('parse');
     if(r.scoreBreakdown){
-      const sum=(Number(r.scoreBreakdown.valuation)||0)+(Number(r.scoreBreakdown.health)||0)+(Number(r.scoreBreakdown.growth)||0);
+      const sum=(Number(r.scoreBreakdown.valuation)||0)+(Number(r.scoreBreakdown.growth)||0)+(Number(r.scoreBreakdown.health)||0);
       if(sum>0)r.riskScore=Math.max(5,Math.min(99,Math.round(sum)));
     }
+    try{localStorage.setItem(_ck,JSON.stringify(r));}catch(e){}  // same company, same day → same report
     renderRiskReport(r);
   }catch(e){
     document.getElementById('modals').innerHTML=`<div class="modal-bg" onclick="closeModal(event)"><div class="modal-box" onclick="event.stopPropagation()"><div class="modal-handle"></div><div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">Couldn't generate the report. Please try again.</div></div></div>`;
@@ -1277,6 +1281,9 @@ const IPO_FACTS={
 async function generateIPOReport(encName){
   const name=decodeURIComponent(encName);
   const ipo=IPOS.find(i=>i.name===name);if(!ipo)return;
+  const _day=new Date().toISOString().slice(0,10);
+  const _ck='lf_iporep_'+name.replace(/\W+/g,'')+'_'+_day;
+  try{const cached=JSON.parse(localStorage.getItem(_ck)||'null');if(cached){renderRiskReport(cached);return;}}catch(e){}
   document.getElementById('modals').innerHTML=`<div class="modal-bg" style="align-items:center;"><div style="text-align:center;color:var(--text2);"><div class="spinner"></div><div class="mono" style="font-size:11px;letter-spacing:1px;margin-top:14px;">ANALYZING ${name.toUpperCase()}…</div></div></div>`;
   try{
     const facts=IPO_FACTS[name]||`${ipo.sector} company expected to IPO ${ipo.date}.`;
@@ -1285,14 +1292,15 @@ Base EVERY field on ${name}'s OWN real situation above — do NOT output generic
 Respond ONLY with valid JSON (no markdown). Replace every ALL-CAPS placeholder with a real value specific to ${name}:
 {"ticker":"${name.toUpperCase()}","name":"${name}","price":"Private","riskScore":0,"rating":"WATCH_OR_PROMISING_OR_CAUTION","kpis":[{"label":"Last Val","value":"REAL_VALUATION"},{"label":"Funding","value":"REAL_TOTAL_RAISED"},{"label":"Founded","value":"REAL_YEAR"},{"label":"Sector","value":"${ipo.sector}"}],"priceChart":[TWELVE_NUMBERS_SHOWING_THIS_COMPANYS_VALUATION_TREND],"chartMarkers":[{"i":3,"label":"REAL_MILESTONE"},{"i":8,"label":"REAL_MILESTONE"}],"valuation":[{"metric":"Last Round","value":"REAL","status":"green_amber_or_red","note":"short specific to ${name}"},{"metric":"Rev Multiple","value":"REAL","status":"...","note":"..."},{"metric":"Burn Rate","value":"REAL","status":"...","note":"..."}],"financialHealth":[{"metric":"Profitability","value":"REAL_yes_or_no","status":"...","note":"..."},{"metric":"Cash Position","value":"REAL","status":"...","note":"..."},{"metric":"Runway","value":"REAL","status":"...","note":"..."}],"growth":[{"metric":"Rev Growth","value":"REAL","status":"...","note":"..."},{"metric":"User/Customer Growth","value":"REAL","status":"...","note":"..."},{"metric":"Market Size","value":"REAL","status":"...","note":"..."}],"scoreBreakdown":{"valuation":0,"health":0,"growth":0},"quarterly":[{"q":"FY22","rev":"REAL_OR_EST","eps":"—","change":"REAL"},{"q":"FY23","rev":"REAL_OR_EST","eps":"—","change":"REAL"},{"q":"FY24","rev":"REAL_OR_EST","eps":"—","change":"REAL"}],"earningsUpdate":"2 sentences on ${name}'s latest known financials and IPO status.","catalysts":["3 catalysts specific to ${name}"],"risks":["3 risks specific to ${name}"],"bottomLine":"2-sentence verdict on ${name}'s IPO prospect."}
 scoreBreakdown: valuation out of 35, health out of 35, growth out of 30 — reflect ${name}'s actual strength (profitable + reasonably valued = high; unprofitable + richly valued = low). These three sum to the overall score.`;
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a JSON-only equity research API. Output only valid JSON. Use the specific known facts given about each company — never output generic template numbers.',messages:[{role:'user',content:prompt}]})});
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({temperature:0.2,system:'You are a JSON-only equity research API. Output only valid JSON. Use the specific known facts given about each company — never output generic template numbers.',messages:[{role:'user',content:prompt}]})});
     const d=await res.json();
     const r=extractJSON(d.content?.find(b=>b.type==='text')?.text||'');
     if(!r)throw new Error('parse');
     if(r.scoreBreakdown){
-      const sum=(Number(r.scoreBreakdown.valuation)||0)+(Number(r.scoreBreakdown.health)||0)+(Number(r.scoreBreakdown.growth)||0);
+      const sum=(Number(r.scoreBreakdown.valuation)||0)+(Number(r.scoreBreakdown.growth)||0)+(Number(r.scoreBreakdown.health)||0);
       if(sum>0)r.riskScore=Math.max(5,Math.min(99,Math.round(sum)));
     }
+    try{localStorage.setItem(_ck,JSON.stringify(r));}catch(e){}  // same company, same day → same report
     renderRiskReport(r);
   }catch(e){
     document.getElementById('modals').innerHTML=`<div class="modal-bg" onclick="closeModal(event)"><div class="modal-box" onclick="event.stopPropagation()"><div class="modal-handle"></div><div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">Couldn't generate the report. Please try again.</div></div></div>`;
@@ -1320,7 +1328,7 @@ async function doSearch(){
     const prompt=`Provide a full investor profile for "${q}"${match?` (ticker ${match.ticker})`:''}.${realLine} If it's a private company not yet public (like a pre-IPO startup), set "public":false. Respond ONLY with valid JSON (no markdown):
 {"ticker":"ENGRO","name":"Engro Corporation","exchange":"PSX","public":true,"price":"${live?parseFloat(live.close).toFixed(2):(match?match.price:'PKR 342')}","change":"+1.15%","up":true,"pe":"8.4","divYield":"9.2%","marketCap":"PKR 197B","week52":"285 – 358","sector":"Conglomerate","about":"2-sentence company overview.","priceHistory":[<12 monthly numbers showing the trend>],"recommendation":"BUY","recReason":"1-sentence reason for the recommendation tailored to a ${RL(S.P.risk)} investor."}
 recommendation must be BUY, HOLD, or SELL. ${live?'Price, change and week52 are REAL — keep them.':'Use realistic figures.'}`;
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a JSON-only equity research API. Output only valid JSON, no markdown.',messages:[{role:'user',content:prompt}]})});
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({temperature:0.2,system:'You are a JSON-only equity research API. Output only valid JSON, no markdown.',messages:[{role:'user',content:prompt}]})});
     const d=await res.json();
     const r=extractJSON(d.content?.find(b=>b.type==='text')?.text||'');
     if(!r)throw new Error('parse');
@@ -1538,9 +1546,51 @@ function showHolding(ticker){
 function askStock(t){goTab('chat');const ta=document.getElementById('cin');if(ta)ta.value=`Tell me about ${t} and whether I should hold, buy more, or sell it.`;setTimeout(()=>sendMsg(),300);}
 
 /* ── RISK REPORT ── */
+/* ── DATA-DRIVEN RISK SCORING ──
+   Computes valuation/health/growth sub-scores IN CODE from real Twelve Data
+   /statistics fundamentals. The AI never picks the score — it only explains it. */
+function scoreFundamentals(st,quote){
+  const g=(o,p)=>{try{return p.split('.').reduce((a,k)=>a?.[k],o);}catch(e){return null;}};
+  const num=v=>{const n=parseFloat(v);return isNaN(n)?null:n;};
+  const pe=num(g(st,'statistics.valuations_metrics.trailing_pe'))??num(g(st,'statistics.valuations_metrics.forward_pe'));
+  const pb=num(g(st,'statistics.valuations_metrics.price_to_book_mrq'));
+  const de=num(g(st,'statistics.financials.balance_sheet.total_debt_to_equity_mrq'));
+  const cr=num(g(st,'statistics.financials.balance_sheet.current_ratio_mrq'));
+  const roe=num(g(st,'statistics.financials.return_on_equity_ttm'));
+  const pm=num(g(st,'statistics.financials.profit_margin'));
+  const revG=num(g(st,'statistics.financials.income_statement.quarterly_revenue_growth'))??num(g(st,'statistics.financials.income_statement.revenue_growth'));
+  const epsG=num(g(st,'statistics.financials.income_statement.quarterly_earnings_growth_yoy'));
+  // Position within 52-week range (0=at low, 1=at high)
+  let rangePos=null;
+  if(quote&&quote.fifty_two_week){const lo=num(quote.fifty_two_week.low),hi=num(quote.fifty_two_week.high),c=num(quote.close);
+    if(lo!==null&&hi!==null&&c!==null&&hi>lo)rangePos=(c-lo)/(hi-lo);}
+  // VALUATION /35 : cheap P/E + reasonable P/B + not at peak
+  let v=17;
+  if(pe!==null){v=pe<=0?8:pe<8?32:pe<14?28:pe<20?22:pe<30?15:pe<45?10:6;}
+  if(pb!==null){v+=pb<1?3:pb<3?1:-2;}
+  if(rangePos!==null){v+=rangePos>0.9?-2:rangePos<0.35?2:0;}
+  v=Math.max(3,Math.min(35,Math.round(v)));
+  // HEALTH /35 : low leverage + liquidity + profitability
+  let h=17;
+  if(de!==null){const d=de>10?de/100:de;h=d<0.3?32:d<0.6?28:d<1?23:d<2?15:8;}
+  if(cr!==null){h+=cr>=1.5?3:cr>=1?1:-3;}
+  if(pm!==null){h+=pm>0.15?3:pm>0?1:-5;}
+  if(roe!==null){h+=roe>0.15?2:roe>0?0:-3;}
+  h=Math.max(3,Math.min(35,Math.round(h)));
+  // GROWTH /30 : revenue + earnings momentum
+  let gr=14;
+  if(revG!==null){gr=revG>0.25?27:revG>0.12?23:revG>0.04?18:revG>0?13:revG>-0.1?8:5;}
+  if(epsG!==null){gr+=epsG>0.15?3:epsG>0?1:-3;}
+  gr=Math.max(3,Math.min(30,Math.round(gr)));
+  return{v,h,g:gr,metrics:{pe,pb,de,cr,roe,pm,revG,epsG,rangePos}};
+}
+
 async function generateRiskReport(ticker){
   const s=ALL_STOCKS.find(x=>x.ticker===ticker)||{ticker,name:ticker,price:'—'};
-  // Show loading overlay
+  // Same stock, same day → identical report (kills score variance between clicks)
+  const _day=new Date().toISOString().slice(0,10);
+  const _ck='lf_riskrep_'+ticker+'_'+_day;
+  try{const cached=JSON.parse(localStorage.getItem(_ck)||'null');if(cached){renderRiskReport(cached);return;}}catch(e){}
   document.getElementById('modals').innerHTML=`
     <div class="modal-bg" style="align-items:center;">
       <div style="text-align:center;color:var(--text2);">
@@ -1549,39 +1599,50 @@ async function generateRiskReport(ticker){
       </div>
     </div>`;
   try{
-    const prompt=`You are an equity research analyst. Generate a detailed risk analysis for ${ticker} (${s.name}), a stock${s.country&&s.country!=='GLOBAL'?' on '+(s.country==='US'?'the US market':s.country):' on the Pakistan Stock Exchange (PSX)'}. Current price: ${s.price}.
+    // 1) Pull REAL fundamentals + quote (statistics needs a Pro-tier plan; degrade gracefully)
+    let stats=null,quote=null,scored=null;
+    if(LIVE_ENABLED){
+      try{
+        const base=ticker.replace(/\.(HK|SI)$/,'');
+        const [qr,sr]=await Promise.all([
+          fetch(`/api/market?type=quote&symbol=${encodeURIComponent(ticker)}`).then(r=>r.json()).catch(()=>null),
+          fetch(`/api/market?type=statistics&symbol=${encodeURIComponent(base)}`).then(r=>r.json()).catch(()=>null)
+        ]);
+        if(qr&&!qr.error&&qr.status!=='error')quote=qr;
+        if(sr&&!sr.error&&sr.status!=='error'&&sr.statistics)stats=sr;
+      }catch(e){}
+    }
+    if(stats)scored=scoreFundamentals(stats,quote);
+    const livePrice=quote&&quote.close?parseFloat(quote.close).toFixed(2):null;
 
-Use your knowledge to produce realistic figures. Respond ONLY with valid JSON (no markdown):
-{
-"ticker":"${ticker}","name":"${s.name}","price":"${s.price}","riskScore":62,"rating":"BUY",
-"kpis":[{"label":"P/E","value":"12.4"},{"label":"Div Yield","value":"6.2%"},{"label":"Mkt Cap","value":"PKR 420B"},{"label":"52W High","value":"340"}],
-"priceChart":[100,105,98,110,115,108,120,118,125,130,128,135],
-"chartMarkers":[{"i":3,"label":"Q1 beat"},{"i":8,"label":"Dividend"}],
-"valuation":[{"metric":"P/E Ratio","value":"12.4x","status":"green","note":"Below sector avg"},{"metric":"P/B","value":"1.8x","status":"amber","note":"Fair"},{"metric":"EV/EBITDA","value":"6.2x","status":"green","note":"Attractive"}],
-"financialHealth":[{"metric":"Debt/Equity","value":"0.4","status":"green","note":"Low leverage"},{"metric":"Current Ratio","value":"1.6","status":"green","note":"Healthy"},{"metric":"ROE","value":"18%","status":"green","note":"Strong"}],
-"growth":[{"metric":"Rev Growth","value":"14%","status":"green","note":"Solid"},{"metric":"EPS Growth","value":"9%","status":"amber","note":"Moderate"},{"metric":"Margin Trend","value":"+2pp","status":"green","note":"Expanding"}],
-"scoreBreakdown":{"valuation":28,"health":30,"growth":22},
-"quarterly":[{"q":"Q1 FY25","rev":"45.2B","eps":"8.1","change":"+12%"},{"q":"Q2 FY25","rev":"48.7B","eps":"9.3","change":"+15%"},{"q":"Q3 FY25","rev":"51.1B","eps":"9.8","change":"+5%"}],
-"earningsUpdate":"Latest quarter beat estimates with revenue up 15% YoY driven by higher volumes.",
-"catalysts":["Rising sector demand","Dividend increase expected","Margin expansion"],
-"risks":["Currency volatility","Regulatory changes","Commodity price swings"],
-"bottomLine":"A fundamentally sound stock with attractive valuation and steady growth, suitable for balanced portfolios."
-}
-scoreBreakdown values: valuation out of 35, health out of 35, growth out of 30 — base each on ${ticker}'s OWN specific fundamentals (a cheap, healthy, fast-growing company scores high; an expensive, indebted, shrinking one scores low). These three sub-scores determine the overall score, so make them genuinely reflect THIS company. rating one of STRONG BUY/BUY/HOLD/SELL. Make all data realistic and specific to ${ticker} — do not reuse generic numbers.`;
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a JSON-only equity research API. Output only valid JSON. Analyze EACH company on its own specific fundamentals — never reuse a generic score. Two different companies must have clearly different scores.',messages:[{role:'user',content:prompt}]})});
-    const d=await res.json();
-    let txt=d.content?.find(b=>b.type==='text')?.text||'';
-    const r=extractJSON(txt);
+    // 2) Ask the AI to EXPLAIN — with real numbers injected when we have them
+    const realBlock=scored?`
+REAL DATA (from live market feed — you MUST use these exact figures, do not alter them):
+P/E: ${scored.metrics.pe??'n/a'} | P/B: ${scored.metrics.pb??'n/a'} | Debt/Equity: ${scored.metrics.de??'n/a'} | Current Ratio: ${scored.metrics.cr??'n/a'} | ROE: ${scored.metrics.roe!==null?(scored.metrics.roe*100).toFixed(1)+'%':'n/a'} | Profit Margin: ${scored.metrics.pm!==null?(scored.metrics.pm*100).toFixed(1)+'%':'n/a'} | Revenue Growth: ${scored.metrics.revG!==null?(scored.metrics.revG*100).toFixed(1)+'%':'n/a'} | EPS Growth: ${scored.metrics.epsG!==null?(scored.metrics.epsG*100).toFixed(1)+'%':'n/a'}
+COMPUTED SCORES (already calculated from the real data — copy them verbatim into scoreBreakdown): valuation=${scored.v}, health=${scored.h}, growth=${scored.g}.`:'No live fundamentals available — use your knowledge of this company for realistic figures and score it on its own specific fundamentals.';
+    const prompt=`You are an equity research analyst. Generate a risk analysis for ${ticker} (${s.name})${livePrice?`, current price ${livePrice}`:`, price ${s.price}`}.
+${realBlock}
+Respond ONLY with valid JSON, same shape as this (fill every field, specific to ${ticker}):
+{"ticker":"${ticker}","name":"${s.name}","price":"${livePrice||s.price}","riskScore":0,"rating":"STRONG BUY|BUY|HOLD|SELL","kpis":[{"label":"P/E","value":"..."},{"label":"ROE","value":"..."},{"label":"D/E","value":"..."},{"label":"Rev Growth","value":"..."}],"priceChart":[12 numbers],"chartMarkers":[{"i":3,"label":"..."},{"i":8,"label":"..."}],"valuation":[3 items {metric,value,status:"green|amber|red",note}],"financialHealth":[3 items],"growth":[3 items],"scoreBreakdown":{"valuation":0,"health":0,"growth":0},"quarterly":[3 items {q,rev,eps,change}],"earningsUpdate":"2 sentences","catalysts":["3 items"],"risks":["3 items"],"bottomLine":"2 sentences"}`;
+    const callAI=async()=>{
+      const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({json:true,max_tokens:3000,temperature:0.15,system:'You are a JSON-only equity research API. Output only valid JSON.',messages:[{role:'user',content:prompt}]})});
+      const d=await res.json();
+      return extractJSON(d.content?.find(b=>b.type==='text')?.text||'');
+    };
+    let r=await callAI();
+    if(!r)r=await callAI(); // one retry on parse failure
     if(!r)throw new Error('parse');
-    // DERIVE the headline riskScore from the sub-scores so it actually reflects the analysis,
-    // rather than trusting the model to pick a meaningful number (it tends to echo the example).
-    if(r.scoreBreakdown){
-      const v=Number(r.scoreBreakdown.valuation)||0;
-      const h=Number(r.scoreBreakdown.health)||0;
-      const g=Number(r.scoreBreakdown.growth)||0;
-      const sum=v+h+g; // out of 100 (35+35+30)
+
+    // 3) The score is OURS, not the AI's: enforce computed sub-scores when we have real data
+    if(scored){
+      r.scoreBreakdown={valuation:scored.v,health:scored.h,growth:scored.g};
+      r.riskScore=Math.max(5,Math.min(99,scored.v+scored.h+scored.g));
+      r._live=true;
+    }else if(r.scoreBreakdown){
+      const sum=(Number(r.scoreBreakdown.valuation)||0)+(Number(r.scoreBreakdown.health)||0)+(Number(r.scoreBreakdown.growth)||0);
       if(sum>0)r.riskScore=Math.max(5,Math.min(99,Math.round(sum)));
     }
+    try{localStorage.setItem(_ck,JSON.stringify(r));}catch(e){}  // same stock, same day → same report
     renderRiskReport(r);
   }catch(e){
     document.getElementById('modals').innerHTML=`<div class="modal-bg" onclick="closeModal(event)"><div class="modal-box" onclick="event.stopPropagation()"><div class="modal-handle"></div><div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">Couldn't generate the report. Please try again.</div></div></div>`;
@@ -1895,7 +1956,7 @@ async function fillAINews(markets){
     const prompt=`Generate 5 concise market news briefing items for the ${label} stock market(s), relevant to an investor interested in ${sectors}. Write them as a financial news editor would — specific, current, and insightful. Respond ONLY with valid JSON (no markdown):
 {"items":[{"source":"MARKET BRIEF","title":"A specific, punchy headline about a real trend, sector move, or macro theme in ${label} markets","summary":"2-3 sentences of specific, useful context an investor would value."}]}
 Make each item distinct and genuinely relevant to ${label}. Do not fabricate specific stock prices or fake breaking events — focus on real, plausible themes, sector trends, and macro context.`;
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'You are a financial markets news editor. Output only valid JSON.',messages:[{role:'user',content:prompt}]})});
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({temperature:0.4,system:'You are a financial markets news editor. Output only valid JSON.',messages:[{role:'user',content:prompt}]})});
     const d=await res.json();
     const r=extractJSON(d.content?.find(b=>b.type==='text')?.text||'');
     if(r&&Array.isArray(r.items)&&r.items.length){
