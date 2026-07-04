@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="LuminFin">
 <link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -42,7 +43,7 @@ body{font-family:'Inter',sans-serif;color:var(--text)}
 .up{color:var(--success)}.dn{color:var(--danger)}
 
 /* ── ONBOARDING ── */
-#ob{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;flex-direction:column;align-items:center;padding:calc(var(--safe-top)+36px) 24px calc(var(--safe-bottom)+20px);max-width:430px;margin:0 auto;left:50%;transform:translateX(-50%);width:100%}
+#ob{position:fixed;top:0;bottom:0;left:0;right:0;margin:0 auto;background:var(--bg);z-index:100;display:flex;flex-direction:column;align-items:center;padding:calc(var(--safe-top)+36px) 24px calc(var(--safe-bottom)+20px);max-width:430px;width:100%}
 .ob-logo{font-family:'Space Mono',monospace;font-size:13px;letter-spacing:2px;color:var(--text2);display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .ob-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);animation:glow 2s infinite}
 @keyframes glow{0%,100%{box-shadow:0 0 6px var(--gold)}50%{box-shadow:0 0 16px var(--gold),0 0 28px rgba(232,160,32,.3)}}
@@ -310,7 +311,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 <div id="root">
 
 <!-- ═══ WELCOME SPLASH ═══ -->
-<div id="welcome" style="position:fixed;inset:0;background:var(--bg);z-index:130;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 32px calc(var(--safe-bottom)+32px);max-width:430px;margin:0 auto;left:50%;transform:translateX(-50%);width:100%;">
+<div id="welcome" style="position:fixed;top:0;bottom:0;left:0;right:0;margin:0 auto;background:var(--bg);z-index:130;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 32px calc(var(--safe-bottom)+32px);max-width:430px;width:100%;">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;">
     <div style="margin-bottom:28px;"><span class="lf-mark xl"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="13" width="3.2" height="7" rx="1" fill="#0a0c12"/><rect x="10.4" y="9" width="3.2" height="11" rx="1" fill="#0a0c12"/><rect x="17.3" y="5" width="3.2" height="15" rx="1" fill="#0a0c12"/><path d="M3 8.5L9 6L14 8L21 3" stroke="#0a0c12" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg></span></div>
     <div style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:4px;color:var(--text2);margin-bottom:18px;">LUMINFIN</div>
@@ -322,7 +323,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 </div>
 
 <!-- ═══ AUTH (LOGIN / SIGNUP) ═══ -->
-<div id="auth" style="position:fixed;inset:0;background:var(--bg);z-index:120;display:flex;flex-direction:column;align-items:center;padding:calc(var(--safe-top)+60px) 24px calc(var(--safe-bottom)+24px);max-width:430px;margin:0 auto;left:50%;transform:translateX(-50%);width:100%;">
+<div id="auth" style="position:fixed;top:0;bottom:0;left:0;right:0;margin:0 auto;background:var(--bg);z-index:120;display:flex;flex-direction:column;align-items:center;padding:calc(var(--safe-top)+60px) 24px calc(var(--safe-bottom)+24px);max-width:430px;width:100%;">
   <div class="ob-logo" style="font-size:16px;"><span class="lf-mark sm"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="13" width="3.2" height="7" rx="1" fill="#0a0c12"/><rect x="10.4" y="9" width="3.2" height="11" rx="1" fill="#0a0c12"/><rect x="17.3" y="5" width="3.2" height="15" rx="1" fill="#0a0c12"/><path d="M3 8.5L9 6L14 8L21 3" stroke="#0a0c12" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg></span>LUMINFIN</div>
   <div class="ob-tag" style="margin-bottom:36px;">AI-powered investing for global markets.</div>
   <div class="ob-card" id="auth-card" style="flex:none;max-height:none;"></div>
@@ -1027,22 +1028,22 @@ function buildHome(){
 
     <div style="height:14px;"></div>
 
-    <div class="col-sec" id="cs-sent">
+    <div class="col-sec ${colOpen('cs-sent')?'open':''}" id="cs-sent">
       <div class="col-hd" onclick="toggleSec2('cs-sent')"><span class="ct">📊 Market Sentiment</span><span class="chev">▼</span></div>
       <div class="col-body"><div id="sentiment-container">${sentimentHTML()}</div></div>
     </div>
 
-    <div class="col-sec" id="cs-watch">
+    <div class="col-sec ${colOpen('cs-watch')?'open':''}" id="cs-watch">
       <div class="col-hd" onclick="toggleSec2('cs-watch')"><span class="ct">⚡ AI Confidence Watchlist</span><span class="chev">▼</span></div>
       <div class="col-body"><div id="watchlist-container">${watchlistHTML()}</div></div>
     </div>
 
-    <div class="col-sec" id="cs-ipo">
+    <div class="col-sec ${colOpen('cs-ipo')?'open':''}" id="cs-ipo">
       <div class="col-hd" onclick="toggleSec2('cs-ipo')"><span class="ct">🚀 Upcoming IPOs</span><span class="chev">▼</span></div>
       <div class="col-body"><div id="ipo-container" style="padding:12px;">${ipoHTML()}</div></div>
     </div>
 
-    <div class="col-sec" id="cs-sugg" style="margin-bottom:6px;">
+    <div class="col-sec ${colOpen('cs-sugg')?'open':''}" id="cs-sugg" style="margin-bottom:6px;">
       <div class="col-hd" onclick="toggleSec2('cs-sugg')"><span class="ct">💡 Suggestions</span><span class="chev">▼</span></div>
       <div class="col-body"><div id="sugg-container">${suggHTML()}</div></div>
     </div>
@@ -1055,9 +1056,13 @@ function buildHome(){
   fillRealIPOs();
 }
 
+const COL_OPEN={}; // section id -> user's open/closed choice (survives re-renders)
+function colOpen(id){return (id in COL_OPEN)?COL_OPEN[id]:!isPhone();}
 function toggleSec2(id){
   const el=document.getElementById(id);
-  if(el)el.classList.toggle('open');
+  if(!el)return;
+  el.classList.toggle('open');
+  COL_OPEN[id]=el.classList.contains('open');
 }
 
 // Replace the home "Top Performers" list with real, ranked live data
@@ -2200,7 +2205,12 @@ launch=function(){
         S.P=saved;
         document.getElementById('auth').style.display='none';
         launch();
-        setTimeout(()=>{const w=document.getElementById('welcome');if(w)w.style.display='none';},1800);
+        // Hide the splash: timer + tap-to-skip + first-interaction fallback (Safari throttles timers)
+        const hideWelcome=()=>{const w=document.getElementById('welcome');if(w)w.style.display='none';};
+        setTimeout(hideWelcome,1800);
+        const w=document.getElementById('welcome');
+        if(w)w.addEventListener('click',hideWelcome,{once:true});
+        document.addEventListener('touchstart',hideWelcome,{once:true,passive:true});
         return;
       }
     }
