@@ -27,6 +27,8 @@ const TTL = {
   dividends: 86_400_000,  // 24 h
   stocks: 86_400_000,     // 24 h — the list of what exists barely changes
   ipo: 43_200_000,        // 12 h
+  statistics: 86_400_000, // 24 h — fundamentals change quarterly
+  statistics: 86_400_000, // 24 h — fundamentals (Pro-plan endpoint)
   news: 1_800_000         // 30 min — company press releases
 };
 
@@ -63,7 +65,7 @@ export default async function handler(req){
     const interval = url.searchParams.get('interval') || '1day';
     const outputsize = url.searchParams.get('outputsize') || '30';
 
-    const allowed = ['quote','price','time_series','profile','dividends','stocks','ipo','news'];
+    const allowed = ['quote','price','time_series','profile','dividends','stocks','ipo','news','statistics'];
     if(!allowed.includes(type)) return new Response(JSON.stringify({ error: 'bad_type' }), { status: 200, headers: cors });
 
     // Symbol required for everything except stocks/ipo
