@@ -29,7 +29,6 @@ body{font-family:'Inter',sans-serif;color:var(--text)}
 @media (min-width:780px){
   body{background:radial-gradient(ellipse at top,#13161d 0%,#070809 70%)}
   #root{max-width:420px;height:92vh;max-height:900px;margin:4vh auto;border:0.5px solid var(--border);border-radius:28px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.03)}
-  #welcome,#auth,#ob{max-width:420px;height:92vh;max-height:900px;top:4vh;bottom:auto;border:0.5px solid var(--border);border-radius:28px;box-shadow:0 30px 80px rgba(0,0,0,0.6)}
   .modal-bg{align-items:center !important}
   .modal-box{max-width:400px;border-radius:20px !important;max-height:80vh}
   .desktop-brand{display:none;position:fixed;left:calc(50% - 530px);top:50%;transform:translateY(-50%);width:300px;flex-direction:column;gap:16px;z-index:1}
@@ -318,12 +317,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
     <div style="font-size:32px;font-weight:600;line-height:1.25;margin-bottom:14px;">Welcome to<br>LuminFin AI</div>
     <div style="font-size:15px;color:var(--muted);line-height:1.6;max-width:280px;">Your personal finance advisor — building intelligent portfolios across global markets.</div>
   </div>
-  <button class="ob-btn" style="margin-top:0;max-width:380px;" onclick="document.getElementById('welcome').style.display='none';">Get Started →</button>
+  <button class="ob-btn" style="margin-top:0;max-width:380px;" onclick="showScreen('auth')">Get Started →</button>
   <div style="font-size:11px;color:var(--muted);margin-top:16px;">Markets · Portfolios · AI Insights</div>
 </div>
 
 <!-- ═══ AUTH (LOGIN / SIGNUP) ═══ -->
-<div id="auth" style="position:fixed;top:0;bottom:0;left:0;right:0;margin:0 auto;background:var(--bg);z-index:120;display:flex;flex-direction:column;align-items:center;padding:calc(var(--safe-top)+60px) 24px calc(var(--safe-bottom)+24px);max-width:430px;width:100%;">
+<div id="auth" style="position:fixed;top:0;bottom:0;left:0;right:0;margin:0 auto;background:var(--bg);z-index:120;display:none;flex-direction:column;align-items:center;padding:calc(var(--safe-top)+60px) 24px calc(var(--safe-bottom)+24px);max-width:430px;width:100%;">
   <div class="ob-logo" style="font-size:16px;"><span class="lf-mark sm"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="13" width="3.2" height="7" rx="1" fill="#0a0c12"/><rect x="10.4" y="9" width="3.2" height="11" rx="1" fill="#0a0c12"/><rect x="17.3" y="5" width="3.2" height="15" rx="1" fill="#0a0c12"/><path d="M3 8.5L9 6L14 8L21 3" stroke="#0a0c12" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg></span>LUMINFIN</div>
   <div class="ob-tag" style="margin-bottom:36px;">AI-powered investing for global markets.</div>
   <div class="ob-card" id="auth-card" style="flex:none;max-height:none;"></div>
@@ -338,7 +337,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 </div>
 
 <!-- ═══ APP ═══ -->
-<div id="app">
+<div id="app" style="display:none;">
   <div class="appbar">
     <div class="appbar-logo"><span class="lf-mark sm"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="13" width="3.2" height="7" rx="1" fill="#0a0c12"/><rect x="10.4" y="9" width="3.2" height="11" rx="1" fill="#0a0c12"/><rect x="17.3" y="5" width="3.2" height="15" rx="1" fill="#0a0c12"/><path d="M3 8.5L9 6L14 8L21 3" stroke="#0a0c12" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg></span>LUMINFIN</div>
     <div class="appbar-right">
@@ -792,8 +791,7 @@ function toggleSec(id){
 
 function launch(){
   if(S.P.sectors.length===0)return;
-  document.getElementById('ob').style.display='none';
-  const a=document.getElementById('app');a.style.display='flex';a.style.flexDirection='column';a.style.flex='1';
+  showScreen('app');
   document.getElementById('av-btn').textContent=ini(S.P.name);
   buildHome();buildMarkets();buildNews();buildProfile();initChat();
   generatePortfolio();
@@ -2179,9 +2177,19 @@ function doLogin(){
   else startOnboarding();
 }
 
+
+/* One screen visible at a time — no stacking, nothing can overlap. */
+function showScreen(which){
+  const disp={welcome:'flex',auth:'flex',ob:'flex',app:'flex'};
+  ['welcome','auth','ob','app'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.style.display=(id===which)?disp[id]:'none';
+  });
+  if(which==='app'){const a=document.getElementById('app');if(a){a.style.flexDirection='column';a.style.flex='1';}}
+}
+
 function startOnboarding(){
-  document.getElementById('auth').style.display='none';
-  document.getElementById('ob').style.display='flex';
+  showScreen('ob');
   S.step=0;renderOB();
 }
 
@@ -2203,14 +2211,7 @@ launch=function(){
       let saved=null;try{saved=JSON.parse(localStorage.getItem('lf_profile_'+sess)||'null');}catch(e){}
       if(saved&&saved.amount){
         S.P=saved;
-        document.getElementById('auth').style.display='none';
-        launch();
-        // Hide the splash: timer + tap-to-skip + first-interaction fallback (Safari throttles timers)
-        const hideWelcome=()=>{const w=document.getElementById('welcome');if(w)w.style.display='none';};
-        setTimeout(hideWelcome,1800);
-        const w=document.getElementById('welcome');
-        if(w)w.addEventListener('click',hideWelcome,{once:true});
-        document.addEventListener('touchstart',hideWelcome,{once:true,passive:true});
+        launch(); // launch() switches straight to the app screen — no splash, nothing stacked
         return;
       }
     }
