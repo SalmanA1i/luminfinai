@@ -27,10 +27,16 @@ export default async function handler(req) {
     const groqBody = {
       model: 'openai/gpt-oss-120b',
       messages: messages,
-      max_tokens: 2000,
-      temperature: 0.7,
+      max_tokens: Math.min(body.max_tokens || 2000, 4000),
+      temperature: typeof body.temperature === 'number' ? body.temperature : (body.json ? 0.15 : 0.7),
       reasoning_effort: 'low'
     };
+    // JSON mode: guarantees valid JSON output and hides reasoning traces.
+    // The client sets json:true for structured requests (risk reports, portfolios).
+    if (body.json) {
+      groqBody.response_format = { type: 'json_object' };
+      groqBody.reasoning_format = 'hidden';
+    }
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
