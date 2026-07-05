@@ -119,7 +119,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
   .ncard{padding:16px}
 }
 /* Collapsible home sections */
-.col-sec{margin-bottom:12px;margin:10px 16px 0;border:0.5px solid var(--border);border-radius:14px;background:var(--bg2);overflow:hidden}
 /* ── PORTFOLIO COMPACT MODE (phones) ── */
 .pf-detail{display:none}
 .pf-card.pf-open .pf-detail{display:block}
@@ -135,15 +134,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
   .impact-card{padding:12px}
   .mkt-row{padding:11px 14px}
   .mkt-vol{display:none}
-  .col-hd{padding:12px 14px}
   #home-movers .mkt-row:nth-child(n+5){display:none} /* show top 4 on phones */
 }
-.col-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 15px;cursor:pointer;user-select:none}
-.col-hd .ct{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
-.col-hd .chev{color:var(--muted);font-size:12px;transition:transform .2s}
-.col-sec.open .chev{transform:rotate(180deg)}
-.col-body{display:none;border-top:0.5px solid var(--border)}
-.col-sec.open .col-body{display:block}
 .sec-more{font-size:11px;color:var(--muted);cursor:pointer}
 .shimmer{background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%);background-size:200% 100%;animation:shim 1.5s infinite;border-radius:6px}
 @keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
@@ -1026,25 +1018,17 @@ function buildHome(){
 
     <div style="height:14px;"></div>
 
-    <div class="col-sec ${colOpen('cs-sent')?'open':''}" id="cs-sent">
-      <div class="col-hd" onclick="toggleSec2('cs-sent')"><span class="ct">📊 Market Sentiment</span><span class="chev">▼</span></div>
-      <div class="col-body"><div id="sentiment-container">${sentimentHTML()}</div></div>
-    </div>
+    <div class="sec-hdr"><span class="sh">📊 Market Sentiment</span></div>
+    <div id="sentiment-container">${sentimentHTML()}</div>
 
-    <div class="col-sec ${colOpen('cs-watch')?'open':''}" id="cs-watch">
-      <div class="col-hd" onclick="toggleSec2('cs-watch')"><span class="ct">⚡ AI Confidence Watchlist</span><span class="chev">▼</span></div>
-      <div class="col-body"><div id="watchlist-container">${watchlistHTML()}</div></div>
-    </div>
+    <div class="sec-hdr"><span class="sh">⚡ AI Confidence Watchlist</span></div>
+    <div id="watchlist-container">${watchlistHTML()}</div>
 
-    <div class="col-sec ${colOpen('cs-ipo')?'open':''}" id="cs-ipo">
-      <div class="col-hd" onclick="toggleSec2('cs-ipo')"><span class="ct">🚀 Upcoming IPOs</span><span class="chev">▼</span></div>
-      <div class="col-body"><div id="ipo-container" style="padding:12px;">${ipoHTML()}</div></div>
-    </div>
+    <div class="sec-hdr"><span class="sh">🚀 Upcoming IPOs</span></div>
+    <div id="ipo-container">${ipoHTML()}</div>
 
-    <div class="col-sec ${colOpen('cs-sugg')?'open':''}" id="cs-sugg" style="margin-bottom:6px;">
-      <div class="col-hd" onclick="toggleSec2('cs-sugg')"><span class="ct">💡 Suggestions</span><span class="chev">▼</span></div>
-      <div class="col-body"><div id="sugg-container">${suggHTML()}</div></div>
-    </div>
+    <div class="sec-hdr"><span class="sh">💡 Suggestions</span></div>
+    <div id="sugg-container">${suggHTML()}</div>
 
     <div id="impact-container" style="display:none;">${impactHTML()}</div>
     ${disclaimerHTML()}
@@ -1054,14 +1038,7 @@ function buildHome(){
   fillRealIPOs();
 }
 
-const COL_OPEN={}; // section id -> user's open/closed choice (survives re-renders)
-function colOpen(id){return (id in COL_OPEN)?COL_OPEN[id]:false;} // closed by default everywhere — tap to open
-function toggleSec2(id){
-  const el=document.getElementById(id);
-  if(!el)return;
-  el.classList.toggle('open');
-  COL_OPEN[id]=el.classList.contains('open');
-}
+
 
 // Replace the home "Top Performers" list with real, ranked live data
 async function fillHomeTopMovers(){
