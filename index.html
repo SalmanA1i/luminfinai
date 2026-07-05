@@ -119,7 +119,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
   .ncard{padding:16px}
 }
 /* Collapsible home sections */
-.col-sec{margin:10px 16px 0;border:0.5px solid var(--border);border-radius:14px;background:var(--bg2);overflow:hidden}
+.col-sec{margin-bottom:12px;margin:10px 16px 0;border:0.5px solid var(--border);border-radius:14px;background:var(--bg2);overflow:hidden}
 /* ── PORTFOLIO COMPACT MODE (phones) ── */
 .pf-detail{display:none}
 .pf-card.pf-open .pf-detail{display:block}
@@ -689,11 +689,11 @@ async function loadTopMovers(m,limit){
 // Build the home "top performers" set across the user's chosen markets
 async function loadHomeTopMovers(){
   const markets=(S.P.markets&&S.P.markets.length)?S.P.markets:['PK'];
-  const cap=isPhone()?4:6;
+  const cap=4;
   const perMarket=markets.length>1?Math.max(2,Math.floor(cap/markets.length)):cap;
   const lists=await Promise.all(markets.map(m=>loadTopMovers(m,perMarket)));
   let out=[];lists.forEach(l=>out=out.concat(l));
-  return out.slice(0,isPhone()?4:6);
+  return out.slice(0,4);
 }
 
 const NEWS=[
@@ -988,7 +988,7 @@ function watchlistHTML(){
   const pool=homeMarketStocks();
   if(!pool.length)return'';
   // Stable confidence from ticker
-  const scored=pool.map(s=>{let seed=0;for(const c of s.ticker)seed+=c.charCodeAt(0);const conf=72+(seed%26);return{...s,conf:Math.min(conf,98)};}).sort((a,b)=>b.conf-a.conf).slice(0,isPhone()?3:4);
+  const scored=pool.map(s=>{let seed=0;for(const c of s.ticker)seed+=c.charCodeAt(0);const conf=72+(seed%26);return{...s,conf:Math.min(conf,98)};}).sort((a,b)=>b.conf-a.conf).slice(0,3);
   return scored.map(s=>{
     const cc=s.conf>=90?'var(--success)':s.conf>=80?'var(--gold)':'var(--text2)';
     return`<div class="mkt-row" onclick="showHolding('${s.ticker}')" style="border-radius:0;">
@@ -1015,7 +1015,7 @@ function buildHome(){
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 16px 0;">
       <div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:.5px;display:flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--success);display:inline-block;"></span>${lastUpdatedText()}</div>
-      <div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:.5px;">⚡ POWERED BY AI</div>
+      
     </div>
 
     <div class="sec-hdr"><span class="sh">Your AI Portfolio</span></div>
@@ -1055,7 +1055,7 @@ function buildHome(){
 }
 
 const COL_OPEN={}; // section id -> user's open/closed choice (survives re-renders)
-function colOpen(id){return (id in COL_OPEN)?COL_OPEN[id]:!isPhone();}
+function colOpen(id){return (id in COL_OPEN)?COL_OPEN[id]:false;} // closed by default everywhere — tap to open
 function toggleSec2(id){
   const el=document.getElementById(id);
   if(!el)return;
@@ -1119,7 +1119,7 @@ function homeMarketStocks(){
   if(groups.length===0)groups.push(PSX);
   // Interleave round-robin
   const out=[];let i=0;
-  const hmCap=isPhone()?4:6;
+  const hmCap=4;
   while(out.length<hmCap){
     let added=false;
     for(const g of groups){if(g[i]){out.push(g[i]);added=true;if(out.length>=hmCap)break;}}
@@ -1175,7 +1175,7 @@ async function fillRealIPOs(){
     };
 
     // Prefer IPOs from the user's markets
-    const ipoCap=isPhone()?4:8;
+    const ipoCap=4;
     let localRows=rows.filter(r=>matchMarket(r.exchange)).slice(0,ipoCap);
     let isGlobal=false;
     let displayRows=localRows;
@@ -1825,7 +1825,7 @@ function buildMarkets(){
     <div class="index-bar" style="margin-top:12px;">${indexBarHTML()}</div>
     <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 16px 0;">
       <div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:.5px;display:flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--success);display:inline-block;"></span>${lastUpdatedText()}</div>
-      <div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:.5px;">⚡ POWERED BY AI</div>
+      
     </div>
     <div class="board-tabs">${ordered.map((t,i)=>`<div class="board-tab ${i===0?'active':''}" onclick="filterBoard(this,'${t.label}')">${t.label}</div>`).join('')}</div>
     <div class="mkt-list" id="board-list">${firstList.map(s=>mktRow(s)).join('')}</div>
