@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- LuminFin build v2.0 -->
 <title>LuminFin</title>
 <meta name="theme-color" content="#0a0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -305,7 +306,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 <div id="welcome" style="position:fixed;top:0;bottom:0;left:0;right:0;margin:0 auto;background:var(--bg);z-index:130;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 32px calc(var(--safe-bottom)+32px);max-width:430px;width:100%;">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;">
     <div style="margin-bottom:28px;"><span class="lf-mark xl"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="13" width="3.2" height="7" rx="1" fill="#0a0c12"/><rect x="10.4" y="9" width="3.2" height="11" rx="1" fill="#0a0c12"/><rect x="17.3" y="5" width="3.2" height="15" rx="1" fill="#0a0c12"/><path d="M3 8.5L9 6L14 8L21 3" stroke="#0a0c12" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg></span></div>
-    <div style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:4px;color:var(--text2);margin-bottom:18px;">LUMINFIN</div>
+    <div style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:3px;color:var(--text2);margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:8px;"><span class="lf-mark sm"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="13" width="3.2" height="7" rx="1" fill="#0a0c12"/><rect x="10.4" y="9" width="3.2" height="11" rx="1" fill="#0a0c12"/><rect x="17.3" y="5" width="3.2" height="15" rx="1" fill="#0a0c12"/><path d="M3 8.5L9 6L14 8L21 3" stroke="#0a0c12" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg></span>LUMINFIN</div>
     <div style="font-size:32px;font-weight:600;line-height:1.25;margin-bottom:14px;">Welcome to<br>LuminFin AI</div>
     <div style="font-size:15px;color:var(--muted);line-height:1.6;max-width:280px;">Your personal finance advisor — building intelligent portfolios across global markets.</div>
   </div>
@@ -319,6 +320,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
   <div class="ob-tag" style="margin-bottom:36px;">AI-powered investing for global markets.</div>
   <div class="ob-card" id="auth-card" style="flex:none;max-height:none;"></div>
 </div>
+<script>try{if(localStorage.getItem('lf_session')){var _w=document.getElementById('welcome');if(_w)_w.style.display='none';}}catch(e){}</script>
 
 <!-- ═══ ONBOARDING ═══ -->
 <div id="ob" style="display:none;">
@@ -1355,7 +1357,7 @@ function showSearchResult(r,q){
         </div>
         ${isPublic?`
         <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px;">
-          <div class="mono" style="font-size:24px;font-weight:700;">${r.price||'—'}</div>
+          <div class="mono" style="font-size:24px;font-weight:700;">${r.price||'—'}${r._live?' <span class="mono" style="font-size:8px;color:#3db87a;border:0.5px solid #3db87a;border-radius:4px;padding:1px 5px;vertical-align:middle;letter-spacing:.5px;">LIVE · TWELVE DATA</span>':''}</div>
           ${r.change?`<div class="mono ${r.up?'up':'dn'}" style="font-size:13px;font-weight:700;">${r.up?'▲':'▼'} ${r.change}</div>`:''}
         </div>
         ${r.priceHistory?`<div style="margin-bottom:6px;">${searchChartSVG(r.priceHistory,r.up)}</div><div class="mono" style="font-size:8px;color:var(--muted);text-align:right;margin-bottom:14px;">12-MONTH TREND</div>`:''}
@@ -1698,6 +1700,7 @@ function renderRiskReport(r){
       </div>
 
       <!-- KPI strip -->
+      <div class="mono" style="font-size:8px;color:#777;letter-spacing:.6px;margin:0 0 10px;">PRICE DATA: TWELVE DATA · ANALYSIS: AI-GENERATED ESTIMATES · ${new Date().toISOString().slice(0,10)}</div>
       <div style="display:flex;background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;margin-bottom:14px;overflow:hidden;">${kpiStrip}</div>
 
       <!-- price chart -->
@@ -1892,7 +1895,10 @@ async function fillRealNews(){
     const perMkt=markets.length>1?2:5;
     const listsRaw=await Promise.all(markets.map(m=>loadTopMovers(m,perMkt)));
     let stocks=[];listsRaw.forEach(l=>stocks=stocks.concat(l));
-    stocks=stocks.slice(0,8);
+    // Press-release coverage is only reliable for US listings. Non-US tickers
+    // (e.g. PSX's PPL/PSO) collide with US symbols and return the WRONG company's
+    // news — so everything else gets the clearly-labeled AI market briefing.
+    stocks=stocks.filter(s=>s.country==='US').slice(0,6);
     if(!stocks.length){await fillAINews(markets);return;}
     const q=MARKET_QUERY; // for exchange hints
     const newsRows=[];
@@ -1905,7 +1911,7 @@ async function fillRealNews(){
         if(d&&Array.isArray(d.press_releases)){
           d.press_releases.slice(0,2).forEach(pr=>{
             const body=(pr.body||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,240);
-            newsRows.push({source:s.ticker,title:pr.title||'Company update',summary:body,
+            newsRows.push({source:s.ticker+' · PRESS RELEASE',title:pr.title||'Company update',summary:body,
               sectors:[],time:pr.datetime?new Date(pr.datetime).toLocaleDateString():'',emoji:'📰',country:s.country});
           });
         }
@@ -1914,7 +1920,7 @@ async function fillRealNews(){
     const el=document.getElementById('news-list');
     if(newsRows.length){
       S.news=newsRows.slice(0,10);
-      if(el)el.innerHTML=S.news.map(n=>nCard(n)).join('');
+      if(el)el.innerHTML=`<div style="padding:10px 16px 4px;"><div class="mono" style="font-size:8px;color:var(--muted);letter-spacing:1px;">📰 COMPANY PRESS RELEASES · VIA TWELVE DATA</div></div>`+S.news.map(n=>nCard(n)).join('');
     }else{
       // No press-release coverage for these markets → generate an AI market briefing
       // (real, current-context analysis, clearly labeled as AI), instead of a dead tab.
@@ -1999,6 +2005,7 @@ function buildProfile(){
       </div>
       <button onclick="signOut()" style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:13px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;">Sign Out</button>
       <button onclick="confirmDelete()" style="width:100%;background:transparent;border:0.5px solid var(--danger);border-radius:10px;padding:13px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--danger);cursor:pointer;">Delete Account</button>
+      <div class="mono" style="text-align:center;font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:14px;">LUMINFIN v2.0</div>
       <div class="mono" style="font-size:8px;color:var(--muted);text-align:center;margin-top:6px;letter-spacing:.5px;">LUMINFIN · v1.0 · NOT FINANCIAL ADVICE</div>
     </div>`;
 }
