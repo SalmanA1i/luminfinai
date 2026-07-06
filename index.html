@@ -32,8 +32,8 @@ body{font-family:'Inter',sans-serif;color:var(--text)}
   #root{max-width:420px;height:92vh;max-height:900px;margin:4vh auto;border:0.5px solid var(--border);border-radius:28px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.03)}
   .modal-bg{align-items:center !important}
   .modal-box{max-width:400px;border-radius:20px !important;max-height:80vh}
-  .desktop-brand{display:none;position:fixed;left:calc(50% - 530px);top:50%;transform:translateY(-50%);width:300px;flex-direction:column;gap:16px;z-index:1}
 }
+.desktop-brand{display:none;position:fixed;left:calc(50% - 530px);top:50%;transform:translateY(-50%);width:300px;flex-direction:column;gap:16px;z-index:1}
 @media (min-width:1120px){.desktop-brand{display:flex !important}}
 .db-logo{display:flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:18px;letter-spacing:2px;color:var(--gold)}
 .db-head{font-size:30px;font-weight:600;line-height:1.25;color:var(--text)}
@@ -1567,28 +1567,6 @@ function scoreFundamentals(st,quote){
   return{v,h,g:gr,metrics:{pe,pb,de,cr,roe,pm,revG,epsG,rangePos}};
 }
 
-// Compute REAL price-action metrics from live daily history (Grow-tier data, all markets)
-function computePriceMetrics(tsValues,quote){
-  try{
-    if(!Array.isArray(tsValues)||tsValues.length<20)return null;
-    const closes=tsValues.map(v=>parseFloat(v.close)).filter(n=>!isNaN(n)).reverse(); // chronological
-    if(closes.length<20)return null;
-    const mom=((closes[closes.length-1]/closes[0])-1)*100;
-    const rets=[];for(let i=1;i<closes.length;i++)rets.push(closes[i]/closes[i-1]-1);
-    const mean=rets.reduce((a,b)=>a+b,0)/rets.length;
-    const sd=Math.sqrt(rets.reduce((a,b)=>a+(b-mean)*(b-mean),0)/rets.length);
-    const vol=sd*Math.sqrt(252)*100;
-    let peak=closes[0],dd=0;
-    closes.forEach(p=>{if(p>peak)peak=p;const d=(p-peak)/peak;if(d<dd)dd=d;});
-    let pos52=null;
-    if(quote&&quote.fifty_two_week){
-      const lo=parseFloat(quote.fifty_two_week.low),hi=parseFloat(quote.fifty_two_week.high),cl=parseFloat(quote.close);
-      if(!isNaN(lo)&&!isNaN(hi)&&!isNaN(cl)&&hi>lo)pos52=((cl-lo)/(hi-lo))*100;
-    }
-    return {mom:+mom.toFixed(1),vol:+vol.toFixed(1),dd:+(dd*100).toFixed(1),pos52:pos52!==null?+pos52.toFixed(0):null};
-  }catch(e){return null;}
-}
-
 async function generateRiskReport(ticker){
   const s=ALL_STOCKS.find(x=>x.ticker===ticker)||{ticker,name:ticker,price:'—'};
   // Same stock, same day → identical report (kills score variance between clicks)
@@ -1604,18 +1582,16 @@ async function generateRiskReport(ticker){
     </div>`;
   try{
     // 1) Pull REAL fundamentals + quote (statistics needs a Pro-tier plan; degrade gracefully)
-    let stats=null,quote=null,scored=null,rm=null;
+    let stats=null,quote=null,scored=null;
     if(LIVE_ENABLED){
       try{
         const base=ticker.replace(/\.(HK|SI)$/,'');
-        const [qr,sr,tr]=await Promise.all([
+        const [qr,sr]=await Promise.all([
           fetch(`/api/market?type=quote&symbol=${encodeURIComponent(ticker)}`).then(r=>r.json()).catch(()=>null),
-          fetch(`/api/market?type=statistics&symbol=${encodeURIComponent(base)}`).then(r=>r.json()).catch(()=>null),
-          fetch(`/api/market?type=time_series&symbol=${encodeURIComponent(ticker)}&interval=1day&outputsize=90`).then(r=>r.json()).catch(()=>null)
+          fetch(`/api/market?type=statistics&symbol=${encodeURIComponent(base)}`).then(r=>r.json()).catch(()=>null)
         ]);
         if(qr&&!qr.error&&qr.status!=='error')quote=qr;
         if(sr&&!sr.error&&sr.status!=='error'&&sr.statistics)stats=sr;
-        if(tr&&!tr.error&&tr.status!=='error'&&Array.isArray(tr.values))rm=computePriceMetrics(tr.values,qr);
       }catch(e){}
     }
     if(stats)scored=scoreFundamentals(stats,quote);
@@ -1626,10 +1602,8 @@ async function generateRiskReport(ticker){
 REAL DATA (from live market feed — you MUST use these exact figures, do not alter them):
 P/E: ${scored.metrics.pe??'n/a'} | P/B: ${scored.metrics.pb??'n/a'} | Debt/Equity: ${scored.metrics.de??'n/a'} | Current Ratio: ${scored.metrics.cr??'n/a'} | ROE: ${scored.metrics.roe!==null?(scored.metrics.roe*100).toFixed(1)+'%':'n/a'} | Profit Margin: ${scored.metrics.pm!==null?(scored.metrics.pm*100).toFixed(1)+'%':'n/a'} | Revenue Growth: ${scored.metrics.revG!==null?(scored.metrics.revG*100).toFixed(1)+'%':'n/a'} | EPS Growth: ${scored.metrics.epsG!==null?(scored.metrics.epsG*100).toFixed(1)+'%':'n/a'}
 COMPUTED SCORES (already calculated from the real data — copy them verbatim into scoreBreakdown): valuation=${scored.v}, health=${scored.h}, growth=${scored.g}.`:'No live fundamentals available — use your knowledge of this company for realistic figures and score it on its own specific fundamentals.';
-    const priceBlock=rm?`
-REAL PRICE ACTION (computed from live 90-day price history — use these EXACT figures where relevant): 90-day momentum ${rm.mom}% | annualized volatility ${rm.vol}% | max drawdown ${rm.dd}%${rm.pos52!==null?` | trading at ${rm.pos52}% of its 52-week range`:''}. Ground the growth sub-score in this momentum, and factor the volatility and drawdown into financial-health and risk notes.`:'';
     const prompt=`You are an equity research analyst. Generate a risk analysis for ${ticker} (${s.name})${livePrice?`, current price ${livePrice}`:`, price ${s.price}`}.
-${realBlock}${priceBlock}
+${realBlock}
 Respond ONLY with valid JSON, same shape as this (fill every field, specific to ${ticker}):
 {"ticker":"${ticker}","name":"${s.name}","price":"${livePrice||s.price}","riskScore":0,"rating":"STRONG BUY|BUY|HOLD|SELL","kpis":[{"label":"P/E","value":"..."},{"label":"ROE","value":"..."},{"label":"D/E","value":"..."},{"label":"Rev Growth","value":"..."}],"priceChart":[12 numbers],"chartMarkers":[{"i":3,"label":"..."},{"i":8,"label":"..."}],"valuation":[3 items {metric,value,status:"green|amber|red",note}],"financialHealth":[3 items],"growth":[3 items],"scoreBreakdown":{"valuation":0,"health":0,"growth":0},"quarterly":[3 items {q,rev,eps,change}],"earningsUpdate":"2 sentences","catalysts":["3 items"],"risks":["3 items"],"bottomLine":"2 sentences"}`;
     const callAI=async()=>{
@@ -1650,7 +1624,6 @@ Respond ONLY with valid JSON, same shape as this (fill every field, specific to 
       const sum=(Number(r.scoreBreakdown.valuation)||0)+(Number(r.scoreBreakdown.health)||0)+(Number(r.scoreBreakdown.growth)||0);
       if(sum>0)r.riskScore=Math.max(5,Math.min(99,Math.round(sum)));
     }
-    if(rm)r._rm=rm;
     try{localStorage.setItem(_ck,JSON.stringify(r));}catch(e){}  // same stock, same day → same report
     renderRiskReport(r);
   }catch(e){
@@ -1690,9 +1663,6 @@ function renderRiskReport(r){
   const ratingColors={'STRONG BUY':'#3db87a','BUY':'#3db87a','HOLD':'#e8a020','SELL':'#e05252'};
   const rc=ratingColors[r.rating]||'#e8a020';
   const kpiStrip=(r.kpis||[]).map(k=>`<div style="flex:1;text-align:center;padding:8px 4px;border-right:0.5px solid rgba(255,255,255,0.06);"><div style="font-size:9px;color:#888;margin-bottom:3px;">${k.label}</div><div style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:#f0ece0;">${k.value}</div></div>`).join('');
-  const _rm=r._rm||null;
-  const _rmCell=(l,v)=>`<div style="flex:1;text-align:center;padding:7px 4px;border-right:0.5px solid rgba(255,255,255,0.06);"><div style="font-size:8px;color:#888;margin-bottom:2px;">${l}</div><div class="mono" style="font-size:12px;font-weight:700;color:#f0ece0;">${v}</div></div>`;
-  const rmStrip=_rm?`<div class="mono" style="font-size:7px;color:#3db87a;letter-spacing:1px;margin:-8px 0 4px;">LIVE · COMPUTED FROM 90-DAY PRICE HISTORY</div><div style="display:flex;background:#11131a;border:0.5px solid rgba(61,184,122,0.25);border-radius:10px;margin-bottom:14px;overflow:hidden;">${_rmCell('MOMENTUM 90D',(_rm.mom>=0?'+':'')+_rm.mom+'%')}${_rmCell('VOLATILITY',_rm.vol+'%')}${_rmCell('MAX DRAWDOWN',_rm.dd+'%')}${_rm.pos52!==null?_rmCell('52W POSITION',_rm.pos52+'%'):''}</div>`:'';
   const sb=r.scoreBreakdown||{valuation:0,health:0,growth:0};
   const scoreBars=`
     <div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:10px;color:#888;margin-bottom:3px;"><span>Valuation</span><span class="mono">${sb.valuation}/35</span></div><div style="height:5px;background:#1e2230;border-radius:3px;"><div style="height:100%;width:${(sb.valuation/35*100)}%;background:#e8a020;border-radius:3px;"></div></div></div>
@@ -1731,7 +1701,7 @@ function renderRiskReport(r){
 
       <!-- KPI strip -->
       <div class="mono" style="font-size:8px;color:#777;letter-spacing:.6px;margin:0 0 10px;">PRICE DATA: TWELVE DATA · ANALYSIS: AI-GENERATED ESTIMATES · ${new Date().toISOString().slice(0,10)}</div>
-      <div style="display:flex;background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;margin-bottom:14px;overflow:hidden;">${kpiStrip}</div>${rmStrip}
+      <div style="display:flex;background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;margin-bottom:14px;overflow:hidden;">${kpiStrip}</div>
 
       <!-- price chart -->
       <div style="background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px;margin-bottom:16px;">
@@ -2192,6 +2162,17 @@ function doLogin(){
 }
 
 
+/* Brand panel guard: decorative desktop-only element — force-hide unless truly wide + truly fixed. */
+function guardBrand(){
+  try{
+    const db=document.querySelector('.desktop-brand');if(!db)return;
+    if(window.innerWidth<1120||getComputedStyle(db).position!=='fixed')db.style.setProperty('display','none','important');
+    else db.style.removeProperty('display');
+  }catch(e){}
+}
+guardBrand();
+window.addEventListener('resize',guardBrand);
+
 /* One screen visible at a time — no stacking, nothing can overlap. */
 function showScreen(which){
   const disp={welcome:'flex',auth:'flex',ob:'flex',app:'flex'};
@@ -2200,6 +2181,7 @@ function showScreen(which){
     if(el)el.style.display=(id===which)?disp[id]:'none';
   });
   if(which==='app'){const a=document.getElementById('app');if(a){a.style.flexDirection='column';a.style.flex='1';}}
+  guardBrand();
 }
 
 function startOnboarding(){
