@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<!-- LuminFin build v2.0 -->
+<!-- LuminFin build v2.1 -->
 <title>LuminFin</title>
 <meta name="theme-color" content="#0a0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -32,8 +32,8 @@ body{font-family:'Inter',sans-serif;color:var(--text)}
   #root{max-width:420px;height:92vh;max-height:900px;margin:4vh auto;border:0.5px solid var(--border);border-radius:28px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.03)}
   .modal-bg{align-items:center !important}
   .modal-box{max-width:400px;border-radius:20px !important;max-height:80vh}
-  .desktop-brand{display:none;position:fixed;left:calc(50% - 530px);top:50%;transform:translateY(-50%);width:300px;flex-direction:column;gap:16px;z-index:1}
 }
+.desktop-brand{display:none;position:fixed;left:calc(50% - 530px);top:50%;transform:translateY(-50%);width:300px;flex-direction:column;gap:16px;z-index:1}
 @media (min-width:1120px){.desktop-brand{display:flex !important}}
 .db-logo{display:flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:18px;letter-spacing:2px;color:var(--gold)}
 .db-head{font-size:30px;font-weight:600;line-height:1.25;color:var(--text)}
@@ -2005,7 +2005,7 @@ function buildProfile(){
       </div>
       <button onclick="signOut()" style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:13px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;">Sign Out</button>
       <button onclick="confirmDelete()" style="width:100%;background:transparent;border:0.5px solid var(--danger);border-radius:10px;padding:13px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--danger);cursor:pointer;">Delete Account</button>
-      <div class="mono" style="text-align:center;font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:14px;">LUMINFIN v2.0</div>
+      <div class="mono" style="text-align:center;font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:14px;">LUMINFIN v2.1</div>
       <div class="mono" style="font-size:8px;color:var(--muted);text-align:center;margin-top:6px;letter-spacing:.5px;">LUMINFIN · v1.0 · NOT FINANCIAL ADVICE</div>
     </div>`;
 }
@@ -2162,6 +2162,17 @@ function doLogin(){
 }
 
 
+/* Brand panel guard: decorative desktop-only element — force-hide unless truly wide + truly fixed. */
+function guardBrand(){
+  try{
+    const db=document.querySelector('.desktop-brand');if(!db)return;
+    if(window.innerWidth<1120||getComputedStyle(db).position!=='fixed')db.style.setProperty('display','none','important');
+    else db.style.removeProperty('display');
+  }catch(e){}
+}
+guardBrand();
+window.addEventListener('resize',guardBrand);
+
 /* One screen visible at a time — no stacking, nothing can overlap. */
 function showScreen(which){
   const disp={welcome:'flex',auth:'flex',ob:'flex',app:'flex'};
@@ -2170,6 +2181,7 @@ function showScreen(which){
     if(el)el.style.display=(id===which)?disp[id]:'none';
   });
   if(which==='app'){const a=document.getElementById('app');if(a){a.style.flexDirection='column';a.style.flex='1';}}
+  guardBrand();
 }
 
 function startOnboarding(){
