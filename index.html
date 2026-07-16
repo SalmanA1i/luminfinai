@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<!-- LuminFin build v2.2 -->
+<!-- LuminFin build v2.3 -->
 <title>LuminFin</title>
 <meta name="theme-color" content="#0a0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1571,7 +1571,7 @@ async function generateRiskReport(ticker){
   const s=ALL_STOCKS.find(x=>x.ticker===ticker)||{ticker,name:ticker,price:'—'};
   // Same stock, same day → identical report (kills score variance between clicks)
   const _day=new Date().toISOString().slice(0,10);
-  const _ck='lf_riskrep_'+ticker+'_'+_day;
+  const _ck='lf_riskrep_v3_'+ticker+'_'+_day;
   try{const cached=JSON.parse(localStorage.getItem(_ck)||'null');if(cached){renderRiskReport(cached);return;}}catch(e){}
   document.getElementById('modals').innerHTML=`
     <div class="modal-bg" style="align-items:center;">
@@ -1582,16 +1582,27 @@ async function generateRiskReport(ticker){
     </div>`;
   try{
     // 1) Pull REAL fundamentals + quote (statistics needs a Pro-tier plan; degrade gracefully)
-    let stats=null,quote=null,scored=null;
+    let stats=null,quote=null,scored=null,series=null;
     if(LIVE_ENABLED){
       try{
         const base=ticker.replace(/\.(HK|SI)$/,'');
-        const [qr,sr]=await Promise.all([
-          fetch(`/api/market?type=quote&symbol=${encodeURIComponent(ticker)}`).then(r=>r.json()).catch(()=>null),
-          fetch(`/api/market?type=statistics&symbol=${encodeURIComponent(base)}`).then(r=>r.json()).catch(()=>null)
+        // Scope non-US symbols to their home exchange so PSX tickers (PSO, PPL…)
+        // don't resolve to same-named US listings. Suffixed (.HK/.SI) and crypto
+        // symbols are already unambiguous.
+        const _mkt=PSX.some(x=>x.ticker===ticker)?'PK':(s.country||'US');
+        const _needEx=_mkt!=='US'&&_mkt!=='GLOBAL'&&!ticker.includes('.')&&!ticker.includes('/');
+        const exq=_needEx&&MARKET_QUERY[_mkt]&&MARKET_QUERY[_mkt].exchange?`&exchange=${encodeURIComponent(MARKET_QUERY[_mkt].exchange)}`:'';
+        const [qr,sr,ts]=await Promise.all([
+          fetch(`/api/market?type=quote&symbol=${encodeURIComponent(ticker)}${exq}`).then(r=>r.json()).catch(()=>null),
+          fetch(`/api/market?type=statistics&symbol=${encodeURIComponent(base)}${exq}`).then(r=>r.json()).catch(()=>null),
+          fetch(`/api/market?type=time_series&symbol=${encodeURIComponent(ticker)}${exq}&interval=1week&outputsize=52`).then(r=>r.json()).catch(()=>null)
         ]);
         if(qr&&!qr.error&&qr.status!=='error')quote=qr;
         if(sr&&!sr.error&&sr.status!=='error'&&sr.statistics)stats=sr;
+        if(ts&&ts.values&&Array.isArray(ts.values)){
+          const closes=ts.values.map(v=>parseFloat(v.close)).filter(Number.isFinite).reverse();
+          if(closes.length>=2)series=closes;
+        }
       }catch(e){}
     }
     if(stats)scored=scoreFundamentals(stats,quote);
@@ -1616,6 +1627,13 @@ Respond ONLY with valid JSON, same shape as this (fill every field, specific to 
     if(!r)throw new Error('parse');
 
     // 3) The score is OURS, not the AI's: enforce computed sub-scores when we have real data
+    if(series){
+      // Real 52-week closes, downsampled to 12 points — the chart is data, not vibes
+      const step=(series.length-1)/11;
+      r.priceChart=Array.from({length:12},(_,i)=>series[Math.round(i*step)]);
+      r.chartMarkers=[];
+      if(quote&&quote.close)r.price=parseFloat(quote.close).toFixed(2);
+    }
     if(scored){
       r.scoreBreakdown={valuation:scored.v,health:scored.h,growth:scored.g};
       r.riskScore=Math.max(5,Math.min(99,scored.v+scored.h+scored.g));
@@ -1638,7 +1656,8 @@ function cardGrid(items){
 }
 
 function priceChartSVG(data,markers){
-  if(!data||!data.length)return'';
+  data=(data||[]).map(Number).filter(Number.isFinite);
+  if(data.length<2)return'';
   const w=320,h=110,pad=8;
   const mx=Math.max(...data),mn=Math.min(...data);
   const pts=data.map((v,i)=>{const x=pad+i*((w-2*pad)/(data.length-1));const y=h-pad-((v-mn)/(mx-mn||1))*(h-2*pad);return[x,y];});
@@ -1656,7 +1675,7 @@ function gaugeSVG(score){
   const rad=(180-angle)*Math.PI/180;
   const x=cx+r*Math.cos(rad),y=cy-r*Math.sin(rad);
   const col=score>=66?'#3db87a':score>=40?'#e8a020':'#e05252';
-  return`<svg viewBox="0 0 180 105" style="width:150px;height:auto;"><path d="M 20 90 A 70 70 0 0 1 160 90" fill="none" stroke="#1e2230" stroke-width="10" stroke-linecap="round"/><path d="M 20 90 A 70 70 0 0 1 ${x.toFixed(1)} ${y.toFixed(1)}" fill="none" stroke="${col}" stroke-width="10" stroke-linecap="round"/><text x="90" y="78" fill="${col}" font-size="26" font-weight="700" text-anchor="middle" font-family="monospace">${score}</text><text x="90" y="94" fill="#666" font-size="9" text-anchor="middle" font-family="monospace">RISK SCORE</text></svg>`;
+  return`<svg viewBox="0 0 180 105" style="width:150px;height:auto;"><path d="M 20 90 A 70 70 0 0 1 160 90" fill="none" stroke="#1e2230" stroke-width="10" stroke-linecap="round"/><path d="M 20 90 A 70 70 0 0 1 ${x.toFixed(1)} ${y.toFixed(1)}" fill="none" stroke="${col}" stroke-width="10" stroke-linecap="round"/><text x="90" y="78" fill="${col}" font-size="26" font-weight="700" text-anchor="middle" font-family="monospace">${score}</text><text x="90" y="94" fill="#666" font-size="9" text-anchor="middle" font-family="monospace">LUMIN SCORE</text></svg>`;
 }
 
 function renderRiskReport(r){
@@ -1767,7 +1786,7 @@ function renderRiskReport(r){
           <div style="font-size:12px;color:#bbb;line-height:1.6;">${r.bottomLine||''}</div>
         </div>
 
-        <div style="font-size:9px;color:#444;text-align:center;line-height:1.5;padding-bottom:10px;">AI-generated analysis for informational purposes only. Not financial advice. Figures are estimates, not live market data.</div>
+        <div style="font-size:9px;color:#444;text-align:center;line-height:1.5;padding-bottom:10px;">AI-generated analysis for informational purposes only. Not financial advice. Price data via Twelve Data; analysis figures are AI estimates.</div>
       </div>
     </div>
   </div>`;
@@ -1781,7 +1800,7 @@ function renderRiskReport(r){
 
 function copyReport(){
   const r=window._lastReport;if(!r)return;
-  const txt=`${r.ticker} — ${r.name}\nPrice: ${r.price} | Rating: ${r.rating} | Risk Score: ${r.riskScore}/100\n\nVALUATION:\n${(r.valuation||[]).map(c=>`- ${c.metric}: ${c.value} (${c.note})`).join('\n')}\n\nFINANCIAL HEALTH:\n${(r.financialHealth||[]).map(c=>`- ${c.metric}: ${c.value} (${c.note})`).join('\n')}\n\nGROWTH:\n${(r.growth||[]).map(c=>`- ${c.metric}: ${c.value} (${c.note})`).join('\n')}\n\nCATALYSTS: ${(r.catalysts||[]).join(', ')}\nRISKS: ${(r.risks||[]).join(', ')}\n\nBOTTOM LINE: ${r.bottomLine}\n\n(AI-generated, not financial advice)`;
+  const txt=`${r.ticker} — ${r.name}\nPrice: ${r.price} | Rating: ${r.rating} | LuminFin Score: ${r.riskScore}/100 (higher = stronger fundamentals)\n\nVALUATION:\n${(r.valuation||[]).map(c=>`- ${c.metric}: ${c.value} (${c.note})`).join('\n')}\n\nFINANCIAL HEALTH:\n${(r.financialHealth||[]).map(c=>`- ${c.metric}: ${c.value} (${c.note})`).join('\n')}\n\nGROWTH:\n${(r.growth||[]).map(c=>`- ${c.metric}: ${c.value} (${c.note})`).join('\n')}\n\nCATALYSTS: ${(r.catalysts||[]).join(', ')}\nRISKS: ${(r.risks||[]).join(', ')}\n\nBOTTOM LINE: ${r.bottomLine}\n\n(AI-generated, not financial advice)`;
   navigator.clipboard.writeText(txt).then(()=>{
     const btn=event.target;const orig=btn.textContent;btn.textContent='✓ Copied';setTimeout(()=>btn.textContent=orig,1500);
   }).catch(()=>{});
@@ -2005,7 +2024,7 @@ function buildProfile(){
       </div>
       <button onclick="signOut()" style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:13px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;">Sign Out</button>
       <button onclick="confirmDelete()" style="width:100%;background:transparent;border:0.5px solid var(--danger);border-radius:10px;padding:13px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--danger);cursor:pointer;">Delete Account</button>
-      <div class="mono" style="text-align:center;font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:14px;">LUMINFIN v2.2</div>
+      <div class="mono" style="text-align:center;font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:14px;">LUMINFIN v2.3</div>
       <div class="mono" style="font-size:8px;color:var(--muted);text-align:center;margin-top:6px;letter-spacing:.5px;">LUMINFIN · v1.0 · NOT FINANCIAL ADVICE</div>
     </div>`;
 }
