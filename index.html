@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<!-- LuminFin build v2.3 -->
+<!-- LuminFin build v2.4 -->
 <title>LuminFin</title>
 <meta name="theme-color" content="#0a0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1571,7 +1571,7 @@ async function generateRiskReport(ticker){
   const s=ALL_STOCKS.find(x=>x.ticker===ticker)||{ticker,name:ticker,price:'—'};
   // Same stock, same day → identical report (kills score variance between clicks)
   const _day=new Date().toISOString().slice(0,10);
-  const _ck='lf_riskrep_v3_'+ticker+'_'+_day;
+  const _ck='lf_riskrep_v4_'+ticker+'_'+_day;
   try{const cached=JSON.parse(localStorage.getItem(_ck)||'null');if(cached){renderRiskReport(cached);return;}}catch(e){}
   document.getElementById('modals').innerHTML=`
     <div class="modal-bg" style="align-items:center;">
@@ -1618,12 +1618,14 @@ ${realBlock}
 Respond ONLY with valid JSON, same shape as this (fill every field, specific to ${ticker}):
 {"ticker":"${ticker}","name":"${s.name}","price":"${livePrice||s.price}","riskScore":0,"rating":"STRONG BUY|BUY|HOLD|SELL","kpis":[{"label":"P/E","value":"..."},{"label":"ROE","value":"..."},{"label":"D/E","value":"..."},{"label":"Rev Growth","value":"..."}],"priceChart":[12 numbers],"chartMarkers":[{"i":3,"label":"..."},{"i":8,"label":"..."}],"valuation":[3 items {metric,value,status:"green|amber|red",note}],"financialHealth":[3 items],"growth":[3 items],"scoreBreakdown":{"valuation":0,"health":0,"growth":0},"quarterly":[3 items {q,rev,eps,change}],"earningsUpdate":"2 sentences","catalysts":["3 items"],"risks":["3 items"],"bottomLine":"2 sentences"}`;
     const callAI=async()=>{
-      const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({json:true,max_tokens:3000,temperature:0.15,system:'You are a JSON-only equity research API. Output only valid JSON.',messages:[{role:'user',content:prompt}]})});
+      const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({json:true,max_tokens:6000,temperature:0.15,system:'You are a JSON-only equity research API. Output only valid JSON.',messages:[{role:'user',content:prompt}]})});
       const d=await res.json();
       return extractJSON(d.content?.find(b=>b.type==='text')?.text||'');
     };
+    const looksComplete=x=>x&&Array.isArray(x.valuation)&&x.valuation.length>=2&&Array.isArray(x.financialHealth)&&x.financialHealth.length>=2&&Array.isArray(x.growth)&&x.growth.length>=2&&x.bottomLine;
     let r=await callAI();
-    if(!r)r=await callAI(); // one retry on parse failure
+    if(!looksComplete(r)){const r2=await callAI();if(looksComplete(r2)||(!r&&r2))r=r2;} // retry truncated/failed output
+    if(!looksComplete(r)){const r3=await callAI();if(looksComplete(r3)||(!r&&r3))r=r3;}
     if(!r)throw new Error('parse');
 
     // 3) The score is OURS, not the AI's: enforce computed sub-scores when we have real data
@@ -1681,7 +1683,7 @@ function gaugeSVG(score){
 function renderRiskReport(r){
   const ratingColors={'STRONG BUY':'#3db87a','BUY':'#3db87a','HOLD':'#e8a020','SELL':'#e05252'};
   const rc=ratingColors[r.rating]||'#e8a020';
-  const kpiStrip=(r.kpis||[]).map(k=>`<div style="flex:1;text-align:center;padding:8px 4px;border-right:0.5px solid rgba(255,255,255,0.06);"><div style="font-size:9px;color:#888;margin-bottom:3px;">${k.label}</div><div style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:#f0ece0;">${k.value}</div></div>`).join('');
+  const kpiStrip=(r.kpis||[]).filter(k=>k&&k.label&&k.value!==undefined&&String(k.value)!=='undefined').map(k=>`<div style="flex:1;text-align:center;padding:8px 4px;border-right:0.5px solid rgba(255,255,255,0.06);"><div style="font-size:9px;color:#888;margin-bottom:3px;">${k.label}</div><div style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:#f0ece0;">${k.value}</div></div>`).join('');
   const sb=r.scoreBreakdown||{valuation:0,health:0,growth:0};
   const scoreBars=`
     <div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:10px;color:#888;margin-bottom:3px;"><span>Valuation</span><span class="mono">${sb.valuation}/35</span></div><div style="height:5px;background:#1e2230;border-radius:3px;"><div style="height:100%;width:${(sb.valuation/35*100)}%;background:#e8a020;border-radius:3px;"></div></div></div>
@@ -1720,25 +1722,25 @@ function renderRiskReport(r){
 
       <!-- KPI strip -->
       <div class="mono" style="font-size:8px;color:#777;letter-spacing:.6px;margin:0 0 10px;">PRICE DATA: TWELVE DATA · ANALYSIS: AI-GENERATED ESTIMATES · ${new Date().toISOString().slice(0,10)}</div>
-      <div style="display:flex;background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;margin-bottom:14px;overflow:hidden;">${kpiStrip}</div>
+      ${kpiStrip?`<div style="display:flex;background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;margin-bottom:14px;overflow:hidden;">${kpiStrip}</div>`:''}
 
       <!-- price chart -->
-      <div style="background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px;margin-bottom:16px;">
+      ${(chartSVG=>chartSVG?`<div style="background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px;margin-bottom:16px;">
         <div style="font-family:'Space Mono',monospace;font-size:9px;color:#888;letter-spacing:1px;margin-bottom:10px;">12-MONTH PRICE</div>
-        ${priceChartSVG(r.priceChart,r.chartMarkers)}
-      </div>
+        ${chartSVG}
+      </div>`:'')(priceChartSVG(r.priceChart,r.chartMarkers))}
 
       <!-- valuation -->
-      <div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:8px;">VALUATION</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">${cardGrid(r.valuation||[])}</div>
+      ${(r.valuation&&r.valuation.length)?`<div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:8px;">VALUATION</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">${cardGrid(r.valuation)}</div>`:''}
 
       <!-- financial health -->
-      <div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:8px;">FINANCIAL HEALTH</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">${cardGrid(r.financialHealth||[])}</div>
+      ${(r.financialHealth&&r.financialHealth.length)?`<div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:8px;">FINANCIAL HEALTH</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">${cardGrid(r.financialHealth)}</div>`:''}
 
       <!-- growth -->
-      <div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:8px;">GROWTH</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">${cardGrid(r.growth||[])}</div>
+      ${(r.growth&&r.growth.length)?`<div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:8px;">GROWTH</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">${cardGrid(r.growth)}</div>`:''}
 
       <!-- score breakdown -->
       <div style="background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px;margin-bottom:20px;">
@@ -1751,27 +1753,27 @@ function renderRiskReport(r){
         <div style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:2px;margin-bottom:14px;">RISK SCORE REPORT · PAGE 2/2</div>
 
         <!-- quarterly table -->
-        <div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:8px;">QUARTERLY TREND</div>
+        ${quarterly?`<div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:8px;">QUARTERLY TREND</div>
         <div style="background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;padding:8px 12px;margin-bottom:16px;">
           <table style="width:100%;border-collapse:collapse;">
             <tr style="color:#666;font-size:9px;font-family:'Space Mono',monospace;"><td style="padding:6px 6px;">QUARTER</td><td style="padding:6px 6px;text-align:right;">REVENUE</td><td style="padding:6px 6px;text-align:right;">EPS</td><td style="padding:6px 6px;text-align:right;">YOY</td></tr>
             ${quarterly}
           </table>
-        </div>
+        </div>`:''}
 
         <!-- earnings update -->
-        <div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:8px;">LATEST EARNINGS</div>
-        <div style="background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px;font-size:12px;color:#bbb;line-height:1.6;margin-bottom:16px;">${r.earningsUpdate||'—'}</div>
+        ${r.earningsUpdate?`<div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:8px;">LATEST EARNINGS</div>
+        <div style="background:#11131a;border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px;font-size:12px;color:#bbb;line-height:1.6;margin-bottom:16px;">${r.earningsUpdate}</div>`:''}
 
         <!-- catalysts vs risks -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        ${(catalysts||risks)?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
           <div style="background:#11131a;border:0.5px solid rgba(61,184,122,0.2);border-radius:10px;padding:12px;">
             <div style="font-family:'Space Mono',monospace;font-size:9px;color:#3db87a;letter-spacing:1px;margin-bottom:6px;">CATALYSTS</div>${catalysts}
           </div>
           <div style="background:#11131a;border:0.5px solid rgba(224,82,82,0.2);border-radius:10px;padding:12px;">
             <div style="font-family:'Space Mono',monospace;font-size:9px;color:#e05252;letter-spacing:1px;margin-bottom:6px;">RISKS</div>${risks}
           </div>
-        </div>
+        </div>`:''}
 
         <!-- bottom line -->
         <div style="font-family:'Space Mono',monospace;font-size:10px;color:#e8a020;letter-spacing:1.5px;margin-bottom:8px;">BOTTOM LINE</div>
@@ -2024,7 +2026,7 @@ function buildProfile(){
       </div>
       <button onclick="signOut()" style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:13px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;">Sign Out</button>
       <button onclick="confirmDelete()" style="width:100%;background:transparent;border:0.5px solid var(--danger);border-radius:10px;padding:13px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--danger);cursor:pointer;">Delete Account</button>
-      <div class="mono" style="text-align:center;font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:14px;">LUMINFIN v2.3</div>
+      <div class="mono" style="text-align:center;font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:14px;">LUMINFIN v2.4</div>
       <div class="mono" style="font-size:8px;color:var(--muted);text-align:center;margin-top:6px;letter-spacing:.5px;">LUMINFIN · v1.0 · NOT FINANCIAL ADVICE</div>
     </div>`;
 }
