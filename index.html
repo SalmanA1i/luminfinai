@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<!-- LuminFin build v2.4 -->
+<!-- LuminFin build v2.5 -->
 <title>LuminFin</title>
 <meta name="theme-color" content="#0a0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1571,7 +1571,7 @@ async function generateRiskReport(ticker){
   const s=ALL_STOCKS.find(x=>x.ticker===ticker)||{ticker,name:ticker,price:'—'};
   // Same stock, same day → identical report (kills score variance between clicks)
   const _day=new Date().toISOString().slice(0,10);
-  const _ck='lf_riskrep_v4_'+ticker+'_'+_day;
+  const _ck='lf_riskrep_v5_'+ticker+'_'+_day;
   try{const cached=JSON.parse(localStorage.getItem(_ck)||'null');if(cached){renderRiskReport(cached);return;}}catch(e){}
   document.getElementById('modals').innerHTML=`
     <div class="modal-bg" style="align-items:center;">
@@ -1616,7 +1616,8 @@ COMPUTED SCORES (already calculated from the real data — copy them verbatim in
     const prompt=`You are an equity research analyst. Generate a risk analysis for ${ticker} (${s.name})${livePrice?`, current price ${livePrice}`:`, price ${s.price}`}.
 ${realBlock}
 Respond ONLY with valid JSON, same shape as this (fill every field, specific to ${ticker}):
-{"ticker":"${ticker}","name":"${s.name}","price":"${livePrice||s.price}","riskScore":0,"rating":"STRONG BUY|BUY|HOLD|SELL","kpis":[{"label":"P/E","value":"..."},{"label":"ROE","value":"..."},{"label":"D/E","value":"..."},{"label":"Rev Growth","value":"..."}],"priceChart":[12 numbers],"chartMarkers":[{"i":3,"label":"..."},{"i":8,"label":"..."}],"valuation":[3 items {metric,value,status:"green|amber|red",note}],"financialHealth":[3 items],"growth":[3 items],"scoreBreakdown":{"valuation":0,"health":0,"growth":0},"quarterly":[3 items {q,rev,eps,change}],"earningsUpdate":"2 sentences","catalysts":["3 items"],"risks":["3 items"],"bottomLine":"2 sentences"}`;
+{"ticker":"${ticker}","name":"${s.name}","price":"${livePrice||s.price}","riskScore":0,"rating":"STRONG BUY|BUY|HOLD|SELL","kpis":[{"label":"P/E","value":"..."},{"label":"ROE","value":"..."},{"label":"D/E","value":"..."},{"label":"Rev Growth","value":"..."}],"priceChart":[12 numbers],"chartMarkers":[{"i":3,"label":"..."},{"i":8,"label":"..."}],"valuation":[3 items {metric,value,status:"green|amber|red",note}],"financialHealth":[3 items],"growth":[3 items],"scoreBreakdown":{"valuation":0,"health":0,"growth":0},"quarterly":[3 items {q,rev,eps,change}],"earningsUpdate":"2 sentences","catalysts":["3 items"],"risks":["3 items"],"bottomLine":"2 sentences"}
+RULES: All monetary figures (revenue, EPS) MUST be in the company's local reporting currency (PKR for Pakistani/PSX companies, EUR for European, HKD for Hong Kong, SGD for Singapore, USD for US) with the currency stated. For quarterly rows use relative labels only ("Latest Qtr", "Prior Qtr", "2 Qtrs Ago") - never invent calendar quarter/year labels.`;
     const callAI=async()=>{
       const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({json:true,max_tokens:6000,temperature:0.15,system:'You are a JSON-only equity research API. Output only valid JSON.',messages:[{role:'user',content:prompt}]})});
       const d=await res.json();
@@ -2026,7 +2027,7 @@ function buildProfile(){
       </div>
       <button onclick="signOut()" style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:13px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;">Sign Out</button>
       <button onclick="confirmDelete()" style="width:100%;background:transparent;border:0.5px solid var(--danger);border-radius:10px;padding:13px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--danger);cursor:pointer;">Delete Account</button>
-      <div class="mono" style="text-align:center;font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:14px;">LUMINFIN v2.4</div>
+      <div class="mono" style="text-align:center;font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:14px;">LUMINFIN v2.5</div>
       <div class="mono" style="font-size:8px;color:var(--muted);text-align:center;margin-top:6px;letter-spacing:.5px;">LUMINFIN · v1.0 · NOT FINANCIAL ADVICE</div>
     </div>`;
 }
