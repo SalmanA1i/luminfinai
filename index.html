@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<!-- LuminFin build v2.5 -->
+<!-- LuminFin build v2.6 -->
 <title>LuminFin</title>
 <meta name="theme-color" content="#0a0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1571,7 +1571,7 @@ async function generateRiskReport(ticker){
   const s=ALL_STOCKS.find(x=>x.ticker===ticker)||{ticker,name:ticker,price:'—'};
   // Same stock, same day → identical report (kills score variance between clicks)
   const _day=new Date().toISOString().slice(0,10);
-  const _ck='lf_riskrep_v5_'+ticker+'_'+_day;
+  const _ck='lf_riskrep_v6_'+ticker+'_'+_day;
   try{const cached=JSON.parse(localStorage.getItem(_ck)||'null');if(cached){renderRiskReport(cached);return;}}catch(e){}
   document.getElementById('modals').innerHTML=`
     <div class="modal-bg" style="align-items:center;">
@@ -1690,9 +1690,10 @@ function renderRiskReport(r){
     <div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:10px;color:#888;margin-bottom:3px;"><span>Valuation</span><span class="mono">${sb.valuation}/35</span></div><div style="height:5px;background:#1e2230;border-radius:3px;"><div style="height:100%;width:${(sb.valuation/35*100)}%;background:#e8a020;border-radius:3px;"></div></div></div>
     <div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:10px;color:#888;margin-bottom:3px;"><span>Financial Health</span><span class="mono">${sb.health}/35</span></div><div style="height:5px;background:#1e2230;border-radius:3px;"><div style="height:100%;width:${(sb.health/35*100)}%;background:#3db87a;border-radius:3px;"></div></div></div>
     <div><div style="display:flex;justify-content:space-between;font-size:10px;color:#888;margin-bottom:3px;"><span>Growth</span><span class="mono">${sb.growth}/30</span></div><div style="height:5px;background:#1e2230;border-radius:3px;"><div style="height:100%;width:${(sb.growth/30*100)}%;background:#4a9eff;border-radius:3px;"></div></div></div>`;
-  const quarterly=(r.quarterly||[]).map(q=>`<tr style="border-top:0.5px solid rgba(255,255,255,0.06);"><td style="padding:8px 6px;font-family:'Space Mono',monospace;font-size:11px;">${q.q}</td><td style="padding:8px 6px;font-family:'Space Mono',monospace;font-size:11px;text-align:right;">${q.rev}</td><td style="padding:8px 6px;font-family:'Space Mono',monospace;font-size:11px;text-align:right;">${q.eps}</td><td style="padding:8px 6px;font-family:'Space Mono',monospace;font-size:11px;text-align:right;color:#3db87a;">${q.change}</td></tr>`).join('');
-  const catalysts=(r.catalysts||[]).map(c=>`<div style="font-size:11px;color:#bbb;padding:5px 0;display:flex;gap:6px;"><span style="color:#3db87a;">▲</span>${c}</div>`).join('');
-  const risks=(r.risks||[]).map(c=>`<div style="font-size:11px;color:#bbb;padding:5px 0;display:flex;gap:6px;"><span style="color:#e05252;">▼</span>${c}</div>`).join('');
+  const _qok=x=>x!==undefined&&x!==null&&String(x)!=='undefined'&&String(x).trim()!=='';
+  const quarterly=(r.quarterly||[]).filter(q=>q&&_qok(q.q)&&_qok(q.rev)&&_qok(q.eps)&&_qok(q.change)).map(q=>`<tr style="border-top:0.5px solid rgba(255,255,255,0.06);"><td style="padding:8px 6px;font-family:'Space Mono',monospace;font-size:11px;">${q.q}</td><td style="padding:8px 6px;font-family:'Space Mono',monospace;font-size:11px;text-align:right;">${q.rev}</td><td style="padding:8px 6px;font-family:'Space Mono',monospace;font-size:11px;text-align:right;">${q.eps}</td><td style="padding:8px 6px;font-family:'Space Mono',monospace;font-size:11px;text-align:right;color:#3db87a;">${q.change}</td></tr>`).join('');
+  const catalysts=(r.catalysts||[]).filter(x=>x&&String(x)!=='undefined'&&String(x).trim()).map(c=>`<div style="font-size:11px;color:#bbb;padding:5px 0;display:flex;gap:6px;"><span style="color:#3db87a;">▲</span>${c}</div>`).join('');
+  const risks=(r.risks||[]).filter(x=>x&&String(x)!=='undefined'&&String(x).trim()).map(c=>`<div style="font-size:11px;color:#bbb;padding:5px 0;display:flex;gap:6px;"><span style="color:#e05252;">▼</span>${c}</div>`).join('');
 
   const reportHTML=`
   <div style="background:#08090d;color:#f0ece0;font-family:'Inter',sans-serif;">
@@ -2027,7 +2028,7 @@ function buildProfile(){
       </div>
       <button onclick="signOut()" style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:13px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;">Sign Out</button>
       <button onclick="confirmDelete()" style="width:100%;background:transparent;border:0.5px solid var(--danger);border-radius:10px;padding:13px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--danger);cursor:pointer;">Delete Account</button>
-      <div class="mono" style="text-align:center;font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:14px;">LUMINFIN v2.5</div>
+      <div class="mono" style="text-align:center;font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:14px;">LUMINFIN v2.6</div>
       <div class="mono" style="font-size:8px;color:var(--muted);text-align:center;margin-top:6px;letter-spacing:.5px;">LUMINFIN · v1.0 · NOT FINANCIAL ADVICE</div>
     </div>`;
 }
